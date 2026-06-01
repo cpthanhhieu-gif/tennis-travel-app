@@ -118,7 +118,7 @@ export default function InTourLive() {
           </Badge>
         )}
         {currentDay > LIVE_DAY && (
-          <Badge variant="default">
+          <Badge variant="yellow">
             <Clock size={10} aria-hidden="true" />
             Ngày cuối
           </Badge>

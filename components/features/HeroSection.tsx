@@ -42,7 +42,10 @@ export default function HeroSection({ searchQuery, onSearch, filterSbu, onFilter
         <div className="absolute top-[6rem] left-[-4rem] w-[14rem] h-[14rem] rounded-full bg-sky-100/80 blur-2xl pointer-events-none" />
 
         {/* Top bar */}
-        <div className="relative z-10 flex items-center justify-between px-[2rem] pt-[5.4rem] pb-[1.2rem]">
+        <div
+          className="relative z-10 flex items-center justify-between px-[2rem] pb-[1.2rem]"
+          style={{ paddingTop: "max(5.4rem, calc(env(safe-area-inset-top, 0px) + 1.2rem))" }}
+        >
           <button aria-label="Menu" className="w-[3.8rem] h-[3.8rem] rounded-2xl bg-white shadow-sm flex items-center justify-center">
             <AlignJustify size={20} className="text-neutral-700" />
           </button>

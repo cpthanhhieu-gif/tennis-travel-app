@@ -12,7 +12,8 @@ export default function PageWrapper({ children, className = "" }: PageWrapperPro
     <>
       <Navbar />
       <main
-        className={`min-h-screen pt-0 md:pt-16 pb-16 md:pb-0 ${className}`}
+        className={`min-h-screen pt-0 md:pt-16 md:pb-0 ${className}`}
+        style={{ paddingBottom: "calc(6.4rem + env(safe-area-inset-bottom, 0px))" }}
       >
         {children}
       </main>

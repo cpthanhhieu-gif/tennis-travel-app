@@ -56,7 +56,7 @@ export default function ToursSection({ searchQuery = "", filterSbu = "all" }: Pr
 
       {/* Tabs — ẩn khi đang search */}
       {!q && (
-        <div className="flex gap-[0.8rem] px-[1.6rem] mb-[1.6rem] overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+        <div className="flex gap-[0.8rem] pl-[1.6rem] pr-[1.6rem] mb-[1.6rem] overflow-x-auto" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
           {TABS.map((tab) => {
             const active = filterSbu === tab.key;
             return (

@@ -209,8 +209,8 @@ body {
     scale: 0.6;
   }
 }
-/* viewport width quá nhỏ */
-@media (max-width: 430px) {
+/* viewport width quá nhỏ — chỉ áp dụng trên desktop (md+) */
+@media (max-width: 430px) and (min-width: 768px) {
   .iphone-frame {
     scale: 0.88;
   }
@@ -367,6 +367,13 @@ body {
   border-radius: 1.6rem 1.6rem 0 0;
   max-height: 90dvh;
   overflow: hidden;
+}
+
+/* ── Real mobile: bottomsheet padding bottom accounts for home indicator ── */
+@media (max-width: 767px) {
+  [role="dialog"] {
+    padding-bottom: max(2.8rem, env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
 /* ── Handle bar ── */

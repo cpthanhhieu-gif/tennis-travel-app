@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Mulish } from "next/font/google";
 import "./globals.css";
-import IPhoneFrame from "@/components/layout/IPhoneFrame";
 
 const mulish = Mulish({
   variable: "--font-mulish",
@@ -29,9 +28,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${mulish.variable} h-full`}>
       <body className="text-neutral-90">
-        <IPhoneFrame>
-          {children}
-        </IPhoneFrame>
+        {children}
       </body>
     </html>
   );

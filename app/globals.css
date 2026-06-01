@@ -95,21 +95,14 @@ html {
 }
 
 body {
-  font-size: 1.6rem;           /* 16px body */
+  font-size: 1.6rem;
   font-family: var(--font-sans);
-  background-color: #111827;
+  background-color: #fff;
   color: #000E1A;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3.2rem 0;
-  /* subtle grid pattern */
-  background-image: radial-gradient(circle, #1e2a3a 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 /* ── Mobile real device: strip the iPhone frame, render as native web app ── */

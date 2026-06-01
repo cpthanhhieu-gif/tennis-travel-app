@@ -1,26 +1,379 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ── Brand Colors ── */
+  --color-brand-primary: #0046C1;
+  --color-brand-primary-dark: #003DA8;
+  --color-brand-secondary: #ED1D24;
+  --color-brand-light: #0391FF;
+  --color-brand-tint: #D9EEFF;
+  --color-brand-tint-light: #F1F9FF;
+
+  /* ── Neutral ── */
+  --color-neutral-100: #191919;
+  --color-neutral-90: #000E1A;
+  --color-neutral-50: #4D4D4D;
+  --color-neutral-40: #636363;
+  --color-neutral-30: #999999;
+  --color-neutral-10: #DDDDDD;
+  --color-neutral-05: #E5E5E5;
+  --color-neutral-03: #F7F7F7;
+  --color-neutral-01: #FFFFFF;
+
+  /* ── Semantic / Status ── */
+  --color-error: #ED1D24;
+  --color-error-dark: #D40E00;
+  --color-error-light: #FFE5E3;
+  --color-success: #007C19;
+  --color-success-light: #DEFFE5;
+  --color-warning: #FF6F34;
+  --color-yellow-accent: #FFDA00;
+  --color-yellow-light: #FFF8DA;
+  --color-yellow-dark: #995C00;
+  --color-purple: #8400E4;
+  --color-purple-light: #F7ECFF;
+
+  /* ── Legacy sport tokens (kept for gamification card) ── */
+  --color-gold-300: #f0d870;
+  --color-gold-400: #e8c84a;
+  --color-gold-500: #d4af37;
+  --color-navy-900: #0a1628;
+  --color-navy-800: #1e3a5f;
+  --color-navy-700: #1e4976;
+  --color-navy-600: #1a6091;
+  --color-xp-blue: #3b82f6;
+  --color-live-red: #ef4444;
+  --color-tier-silver: #9ca3af;
+  --color-tier-gold: #d97706;
+  --color-tier-diamond: #7c3aed;
+  --color-bronze-600: #b45309;
+
+  /* ── Font ── */
+  --font-sans: var(--font-mulish), 'Mulish', Arial, sans-serif;
+
+  /* ── Shadows (Elevation) ── */
+  --shadow-card:     rgba(0,0,0,0.08) 0px 2px 8px;
+  --shadow-floating: rgba(23,23,23,0.12) 0px 0px 10px;
+  --shadow-news:     rgba(23,23,23,0.12) 4px 4px 12px;
+  --shadow-dialog:   rgba(0,0,0,0.2) 0px 0px 10px;
+  --shadow-dropdown: rgba(99,99,99,0.2) 0px 2px 8px;
+  --shadow-drawer:   rgba(0,0,0,0.15) 2px 0px 8px;
+  --shadow-gold:     rgba(255,77,79,0.3) 0px 2px 8px;
+  /* legacy */
+  --shadow-elevated: 0 8px 32px rgba(0,0,0,0.25);
+
+  /* ── Border Radius ── */
+  --radius-xs:   0.4rem;
+  --radius-sm:   0.5rem;
+  --radius-md:   0.8rem;
+  --radius-lg:   1.2rem;
+  --radius-xl:   1.6rem;
+  --radius-2xl:  2.0rem;
+  --radius-3xl:  2.4rem;
+  --radius-full: 4rem;
+
+  /* ── Spacing ── */
+  --spacing-1:  0.4rem;
+  --spacing-2:  0.8rem;
+  --spacing-3:  1.0rem;
+  --spacing-4:  1.2rem;
+  --spacing-6:  1.6rem;
+  --spacing-8:  2.0rem;
+  --spacing-10: 2.4rem;
+  --spacing-12: 3.2rem;
+  --spacing-16: 4.0rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Base: 10px root = 1rem ── */
+html {
+  font-size: 10px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.6rem;           /* 16px body */
+  font-family: var(--font-sans);
+  background-color: #111827;
+  color: #000E1A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.2rem 0;
+  /* subtle grid pattern */
+  background-image: radial-gradient(circle, #1e2a3a 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ── Mobile real device: strip the iPhone frame, render as native web app ── */
+@media (max-width: 767px) {
+  body {
+    background-color: #fff;
+    background-image: none;
+    display: block;
+    min-height: 100dvh;
+  }
+
+  /* Frame becomes full-screen, no decorative chrome */
+  .iphone-frame {
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    background: #fff;
+    border-radius: 0;
+    box-shadow: none;
+    scale: 1 !important;
+    overflow: visible;
+  }
+
+  /* Remove side buttons */
+  .iphone-frame::before,
+  .iphone-frame::after {
+    display: none;
+  }
+
+  /* Screen: normal document flow */
+  .iphone-screen {
+    position: static;
+    border-radius: 0;
+    overflow: visible;
+    height: auto;
+    min-height: 100dvh;
+    transform: none;
+  }
+
+  /* Hide fake OS chrome — real device has its own */
+  .iphone-status-bar,
+  .iphone-island,
+  .iphone-home {
+    display: none !important;
+  }
+
+  /* Content: normal flow */
+  .iphone-content {
+    position: static;
+    overflow: visible;
+    height: auto;
+  }
+
+  /* Main: account for real home indicator via safe-area */
+  .iphone-screen main {
+    padding-bottom: calc(7.2rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ── iPhone Mockup — iPhone 17 (393×852pt, Dynamic Island) ── */
+.iphone-frame {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  background: #1a1a1a;
+  border-radius: 50px;
+  box-shadow:
+    0 0 0 2px #3a3a3a,
+    0 0 0 4px #1a1a1a,
+    0 0 0 6px #4a4a4a,
+    0 40px 80px rgba(0,0,0,0.6),
+    inset 0 0 0 2px #2a2a2a;
+  flex-shrink: 0;
+  overflow: hidden;
+  /* scale down on small viewports so frame always fits */
+  transform-origin: top center;
+}
+
+/* scale breakpoints — căn theo height 852px */
+@media (max-height: 980px) {
+  .iphone-frame {
+    scale: 0.9;
+  }
+}
+@media (max-height: 880px) {
+  .iphone-frame {
+    scale: 0.8;
+  }
+}
+@media (max-height: 780px) {
+  .iphone-frame {
+    scale: 0.7;
+  }
+}
+@media (max-height: 680px) {
+  .iphone-frame {
+    scale: 0.6;
+  }
+}
+/* viewport width quá nhỏ */
+@media (max-width: 430px) {
+  .iphone-frame {
+    scale: 0.88;
+  }
+}
+
+/* side buttons */
+.iphone-frame::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 120px;
+  width: 4px;
+  height: 32px;
+  background: #3a3a3a;
+  border-radius: 2px 0 0 2px;
+  box-shadow: 0 44px 0 #3a3a3a, 0 88px 0 #3a3a3a;
+}
+
+.iphone-frame::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 160px;
+  width: 4px;
+  height: 64px;
+  background: #3a3a3a;
+  border-radius: 0 2px 2px 0;
+}
+
+/* screen area */
+.iphone-screen {
+  position: absolute;
+  inset: 0;
+  border-radius: 48px;
+  overflow: hidden;
+  background: #fff;
+  transform: translateZ(0); /* makes fixed children relative to this container, not viewport */
+}
+
+/* ── Force mobile layout inside frame regardless of viewport width ── */
+/* Hide desktop Navbar — always */
+.iphone-screen nav[aria-label="Điều hướng chính"] {
+  display: none !important;
+}
+/* Always show BottomNav — override md:hidden */
+.iphone-screen nav[aria-label="Điều hướng nhanh"] {
+  display: block !important;
+  padding-bottom: 14px !important; /* space for home indicator */
+}
+/* Remove desktop padding overrides on main */
+.iphone-screen main {
+  padding-top: 0 !important;
+  padding-bottom: 7.2rem !important; /* BottomNav height + home indicator */
+}
+/* Hide scrollbar utility (global) */
+.scroll-x-hidden {
+  scrollbar-width: none;
+}
+.scroll-x-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Status bar ── */
+.iphone-status-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 26px 10px;
+  z-index: 102;
+  pointer-events: none;
+  /* Nền trắng mờ + blur → luôn đọc được trên mọi background */
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  /* Text/icon tối để contrast tốt trên nền sáng */
+  color: #111;
+}
+
+.iphone-time {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1;
+  font-family: -apple-system, sans-serif;
+}
+
+.iphone-indicators {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* dynamic island */
+.iphone-island {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 118px;
+  height: 34px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 103;
+}
+
+/* scrollable app content */
+.iphone-content {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.iphone-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* home indicator */
+.iphone-home {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 3px;
+  z-index: 50;
+}
+
+/* ── Safe area helpers ── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Utility: Bottom Sheet shape ── */
+.bottom-sheet {
+  background-color: #FFFFFF;
+  border-radius: 1.6rem 1.6rem 0 0;
+  max-height: 90dvh;
+  overflow: hidden;
+}
+
+/* ── Handle bar ── */
+.handle-bar {
+  background-color: #DDDDDD;
+  border-radius: 8px;
+  height: 0.4rem;
+  width: 4rem;
+  margin: 0 auto 1.2rem;
 }

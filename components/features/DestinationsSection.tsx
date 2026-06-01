@@ -51,7 +51,7 @@ export default function DestinationsSection() {
                   <Clock size={12} aria-hidden="true" />{dest.duration}
                 </span>
                 <span className="flex items-center gap-[0.3rem]">
-                  <MapPin size={12} aria-hidden="true" />{dest.dates}
+                  <MapPin size={12} aria-hidden="true" />{dest.resort}
                 </span>
               </div>
               <ul className="space-y-[0.4rem] mb-[1.4rem]">

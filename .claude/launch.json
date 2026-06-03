@@ -1,0 +1,12 @@
+﻿{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tennis-travel-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "tennis-travel-app", "--", "-p", "8080"],
+      "port": 8080,
+      "autoPort": false
+    }
+  ]
+}

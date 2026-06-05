@@ -61,6 +61,10 @@ export default function BookingStep4({ onConfirm }: Props) {
     { label: "Ngày khởi hành", value: dateLabels[booking.departureDate] || booking.departureDate },
     { label: "Số người",       value: `${booking.numPeople} người` },
     { label: "NTRP",           value: booking.ntrpLabel ? `${booking.ntrpLevel} — ${booking.ntrpLabel}` : "Chưa đánh giá" },
+    ...(booking.leiScore ? [
+      { label: "Điểm bản địa (LEI)", value: `${booking.leiScore}/100` },
+      { label: "Tiêu chuẩn xanh",   value: booking.esgTier ?? "" },
+    ] : []),
     { label: "Liên hệ",        value: booking.name  || "Nguyễn Minh Khoa" },
     { label: "Điện thoại",     value: booking.phone || "0901 234 567" },
     { label: "Email",          value: booking.email || "minhkhoa@gmail.com" },

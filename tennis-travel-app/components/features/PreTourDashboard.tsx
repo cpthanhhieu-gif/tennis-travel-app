@@ -134,28 +134,48 @@ export default function PreTourDashboard() {
       </div>
 
       {/* Countdown banner */}
-      <div className="mb-10 bg-brand-tint rounded-xl p-4 border border-brand-light">
-        <p className="text-xs text-neutral-40 mb-1">Đà Nẵng 3N2D · 13–15/06/2026</p>
-        <p className="text-xs font-semibold text-brand-primary mb-3">🎾 Khởi hành sau</p>
+      <div
+        className="relative mb-10 rounded-2xl p-5 overflow-hidden"
+        style={{
+          background: "radial-gradient(ellipse 110% 90% at 50% -10%, #D9EEFF 0%, #F1F9FF 55%, #ffffff 100%)",
+          border: "1px solid #D9EEFF",
+        }}
+      >
+        {/* Arc decorative circle — tạo depth như hình ref */}
         <div
-          className="flex gap-2"
-          role="timer"
-          aria-label={`Khởi hành sau ${countdown.d} ngày ${countdown.h} giờ ${countdown.m} phút`}
-          aria-live="off"
-        >
-          {[
-            { value: countdown.d, label: "ngày" },
-            { value: countdown.h, label: "giờ" },
-            { value: countdown.m, label: "phút" },
-            { value: countdown.s, label: "giây" },
-          ].map(({ value, label }) => (
-            <div key={label} className="flex-1 flex flex-col items-center bg-neutral-01 rounded-lg py-2 border border-neutral-05">
-              <span className="text-xl font-extrabold text-brand-primary tabular-nums leading-none">
-                {value === null ? "--" : String(value).padStart(2, "0")}
-              </span>
-              <span className="text-[10px] text-neutral-40 mt-0.5">{label}</span>
-            </div>
-          ))}
+          className="absolute top-[-60%] left-1/2 -translate-x-1/2 w-[160%] aspect-square rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(217,238,255,0.55) 0%, transparent 65%)" }}
+          aria-hidden="true"
+        />
+
+        {/* Content */}
+        <div className="relative z-10">
+          <p className="text-xs text-neutral-40 mb-0.5">Đà Nẵng 3N2D · 13–15/06/2026</p>
+          <p className="text-sm font-bold text-brand-primary mb-4">🎾 Khởi hành sau</p>
+          <div
+            className="flex gap-2"
+            role="timer"
+            aria-label={`Khởi hành sau ${countdown.d} ngày ${countdown.h} giờ ${countdown.m} phút`}
+            aria-live="off"
+          >
+            {[
+              { value: countdown.d, label: "ngày" },
+              { value: countdown.h, label: "giờ" },
+              { value: countdown.m, label: "phút" },
+              { value: countdown.s, label: "giây" },
+            ].map(({ value, label }) => (
+              <div
+                key={label}
+                className="flex-1 flex flex-col items-center rounded-xl py-3"
+                style={{ background: "rgba(255,255,255,0.75)", backdropFilter: "blur(8px)", border: "1px solid rgba(217,238,255,0.8)" }}
+              >
+                <span className="text-2xl font-extrabold text-brand-primary tabular-nums leading-none">
+                  {value === null ? "--" : String(value).padStart(2, "0")}
+                </span>
+                <span className="text-[10px] text-neutral-40 mt-1 font-medium">{label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

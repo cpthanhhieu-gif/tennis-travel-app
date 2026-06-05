@@ -2,10 +2,19 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { useBooking } from "@/lib/BookingContext";
-import { tours, tourPackages, formatVNDShort, type Tour } from "@/lib/mock-data";
-import { Check, Hash, ChevronDown, Calendar, MapPin, Clock, Target } from "lucide-react";
+import Link from "next/link";
+import { tours, tourPackages, formatVNDShort, leiEsgTours, type Tour, type ESGTier } from "@/lib/mock-data";
+import { Check, Hash, ChevronDown, Calendar, MapPin, Clock, Target, ArrowRight } from "lucide-react";
+
+
+const ESG_TEASER: Record<ESGTier, { emoji: string; label: string; bg: string; text: string }> = {
+  "Green Champion": { emoji: "🟢", label: "Green Champion", bg: "bg-success-light", text: "text-success"     },
+  "Eco Friendly":   { emoji: "🟡", label: "Eco Friendly",   bg: "bg-yellow-light",  text: "text-yellow-dark" },
+  "Standard":       { emoji: "⚪", label: "Standard",       bg: "bg-neutral-03",    text: "text-neutral-40"  },
+};
 
 interface Props { onNext: () => void }
 
@@ -100,9 +109,11 @@ function DepartureList({
 
 export default function BookingStep1({ onNext }: Props) {
   const { booking, updateBooking } = useBooking();
+  const searchParams = useSearchParams();
 
   const [pkgFilter, setPkgFilter]   = useState("all");
-  const [destFilter, setDestFilter] = useState("all");
+  const [destFilter, setDestFilter] = useState(searchParams.get("dest") ?? "all");
+  const leiTourIdParam = searchParams.get("leiTourId") ?? undefined;
   const [selectedTourId, setSelectedTourId] = useState(booking.tourId || "dn-sbu1");
   const [scheduleOpen, setScheduleOpen]     = useState(false);
   const [people, setPeople]                 = useState(booking.numPeople || 2);
@@ -133,6 +144,9 @@ export default function BookingStep1({ onNext }: Props) {
 
   const handleNext = () => {
     const pkg = tourPackages.find((p) => p.id === selectedTour.packageId);
+    const activeLeiTour = leiTourIdParam
+      ? leiEsgTours.find((l) => l.id === leiTourIdParam)
+      : undefined;
     updateBooking({
       tourId: selectedTour.id,
       packageId: selectedTour.packageId,
@@ -141,15 +155,37 @@ export default function BookingStep1({ onNext }: Props) {
       departureCode: selectedSchedule.code,
       numPeople: people,
       totalPrice: (pkg?.priceRange.min ?? selectedSchedule.price) * people,
+      leiTourId: activeLeiTour?.id,
+      leiScore:  activeLeiTour?.lei.total,
+      esgTier:   activeLeiTour?.esg.tier,
     });
     onNext();
   };
+
+  const contextLeiTour = leiTourIdParam
+    ? leiEsgTours.find((l) => l.id === leiTourIdParam)
+    : undefined;
 
   return (
     <div>
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-5">
         Chọn hành trình &amp; ngày khởi hành
       </h2>
+
+      {/* Context banner — chỉ hiện khi user đến từ LEI tour detail */}
+      {contextLeiTour && (
+        <div className="flex items-center gap-2.5 bg-brand-tint border border-brand-light/40 rounded-lg px-3 py-2.5 mb-5">
+          <span className="text-brand-primary text-[1.4rem] shrink-0">⭐</span>
+          <div className="min-w-0">
+            <p className="text-brand-primary font-semibold text-[1.3rem] truncate">
+              {contextLeiTour.name}
+            </p>
+            <p className="text-neutral-40 text-[1.2rem]">
+              LEI {contextLeiTour.lei.total}/100 · {contextLeiTour.esg.tier}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Filter chips — Package */}
       <div className="mb-3">
@@ -212,7 +248,10 @@ export default function BookingStep1({ onNext }: Props) {
 
         {filtered.map((tour) => {
           const isSelected = tour.id === selectedTourId;
-          const pkgInfo = tourPackages.find((p) => p.id === tour.packageId);
+          const pkgInfo    = tourPackages.find((p) => p.id === tour.packageId);
+          const leiTour = leiTourIdParam
+            ? leiEsgTours.find((l) => l.id === leiTourIdParam)
+            : leiEsgTours.find((l) => l.bookingDestinationId === tour.destinationId);
 
           return (
             <div key={tour.id}>
@@ -286,6 +325,52 @@ export default function BookingStep1({ onNext }: Props) {
                       ))}
                     </div>
                   )}
+
+                  {/* LEI & ESG teaser — chỉ hiện khi tour được chọn và có leiTour tương ứng */}
+                  {isSelected && leiTour && (() => {
+                    const esg = ESG_TEASER[leiTour.esg.tier];
+                    return (
+                      <div className="mb-2.5 p-2.5 rounded-lg bg-brand-tint-light border border-brand-tint">
+                        {/* Title row */}
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-semibold text-brand-primary uppercase tracking-wide">
+                            ⭐ Điểm bản địa &amp; xanh
+                          </p>
+                          <Link
+                            href={`/tour/${leiTour.id}`}
+                            className="flex items-center gap-0.5 text-xs font-semibold text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1 rounded min-h-[44px] px-1"
+                            aria-label={`Xem chi tiết LEI và ESG của tour ${leiTour.name}`}
+                          >
+                            Chi tiết
+                            <ArrowRight size={11} aria-hidden="true" />
+                          </Link>
+                        </div>
+
+                        {/* Scores row */}
+                        <div className="flex items-center gap-3">
+                          {/* LEI mini bar */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-semibold text-neutral-40 uppercase tracking-wide">LEI</span>
+                              <span className="text-xs font-extrabold text-brand-primary">{leiTour.lei.total}/100</span>
+                            </div>
+                            <div className="h-1 rounded-full bg-brand-tint overflow-hidden">
+                              <div
+                                className="h-full bg-brand-primary rounded-full"
+                                style={{ width: `${leiTour.lei.total}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* ESG badge */}
+                          <div className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full ${esg.bg}`}>
+                            <span className="text-xs leading-none" aria-hidden="true">{esg.emoji}</span>
+                            <span className={`text-xs font-semibold leading-none ${esg.text}`}>{esg.label}</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   <div className="flex items-center justify-between">
                     <div>

@@ -17,6 +17,9 @@ export interface BookingState {
   email: string;
   notes: string;
   totalPrice: number;
+  leiTourId?: string;      // id của leiEsgTour user đến từ, ví dụ "dalat-local-tennis-4d"
+  leiScore?: number;       // điểm LEI tổng, ví dụ 92
+  esgTier?: string;        // ESG tier label, ví dụ "Green Champion"
 }
 
 export interface NtrpQuizState {

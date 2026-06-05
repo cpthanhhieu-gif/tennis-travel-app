@@ -276,9 +276,11 @@ export const xpActions = [
 ];
 
 export const badges = [
-  { id: "first_serve", name: "First Serve", icon: "Zap", description: "Khởi đầu hành trình tennis cùng Vietravel", earnedAt: "13/06/2026" },
-  { id: "fei_master", name: "FEI Master", icon: "UtensilsCrossed", description: "Tận hưởng trọn vẹn ẩm thực FEI đạt chuẩn", earnedAt: "14/06/2026" },
-  { id: "court_warrior", name: "Court Warrior", icon: "Trophy", description: "Chinh phục sân đấu · Ghi dấu kỷ niệm", earnedAt: "14/06/2026" },
+  { id: "first_serve",      name: "First Serve",           icon: "Zap",             description: "Khởi đầu hành trình tennis cùng Vietravel",    earnedAt: "13/06/2026" },
+  { id: "fei_master",       name: "FEI Master",            icon: "UtensilsCrossed", description: "Tận hưởng trọn vẹn ẩm thực FEI đạt chuẩn",    earnedAt: "14/06/2026" },
+  { id: "court_warrior",    name: "Court Warrior",         icon: "Trophy",          description: "Chinh phục sân đấu · Ghi dấu kỷ niệm",          earnedAt: "14/06/2026" },
+  { id: "local_explorer",   name: "Local Tennis Explorer", icon: "MapPin",          description: "Trải nghiệm sân tennis bản địa LEI > 70 lần đầu", earnedAt: "04/06/2026" },
+  { id: "green_player",     name: "Green Player",          icon: "Leaf",            description: "Chọn tour ESG > 80 — du lịch có trách nhiệm",    earnedAt: "04/06/2026" },
 ];
 
 export const pricingBreakdown = {
@@ -545,6 +547,172 @@ export const tours: Tour[] = [
       { date: "2026-07-05", dateLabel: "05/07/2026", dayOfWeek: "Thứ Bảy",  price: 5100000, code: "FEPTG211-003-050726XE-H" },
       { date: "2026-07-12", dateLabel: "12/07/2026", dayOfWeek: "Thứ Bảy",  price: 5100000, code: "FEPTG211-004-120726XE-H" },
     ],
+  },
+];
+
+// ── LEI / ESG Tour Data ───────────────────────────────────────────────────
+
+export type ESGTier = "Green Champion" | "Eco Friendly" | "Standard";
+
+export interface LEIBreakdown {
+  localCourt: number;
+  localPro: number;
+  localCulture: number;
+  localTransport: number;
+}
+
+export interface ESGBreakdown {
+  environmental: number;
+  social: number;
+  governance: number;
+}
+
+export interface ESGImpact {
+  co2Saved: number;
+  localFamiliesSupported: number;
+  localProSessions: number;
+  localRevenuePercent: number;
+}
+
+export interface LEIESGTour {
+  id: string;
+  name: string;
+  location: string;
+  image: string;
+  bookingDestinationId: string;
+  lei: {
+    total: number;
+    badge: string;
+    breakdown: LEIBreakdown;
+  };
+  esg: {
+    total: number;
+    tier: ESGTier;
+    breakdown: ESGBreakdown;
+    impact: ESGImpact;
+  };
+  localPro: {
+    name: string;
+    experience: number;
+    verified: boolean;
+    quote: string;
+  };
+}
+
+export const leiEsgTours: LEIESGTour[] = [
+  {
+    id: "dalat-local-tennis-4d",
+    name: "Đà Lạt Local Tennis Experience",
+    location: "Đà Lạt",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+    bookingDestinationId: "danang",
+    lei: {
+      total: 92,
+      badge: "True Local",
+      breakdown: { localCourt: 95, localPro: 98, localCulture: 88, localTransport: 85 },
+    },
+    esg: {
+      total: 82,
+      tier: "Green Champion",
+      breakdown: { environmental: 85, social: 88, governance: 72 },
+      impact: { co2Saved: 12.4, localFamiliesSupported: 2, localProSessions: 4, localRevenuePercent: 70 },
+    },
+    localPro: { name: "Thầy Hùng", experience: 15, verified: true, quote: "Biết từng góc sân, từng gió buổi sáng trên cao nguyên" },
+  },
+  {
+    id: "hoian-heritage-tennis-3d",
+    name: "Hội An Heritage Tennis",
+    location: "Hội An",
+    image: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80",
+    bookingDestinationId: "danang",
+    lei: {
+      total: 85,
+      badge: "Local Explorer",
+      breakdown: { localCourt: 82, localPro: 90, localCulture: 88, localTransport: 78 },
+    },
+    esg: {
+      total: 76,
+      tier: "Eco Friendly",
+      breakdown: { environmental: 78, social: 80, governance: 68 },
+      impact: { co2Saved: 9.2, localFamiliesSupported: 2, localProSessions: 3, localRevenuePercent: 60 },
+    },
+    localPro: { name: "Thầy Bình", experience: 10, verified: true, quote: "Phố cổ Hội An là sân nhà — tôi biết từng đường bóng, từng cơn gió chiều" },
+  },
+  {
+    id: "nhatrang-beach-tennis-3d",
+    name: "Nha Trang Beach Tennis",
+    location: "Nha Trang",
+    image: "https://images.unsplash.com/photo-1570366583862-f91883984fde?w=800&q=80",
+    bookingDestinationId: "nhatrang",
+    lei: {
+      total: 74,
+      badge: "Local Starter",
+      breakdown: { localCourt: 70, localPro: 78, localCulture: 72, localTransport: 76 },
+    },
+    esg: {
+      total: 69,
+      tier: "Eco Friendly",
+      breakdown: { environmental: 65, social: 74, governance: 68 },
+      impact: { co2Saved: 7.1, localFamiliesSupported: 1, localProSessions: 3, localRevenuePercent: 55 },
+    },
+    localPro: { name: "Thầy Nam", experience: 8, verified: true, quote: "Sân biển Nha Trang — không đâu có ánh nắng và gió biển như ở đây" },
+  },
+  {
+    id: "sapa-mountain-tennis-4d",
+    name: "Sapa Mountain Tennis Retreat",
+    location: "Sapa",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    bookingDestinationId: "hanoi",
+    lei: {
+      total: 88,
+      badge: "True Local",
+      breakdown: { localCourt: 90, localPro: 92, localCulture: 85, localTransport: 82 },
+    },
+    esg: {
+      total: 86,
+      tier: "Green Champion",
+      breakdown: { environmental: 90, social: 85, governance: 80 },
+      impact: { co2Saved: 15.2, localFamiliesSupported: 3, localProSessions: 5, localRevenuePercent: 78 },
+    },
+    localPro: { name: "Thầy Tuấn", experience: 12, verified: true, quote: "Sân cao nguyên Sapa — mỗi buổi sáng tập trong mây là trải nghiệm không nơi nào có" },
+  },
+  {
+    id: "muine-wind-tennis-2d",
+    name: "Mũi Né Wind Tennis Weekend",
+    location: "Mũi Né",
+    image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&q=80",
+    bookingDestinationId: "nhatrang",
+    lei: {
+      total: 62,
+      badge: "Local Starter",
+      breakdown: { localCourt: 60, localPro: 65, localCulture: 60, localTransport: 62 },
+    },
+    esg: {
+      total: 55,
+      tier: "Standard",
+      breakdown: { environmental: 52, social: 60, governance: 54 },
+      impact: { co2Saved: 4.8, localFamiliesSupported: 1, localProSessions: 2, localRevenuePercent: 42 },
+    },
+    localPro: { name: "Thầy Khoa", experience: 5, verified: true, quote: "Gió Mũi Né là bài test thật sự cho kỹ thuật của bạn" },
+  },
+  {
+    id: "hanoi-oldquarter-tennis-3d",
+    name: "Hà Nội Old Quarter Tennis",
+    location: "Hà Nội",
+    image: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80",
+    bookingDestinationId: "hanoi",
+    lei: {
+      total: 79,
+      badge: "Local Explorer",
+      breakdown: { localCourt: 76, localPro: 82, localCulture: 80, localTransport: 75 },
+    },
+    esg: {
+      total: 72,
+      tier: "Eco Friendly",
+      breakdown: { environmental: 70, social: 76, governance: 70 },
+      impact: { co2Saved: 8.3, localFamiliesSupported: 2, localProSessions: 3, localRevenuePercent: 58 },
+    },
+    localPro: { name: "Thầy Long", experience: 11, verified: true, quote: "Phố cổ Hà Nội — tôi biết từng sân bóng ẩn mình sau những con ngõ nhỏ" },
   },
 ];
 

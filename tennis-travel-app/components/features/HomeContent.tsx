@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import HeroSection from "@/components/features/HeroSection";
+import LEIToursSection from "@/components/features/LEIToursSection";
 import PromoSection from "@/components/features/PromoSection";
 import ToursSection from "@/components/features/ToursSection";
 import MobileMenu from "@/components/features/MobileMenu";
@@ -21,6 +22,7 @@ export default function HomeContent() {
         onFilter={setFilterSbu}
         onMenuOpen={() => setMenuOpen(true)}
       />
+      <LEIToursSection />
       <PromoSection />
       <ToursSection searchQuery={searchQuery} filterSbu={filterSbu} />
     </>

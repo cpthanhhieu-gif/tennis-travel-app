@@ -126,6 +126,10 @@
   --gradient-primary:  linear-gradient(90deg, #d4af37, #f0d870);
   --gradient-gold-bar: linear-gradient(to right, #d4af37, #f0d870);
   --gradient-hero:     linear-gradient(160deg, #dbeafe 0%, #eff6ff 40%, #f0fdf4 100%);
+  /* Brand tint radial — dùng cho countdown/pre-tour/in-tour hero area */
+  --gradient-tint-radial: radial-gradient(ellipse 110% 90% at 50% -10%, #D9EEFF 0%, #F1F9FF 55%, #ffffff 100%);
+  /* Arc decorative overlay — dùng cùng với gradient-tint-radial */
+  --gradient-tint-arc:    radial-gradient(circle, rgba(217,238,255,0.55) 0%, transparent 65%);
 
   /* ── [NEW] Sidebar ── */
   --color-sidebar:                    #1e3a5f;

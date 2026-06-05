@@ -1,6 +1,6 @@
 "use client";
 
-import { useState as useLocalState } from "react";
+import { useState as useLocalState, useRef } from "react";
 import Button from "@/components/ui/Button";
 import { Target, AlertTriangle, CheckCircle2, ChevronLeft } from "lucide-react";
 import { useBooking } from "@/lib/BookingContext";
@@ -14,6 +14,7 @@ export default function BookingStep2({ onNext }: Props) {
 
   const [currentQ, setCurrentQ] = useLocalState(0);
   const [advancing, setAdvancing] = useLocalState(false);
+  const ctaRef = useRef<HTMLDivElement>(null);
 
   const allAnswered = ntrpQuiz.every((q) => answers[q.id] !== undefined);
 
@@ -80,11 +81,11 @@ export default function BookingStep2({ onNext }: Props) {
               <AlertTriangle size={20} className="text-warning shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <p className="font-bold text-[1.5rem] text-neutral-90 mb-1">
-                  Hành trình bạn chọn chưa phù hợp trình độ
+                  Gói dịch vụ bạn chọn chưa phù hợp trình độ
                 </p>
                 <p className="text-neutral-50 text-[1.3rem]">
-                  Bạn đã chọn <strong className="text-neutral-90">{selectedPkg?.name}</strong>, nhưng với NTRP {ntrpResult.level} ({ntrpResult.label}), AI đề xuất{" "}
-                  <strong className="text-brand-primary">{recommendedPkg?.name}</strong>.
+                  Với NTRP {ntrpResult.level} ({ntrpResult.label}), Vietravel đề xuất đổi sang gói{" "}
+                  <strong className="text-brand-primary">{recommendedPkg?.name}</strong> — tour và điểm đến giữ nguyên.
                 </p>
               </div>
             </div>
@@ -142,6 +143,10 @@ export default function BookingStep2({ onNext }: Props) {
         setCurrentQ((i) => i + 1);
         setAdvancing(false);
       }, 350);
+    } else {
+      setTimeout(() => {
+        ctaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 400);
     }
   };
 
@@ -151,7 +156,7 @@ export default function BookingStep2({ onNext }: Props) {
         Khám phá trình độ của bạn
       </h2>
       <p className="text-neutral-40 text-[1.4rem] mb-6">
-        Vietravel sẽ gợi ý hành trình phù hợp nhất với bạn
+        Xác nhận gói dịch vụ phù hợp với trình độ của bạn
       </p>
 
       {/* Progress dots */}
@@ -242,17 +247,19 @@ export default function BookingStep2({ onNext }: Props) {
             Câu tiếp theo
           </button>
         ) : (
-          <Button
-            variant="primary"
-            size="md"
-            className="flex-1"
-            onClick={handleCalculate}
-            disabled={!allAnswered}
-          >
-            {allAnswered
-              ? "Xem kết quả trình độ"
-              : `Còn ${ntrpQuiz.length - answeredCount} câu chưa trả lời`}
-          </Button>
+          <div ref={ctaRef} className="flex-1">
+            <Button
+              variant="primary"
+              size="md"
+              className="w-full"
+              onClick={handleCalculate}
+              disabled={!allAnswered}
+            >
+              {allAnswered
+                ? "Xem kết quả trình độ"
+                : `Còn ${ntrpQuiz.length - answeredCount} câu chưa trả lời`}
+            </Button>
+          </div>
         )}
       </div>
 

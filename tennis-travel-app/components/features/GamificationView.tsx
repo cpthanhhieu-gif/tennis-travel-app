@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Toast from "@/components/ui/Toast";
-import { mockUser, tiers, xpActions, badges, feiScoreData, danangItinerary, questMapNodes, destinations, avatarLevel } from "@/lib/mock-data";
+import { mockUser, tiers, xpActions, badges, feiScoreData, danangItinerary, questMapNodes, destinations, avatarLevel, leiEsgTours } from "@/lib/mock-data";
 import { Trophy, Share2, Lock, Gem, Flag, ChefHat, Zap, CheckCircle2, UtensilsCrossed, Users, Star, ArrowRight, Sparkles, MapPin, Calendar, X, RotateCcw } from "lucide-react";
 import VietravelIcon from "@/components/ui/VietravelIcon";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
@@ -33,9 +33,11 @@ const badgeColors: Record<string, { bg: string; ring: string; icon: string }> = 
 };
 
 const LOCKED_BADGES = [
-  { id: "tour_collector", name: "Tour Collector", description: "Hoàn thành 3 tours", progress: 1, total: 3, icon: "🗺️", hint: "Đặt thêm 2 tours để mở khóa" },
-  { id: "refer_master",   name: "Refer Master",   description: "Giới thiệu 5 bạn bè",  progress: 0, total: 5, icon: "👥", hint: "Chia sẻ link giới thiệu để bắt đầu" },
-  { id: "fei_legend",     name: "FEI Legend",     description: "Đạt FEI >95/100",       progress: feiScoreData.totalFEI, total: 95, icon: "⭐", unit: "/100", hint: `Còn ${95 - feiScoreData.totalFEI} điểm nữa — tham gia thêm bữa ăn FEI cao cấp` },
+  { id: "tour_collector",     name: "Tour Collector",     description: "Hoàn thành 3 tours",               progress: 1,                                      total: 3,   icon: "🗺️", hint: "Đặt thêm 2 tours để mở khóa" },
+  { id: "refer_master",       name: "Refer Master",       description: "Giới thiệu 5 bạn bè",              progress: 0,                                      total: 5,   icon: "👥", hint: "Chia sẻ link giới thiệu để bắt đầu" },
+  { id: "fei_legend",         name: "FEI Legend",         description: "Đạt FEI >95/100",                  progress: feiScoreData.totalFEI,                  total: 95,  icon: "⭐", unit: "/100", hint: `Còn ${95 - feiScoreData.totalFEI} điểm nữa — tham gia thêm bữa ăn FEI cao cấp` },
+  { id: "community_champion", name: "Community Champion", description: "5 tours có Social score cao",       progress: 1,                                      total: 5,   icon: "🤝", hint: "Chọn thêm tour ESG có S-score cao để tích lũy" },
+  { id: "true_local",         name: "True Local",         description: "Đạt LEI 100/100 — bản địa thật sự", progress: leiEsgTours[0]?.lei.total ?? 92,         total: 100, icon: "🏡", unit: "/100", hint: `LEI hiện tại ${leiEsgTours[0]?.lei.total ?? 92}/100 — khám phá thêm văn hóa bản địa` },
 ];
 
 const TIER_GRADIENTS: Record<string, string> = {
@@ -389,7 +391,7 @@ export default function GamificationView() {
     <div className="min-h-screen pb-24 max-w-3xl mx-auto">
 
       {/* ── Explorer Profile Hero ── */}
-      <section aria-labelledby="profile-title" className="bg-neutral-01 border-b border-neutral-10 px-5 pt-16 pb-6">
+      <section aria-labelledby="profile-title" className="border-b border-neutral-10 px-5 pt-16 pb-6" style={{ background: "var(--gradient-tint-radial)" }}>
         <div className="flex items-start gap-4 mb-5">
           <div className="relative shrink-0">
             <div className={`w-[7.2rem] h-[7.2rem] rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-3xl font-extrabold shadow-card`}>

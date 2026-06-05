@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Shield } from "lucide-react";
+import { MapPin, Shield, Leaf, Users } from "lucide-react";
 import { leiEsgTours, LEIESGTour, ESGTier } from "@/lib/mock-data";
 import LEIModal from "@/components/features/LEIModal";
 

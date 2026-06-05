@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MapPin, CheckCircle, SlidersHorizontal, ArrowRight } from "lucide-react";
 import { leiEsgTours, type ESGTier, type LEIESGTour } from "@/lib/mock-data";
 import Modal from "@/components/ui/Modal";
-import LEIModal from "@/components/features/LEIModal";
+import LeiBookingSheet from "@/components/features/LeiBookingSheet";
 
 // ── ESG tier config ──────────────────────────────────────────────────────────
 const ESG_CFG: Record<ESGTier, { label: string; emoji: string; bg: string; text: string; activeBorder: string; bgClass: string; textClass: string }> = {
@@ -117,7 +117,7 @@ export default function LEIToursSection() {
     .filter((t) => esgFilter === "all" || t.esg.tier === esgFilter)
     .sort((a, b) => sortBy === "esg" ? b.esg.total - a.esg.total : b.lei.total - a.lei.total);
 
-  const showVertical = hasActiveFilter || expandList;
+  const showVertical = expandList;
 
   function openFilter() {
     setPendingLei(leiMin); setPendingEsg(esgFilter); setPendingSort(sortBy);
@@ -175,29 +175,77 @@ export default function LEIToursSection() {
         </button>
       </div>
 
-      {/* Active filter chips */}
-      {hasActiveFilter && (
-        <div className="px-4 mb-3 flex flex-wrap gap-2">
-          {leiMin > 0 && (
-            <button onClick={() => { setLeiMin(0); setPendingLei(0); }} aria-label="Xóa lọc LEI"
-              className="flex items-center gap-1 px-3 h-8 rounded-full bg-brand-tint border border-brand-primary text-xs font-semibold text-brand-primary transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1">
-              LEI ≥ {leiMin}<span className="text-brand-primary/60 font-normal ml-0.5">×</span>
-            </button>
-          )}
-          {esgFilter !== "all" && (
-            <button onClick={() => { setEsgFilter("all"); setPendingEsg("all"); }} aria-label="Xóa lọc ESG"
-              className="flex items-center gap-1 px-3 h-8 rounded-full bg-brand-tint border border-brand-primary text-xs font-semibold text-brand-primary transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1">
-              {ESG_CFG[esgFilter].emoji} {ESG_CFG[esgFilter].label}<span className="text-brand-primary/60 font-normal ml-0.5">×</span>
-            </button>
-          )}
-          {sortBy !== "default" && (
-            <button onClick={() => { setSortBy("default"); setPendingSort("default"); }} aria-label="Xóa sắp xếp"
-              className="flex items-center gap-1 px-3 h-8 rounded-full bg-brand-tint border border-brand-primary text-xs font-semibold text-brand-primary transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1">
-              {sortBy === "lei" ? "LEI cao nhất" : "ESG cao nhất"}<span className="text-brand-primary/60 font-normal ml-0.5">×</span>
-            </button>
-          )}
-        </div>
-      )}
+      {/* Overview block */}
+      {displayed.length > 0 && (() => {
+        const leiAvg = Math.round(displayed.reduce((s, t) => s + t.lei.total, 0) / displayed.length);
+        const esgCounts: Record<ESGTier, number> = { "Green Champion": 0, "Eco Friendly": 0, "Standard": 0 };
+        displayed.forEach((t) => { esgCounts[t.esg.tier]++; });
+
+        const ESG_CHIP: Record<ESGTier, { label: string; dot: string; activeBg: string; activeText: string; activeBorder: string }> = {
+          "Green Champion": { label: "Green",    dot: "bg-success",     activeBg: "bg-success-light", activeText: "text-success",     activeBorder: "border-success"     },
+          "Eco Friendly":   { label: "Eco",      dot: "bg-yellow-dark", activeBg: "bg-yellow-light",  activeText: "text-yellow-dark", activeBorder: "border-yellow-dark" },
+          "Standard":       { label: "Standard", dot: "bg-neutral-30",  activeBg: "bg-neutral-05",    activeText: "text-neutral-50",  activeBorder: "border-neutral-10"  },
+        };
+
+        return (
+          <div className="mx-4 mb-4 px-4 py-3">
+            {/* LEI bar */}
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold text-neutral-40 uppercase tracking-wide">LEI trung bình</span>
+                <span className="text-sm font-extrabold text-brand-primary">{leiAvg}<span className="text-xs font-normal text-neutral-30">/100</span></span>
+              </div>
+              <div className="h-1.5 rounded-full bg-neutral-10 overflow-hidden">
+                <div
+                  className="h-full bg-brand-primary rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${leiAvg}%` }}
+                />
+              </div>
+              <div className="flex gap-1.5 mt-2">
+                {([{ label: "Tất cả", value: 0 }, { label: "≥70", value: 70 }, { label: "≥80", value: 80 }, { label: "≥90", value: 90 }]).map(({ label, value }) => {
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => { setLeiMin(value); setPendingLei(value); }}
+                      className="px-5 h-7 rounded-full text-xs font-semibold border border-neutral-10 bg-neutral-01 text-neutral-50 transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1"
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ESG chips */}
+            <div className="flex gap-2 flex-wrap">
+              {(["Green Champion", "Eco Friendly", "Standard"] as ESGTier[]).map((tier) => {
+                const cfg = ESG_CHIP[tier];
+                const count = esgCounts[tier];
+                if (count === 0) return null;
+                const active = esgFilter === tier;
+                return (
+                  <button
+                    key={tier}
+                    onClick={() => { setEsgFilter(active ? "all" : tier); setPendingEsg(active ? "all" : tier); setExpandList(false); }}
+                    aria-pressed={active}
+                    className={`flex items-center gap-1.5 px-3 h-9 rounded-full text-xs font-semibold border transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-1 ${
+                      active
+                        ? `${cfg.activeBg} ${cfg.activeText} ${cfg.activeBorder}`
+                        : "bg-neutral-01 text-neutral-50 border-neutral-10"
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} aria-hidden="true" />
+                    {cfg.label}
+                    <span className={`text-[10px] font-bold px-1 py-0.5 rounded-full ${active ? "bg-white/30" : "text-neutral-40"}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Card area */}
       {displayed.length > 0 ? (
@@ -326,8 +374,15 @@ export default function LEIToursSection() {
         </div>
       </Modal>
 
-      {/* LEI Detail Modal */}
-      {selectedTour && <LEIModal tour={selectedTour} onClose={() => setSelectedTour(null)} />}
+      {/* Booking sheet */}
+      {selectedTour && (
+        <LeiBookingSheet
+          tour={selectedTour}
+          isOpen={!!selectedTour}
+          onClose={() => setSelectedTour(null)}
+          showLeiBreakdown
+        />
+      )}
 
     </section>
   );

@@ -580,6 +580,7 @@ export interface LEIESGTour {
   location: string;
   image: string;
   bookingDestinationId: string;
+  bookingTourId: string;
   lei: {
     total: number;
     badge: string;
@@ -606,6 +607,7 @@ export const leiEsgTours: LEIESGTour[] = [
     location: "Đà Lạt",
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
     bookingDestinationId: "danang",
+    bookingTourId: "dn-sbu1",
     lei: {
       total: 92,
       badge: "True Local",
@@ -625,6 +627,7 @@ export const leiEsgTours: LEIESGTour[] = [
     location: "Hội An",
     image: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80",
     bookingDestinationId: "danang",
+    bookingTourId: "dn-sbu1",
     lei: {
       total: 85,
       badge: "Local Explorer",
@@ -644,6 +647,7 @@ export const leiEsgTours: LEIESGTour[] = [
     location: "Nha Trang",
     image: "https://images.unsplash.com/photo-1570366583862-f91883984fde?w=800&q=80",
     bookingDestinationId: "nhatrang",
+    bookingTourId: "nt-sbu1",
     lei: {
       total: 74,
       badge: "Local Starter",
@@ -663,6 +667,7 @@ export const leiEsgTours: LEIESGTour[] = [
     location: "Sapa",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
     bookingDestinationId: "hanoi",
+    bookingTourId: "dn-sbu1",
     lei: {
       total: 88,
       badge: "True Local",
@@ -682,6 +687,7 @@ export const leiEsgTours: LEIESGTour[] = [
     location: "Mũi Né",
     image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800&q=80",
     bookingDestinationId: "nhatrang",
+    bookingTourId: "nt-sbu1",
     lei: {
       total: 62,
       badge: "Local Starter",
@@ -701,6 +707,7 @@ export const leiEsgTours: LEIESGTour[] = [
     location: "Hà Nội",
     image: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800&q=80",
     bookingDestinationId: "hanoi",
+    bookingTourId: "dn-sbu1",
     lei: {
       total: 79,
       badge: "Local Explorer",

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, PartyPopper } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { useBooking } from "@/lib/BookingContext";
+import { tours, leiEsgTours, tourPackages } from "@/lib/mock-data";
 import BookingStep1 from "./BookingStep1";
 import BookingStep2 from "./BookingStep2";
 import BookingStep3 from "./BookingStep3";
@@ -14,11 +15,46 @@ import BookingStep4 from "./BookingStep4";
 const STEPS = ["Chọn gói tour", "Đánh giá NTRP", "Thông tin", "Xác nhận"];
 
 export default function BookingFlow() {
-  const [step, setStep] = useState(1);
+  const searchParams = useSearchParams();
+  const startStep = Number(searchParams.get("startStep") ?? 1);
+  const [step, setStep] = useState(Math.min(Math.max(startStep, 1), 4));
   const [showSuccess, setShowSuccess] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const { booking, resetBooking } = useBooking();
+  const { booking, updateBooking, resetBooking } = useBooking();
   const router = useRouter();
+
+  // Pre-fill booking context when coming from LeiBookingSheet
+  useEffect(() => {
+    if (startStep < 2) return;
+    const tourId       = searchParams.get("tourId");
+    const leiTourId    = searchParams.get("leiTourId");
+    const numPeople    = Number(searchParams.get("numPeople") ?? 2);
+    const departureCode = searchParams.get("departureCode");
+    if (!tourId) return;
+
+    const tour    = tours.find((t) => t.id === tourId);
+    const leiTour = leiTourId ? leiEsgTours.find((l) => l.id === leiTourId) : undefined;
+    if (!tour) return;
+
+    const schedule = departureCode
+      ? tour.departureSchedules.find((s) => s.code === departureCode)
+      : tour.departureSchedules[0];
+    const pkg = tourPackages.find((p) => p.id === tour.packageId);
+
+    updateBooking({
+      tourId:        tour.id,
+      packageId:     tour.packageId,
+      destination:   tour.destinationId,
+      departureDate: schedule?.date ?? tour.departureSchedules[0].date,
+      departureCode: schedule?.code ?? tour.departureSchedules[0].code,
+      numPeople,
+      totalPrice:    (pkg?.priceRange.min ?? schedule?.price ?? 0) * numPeople,
+      leiTourId:     leiTour?.id,
+      leiScore:      leiTour?.lei.total,
+      esgTier:       leiTour?.esg.tier,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleBack = () => {
     if (step >= 3) {

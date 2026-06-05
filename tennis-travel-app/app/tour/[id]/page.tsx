@@ -7,7 +7,7 @@ import PageWrapper from "@/components/layout/PageWrapper";
 import LEIScoreCard from "@/components/features/LEIScoreCard";
 import ESGScoreCard from "@/components/features/ESGScoreCard";
 import LocalProProfile from "@/components/ui/LocalProProfile";
-import Button from "@/components/ui/Button";
+import TourDetailBookingSection from "@/components/features/TourDetailBookingSection";
 
 // ── ESG style helpers ────────────────────────────────────────────────────────
 const ESG_BADGE: Record<ESGTier, { bg: string; text: string; emoji: string }> = {
@@ -107,21 +107,8 @@ export default async function TourDetailPage({
         <LocalProProfile data={tour} />
       </div>
 
-      {/* ── CTA ── */}
-      <div className="px-4 pt-3 pb-8">
-        <Link
-          href={`/booking?dest=${tour.bookingDestinationId}&leiTourId=${tour.id}`}
-          className="block rounded-full focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
-          aria-label={`Đặt tour ${tour.name}`}
-        >
-          <Button variant="primary" size="lg" className="w-full" tabIndex={-1}>
-            Đặt tour ngay
-          </Button>
-        </Link>
-        <p className="text-xs text-neutral-30 text-center mt-2">
-          Hoàn tiền 100% nếu hủy trước 7 ngày
-        </p>
-      </div>
+      {/* ── Booking section ── */}
+      <TourDetailBookingSection tour={tour} />
 
     </PageWrapper>
   );

@@ -13,8 +13,7 @@ export default function PageWrapper({ children, className = "" }: PageWrapperPro
       <Navbar />
       <main
         className={`min-h-screen pt-0 md:pt-14 md:pb-0 ${className}`}
-        style={{ background: "var(--gradient-tint-radial)" }}
-        style={{ paddingBottom: "calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))" }}
+        style={{ background: "var(--gradient-tint-radial)", paddingBottom: "calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))" }}
       >
         {children}
       </main>

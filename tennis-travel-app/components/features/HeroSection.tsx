@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Bell, Trophy, Search, AlignJustify, ChevronDown, X, SlidersHorizontal } from "lucide-react";
+import Image from "next/image";
+import { Bell, Trophy, Search, ChevronDown, X, SlidersHorizontal } from "lucide-react";
 import { mockUser } from "@/lib/mock-data";
 
 const TIER_COLOR: Record<string, string> = {
@@ -57,10 +58,14 @@ export default function HeroSection({ searchQuery, onSearch, filterSbu, onFilter
             <span className="w-full h-[2px] bg-neutral-90 rounded-full" />
           </button>
 
-          <button className="flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-150 ease-out active:scale-[0.98] focus:ring-2 focus:ring-brand-primary focus:ring-offset-2">
-            <MapPin size={13} className="text-brand-primary" />
-            <span className="text-neutral-90 text-xs font-semibold">TP. Hồ Chí Minh</span>
-          </button>
+          <Image
+            src="/vietravel-logo.png"
+            alt="Vietravel"
+            height={28}
+            width={120}
+            className="object-contain"
+            priority
+          />
 
           <button
             aria-label="Thông báo"

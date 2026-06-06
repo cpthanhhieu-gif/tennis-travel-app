@@ -1,7 +1,7 @@
 export const mockUser = {
   id: "user_001",
-  name: "Nguyễn Minh Khoa",
-  firstName: "Khoa",
+  name: "Nguyễn Thủy Tiên",
+  firstName: "Tiên",
   age: 32,
   segment: "A",
   ntrpLevel: 3.5,

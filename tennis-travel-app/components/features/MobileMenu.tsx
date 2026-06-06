@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X, Home, MapPin, Trophy, CreditCard, Tag, Settings } from "lucide-react";
@@ -132,9 +133,16 @@ export default function MobileMenu({ open, onClose }: Props) {
         </ul>
 
         {/* Version */}
-        <p className="mt-auto px-5 pb-8 text-neutral-30 text-xs">
-          Vietravel Tennis Travel v1.0
-        </p>
+        <div className="mt-auto px-5 pb-8 flex items-center gap-2">
+          <Image
+            src="/vietravel-logo.png"
+            alt="Vietravel"
+            height={20}
+            width={84}
+            className="object-contain"
+          />
+          <span className="text-neutral-30 text-xs">Tennis Travel v1.0</span>
+        </div>
       </nav>
     </div>
   );

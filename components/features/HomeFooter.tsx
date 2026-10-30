@@ -33,7 +33,7 @@ export default function HomeFooter() {
                 { href: "/", label: "Trang chủ" },
                 { href: "/booking", label: "Đặt tour" },
                 { href: "/pre-tour", label: "Trước hành trình" },
-                { href: "/gamification", label: "Tích điểm XP" },
+                { href: "/gamification", label: "Ace Club & Ace Points" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <a
@@ -62,7 +62,7 @@ export default function HomeFooter() {
 
         <div className="border-t border-white/10 pt-[2.4rem] flex flex-col md:flex-row justify-between items-center gap-[1.6rem]">
           <p className="text-white/40 text-[1.2rem]">
-            © 2026 Vietravel. Tennis Travel Experience — Spec v1.0 · Product to Lead 2026
+            © 2027 Vietravel. Tennis Travel Experience — Prototype V2.12
           </p>
           <p className="text-white/40 text-[1.2rem]">
             Thiết kế bởi Nguyễn Thủy Tiên — Ban Nhân chính, Vietravel

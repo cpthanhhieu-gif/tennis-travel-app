@@ -4,13 +4,13 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Toast from "@/components/ui/Toast";
-import { mockUser, tiers, xpActions, badges, feiScoreData, danangItinerary } from "@/lib/mock-data";
+import { mockUser, tiers, pointActions, badges, feiScoreData, danangItinerary } from "@/lib/mock-data";
 import { Trophy, Share2, Lock, Gem, Flag, ChefHat, Zap, CheckCircle2, UtensilsCrossed, Users, Star, ArrowRight, Sparkles } from "lucide-react";
 import VietravelIcon from "@/components/ui/VietravelIcon";
 
 type IconRenderer = (size: number, className: string) => React.ReactNode;
 
-const xpIconMap: Record<string, IconRenderer> = {
+const pointIconMap: Record<string, IconRenderer> = {
   Flag:            (s, c) => <Flag size={s} className={c} aria-hidden />,
   UtensilsCrossed: (s, c) => <VietravelIcon id="cuisine-bold" size={s} className={c} />,
   MapPin:          (s, c) => <VietravelIcon id="location-bold" size={s} className={c} />,
@@ -38,8 +38,7 @@ const LOCKED_BADGES = [
 ];
 
 const TIER_GRADIENTS: Record<string, string> = {
-  Bronze:  "from-amber-700 to-amber-500",
-  Silver:  "from-slate-500 to-slate-400",
+  Member:  "from-blue-700 to-blue-500",
   Gold:    "from-yellow-600 to-yellow-400",
   Diamond: "from-purple-700 to-purple-500",
 };
@@ -96,7 +95,7 @@ function MilestoneTrack({ current, min, max }: { current: number; min: number; m
         })}
         <div className="absolute w-[2.6rem] h-[2.6rem] rounded-full bg-white border-[3px] border-white/50 shadow-[0_0_0_3px_rgba(255,255,255,0.4)] transition-all duration-700"
           style={{ left: `${pct}%`, transform: "translateX(-50%)", top: "50%", marginTop: "-1.3rem" }}
-          aria-label={`${current.toLocaleString("vi-VN")} XP`} />
+          aria-label={`${current.toLocaleString("vi-VN")} Ace Points`} />
       </div>
       <div className="relative flex mt-[0.8rem]">
         {milestones.map((xp, i) => {
@@ -142,7 +141,7 @@ function useCountUp(target: number, duration = 1500) {
 const tourTotalXp = danangItinerary.reduce((s, d) => s + d.totalXp, 0);
 
 export default function GamificationView() {
-  const xpCount = useCountUp(mockUser.xp, 1500);
+  const xpCount = useCountUp(mockUser.acePoints, 1500);
   const [activeTab, setActiveTab] = useState<"xp" | "badges" | "tiers" | "fei">("xp");
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "info" | "xp"; xp?: number }>({
     visible: false, message: "", type: "info",
@@ -150,8 +149,8 @@ export default function GamificationView() {
 
   const currentTier = tiers.find((t) => t.name === mockUser.tier)!;
   const nextTier = tiers[tiers.indexOf(currentTier) + 1];
-  const xpToNext = nextTier ? nextTier.xpMin - mockUser.xp : 0;
-  const referXpPerFriend = 800;
+  const xpToNext = nextTier ? nextTier.pointsMin - mockUser.acePoints : 0;
+  const referXpPerFriend = 300;
   const friendsNeeded = Math.ceil(xpToNext / referXpPerFriend);
   const gradient = TIER_GRADIENTS[currentTier.name] ?? "from-slate-500 to-slate-400";
 
@@ -162,7 +161,7 @@ export default function GamificationView() {
   const hideToast = useCallback(() => setToast((t) => ({ ...t, visible: false })), []);
 
   const TABS: { key: "xp" | "badges" | "tiers" | "fei"; label: string }[] = [
-    { key: "xp",     label: "XP" },
+    { key: "xp",     label: "Ace Points" },
     { key: "badges", label: `Badges (${badges.length})` },
     { key: "tiers",  label: "Cấp bậc" },
     { key: "fei",    label: "FEI" },
@@ -191,7 +190,7 @@ export default function GamificationView() {
             <div className="flex items-center gap-[0.8rem] mt-[0.6rem] flex-wrap">
               <span className="inline-flex items-center gap-[0.4rem] px-[1.0rem] py-[0.3rem] bg-white/20 backdrop-blur-sm rounded-full text-white text-[1.2rem] font-bold border border-white/30">
                 <TierIcon name={currentTier.name} size={12} />
-                {currentTier.name} Member
+                Hạng {currentTier.name}
               </span>
               <span className="text-white/70 text-[1.2rem]">NTRP {mockUser.ntrpLevel}</span>
             </div>
@@ -205,26 +204,26 @@ export default function GamificationView() {
           </Link>
         </div>
 
-        {/* XP Counter */}
+        {/* Ace Points Counter */}
         <div className="mb-[0.8rem]">
           <div className="flex justify-between items-end mb-[1.2rem]">
             <div>
-              <p className="text-white/60 text-[1.2rem] mb-[0.2rem] uppercase tracking-widest font-medium">Tổng XP</p>
-              <p className="text-[5.2rem] font-extrabold text-white leading-none drop-shadow-sm" aria-label={`${mockUser.xp} XP`}>
+              <p className="text-white/60 text-[1.2rem] mb-[0.2rem] uppercase tracking-widest font-medium">Tổng Ace Points</p>
+              <p className="text-[5.2rem] font-extrabold text-white leading-none drop-shadow-sm" aria-label={`${mockUser.acePoints} Ace Points`}>
                 {xpCount.toLocaleString("vi-VN")}
-                <span className="text-[2rem] text-white/60 font-normal"> XP</span>
+                <span className="text-[2rem] text-white/60 font-normal"> điểm</span>
               </p>
             </div>
             {nextTier && (
               <div className="text-right bg-white/10 backdrop-blur-sm rounded-[1rem] px-[1.4rem] py-[0.8rem] border border-white/20">
                 <p className="text-white/60 text-[1.1rem] uppercase tracking-wide">Lên {nextTier.name}</p>
                 <p className="text-white font-extrabold text-[1.8rem]">
-                  {xpToNext.toLocaleString("vi-VN")} XP
+                  {xpToNext.toLocaleString("vi-VN")} điểm
                 </p>
               </div>
             )}
           </div>
-          <MilestoneTrack current={mockUser.xp} min={currentTier.xpMin} max={currentTier.xpMax} />
+          <MilestoneTrack current={mockUser.acePoints} min={currentTier.pointsMin} max={currentTier.pointsMax} />
         </div>
 
         {/* Mini stats strip */}
@@ -258,7 +257,7 @@ export default function GamificationView() {
           <div className="flex items-center gap-[1rem] bg-amber-50 border border-amber-200 rounded-[1rem] px-[1.4rem] py-[1rem]">
             <span className="text-[1.8rem] shrink-0">💡</span>
             <p className="text-amber-800 text-[1.3rem] flex-1">
-              Refer <strong>{friendsNeeded} bạn bè</strong> = +{(friendsNeeded * referXpPerFriend).toLocaleString("vi-VN")} XP → lên <strong>{nextTier.name}</strong>
+              Giới thiệu <strong>{friendsNeeded} bạn bè</strong> = +{(friendsNeeded * referXpPerFriend).toLocaleString("vi-VN")} điểm → lên <strong>{nextTier.name}</strong>
             </p>
             <ArrowRight size={14} className="text-amber-500 shrink-0" />
           </div>
@@ -285,14 +284,14 @@ export default function GamificationView() {
 
       <div className="px-[1.6rem]">
 
-        {/* ── Tab: XP ── */}
+        {/* ── Tab: Ace Points ── */}
         {activeTab === "xp" && (
-          <section aria-label="Chi tiết XP">
+          <section aria-label="Chi tiết Ace Points">
 
             {/* Tour breakdown card */}
             <div className="bg-neutral-01 rounded-[1.2rem] border border-neutral-10 shadow-[rgba(0,0,0,0.06)_0px_2px_12px] p-[2rem] mb-[2rem]">
               <div className="flex items-center justify-between mb-[1.6rem]">
-                <h2 className="font-bold text-neutral-90 text-[1.5rem]">📍 Tour Đà Nẵng — Tổng kết XP</h2>
+                <h2 className="font-bold text-neutral-90 text-[1.5rem]">📍 Hoạt động hành trình — Ace Points</h2>
                 <span className="inline-flex items-center gap-[0.4rem] px-[1.2rem] py-[0.4rem] bg-brand-tint rounded-full text-brand-primary font-extrabold text-[1.4rem]">
                   <Sparkles size={12} />
                   +{tourTotalXp.toLocaleString("vi-VN")}
@@ -310,17 +309,17 @@ export default function GamificationView() {
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="text-brand-secondary font-extrabold text-[1.5rem]">+{day.totalXp.toLocaleString("vi-VN")}</p>
-                      <p className="text-neutral-30 text-[1.0rem]">XP</p>
+                      <p className="text-neutral-30 text-[1.0rem]">điểm</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* XP Actions */}
+            {/* Ace Point Actions */}
             <p className="text-neutral-40 text-[1.2rem] font-bold mb-[1.2rem] uppercase tracking-widest">Hoạt động</p>
             <div className="space-y-[1rem] mb-[2.4rem]">
-              {xpActions.map((action) => (
+              {pointActions.map((action) => (
                 <button
                   key={action.action}
                   className={`w-full flex items-center gap-[1.4rem] p-[1.6rem] rounded-[1.2rem] border text-left transition-all duration-200 focus:outline-none ${
@@ -330,22 +329,22 @@ export default function GamificationView() {
                   }`}
                   onClick={() => {
                     if (!action.earned) {
-                      showToast(`Hoàn thành tour để mở khóa +${action.xp} XP`, "info");
+                      showToast(`Hoàn thành hoạt động để nhận +${action.points} Ace Points`, "info");
                     }
                   }}
-                  aria-label={`${action.action} — ${action.earned ? "Đã hoàn thành" : `Chưa mở, +${action.xp} XP`}`}
+                  aria-label={`${action.action} — ${action.earned ? "Đã hoàn thành" : `Chưa mở, +${action.points} Ace Points`}`}
                 >
                   <span className={`shrink-0 flex items-center justify-center w-[4.4rem] h-[4.4rem] rounded-[1rem] ${
                     action.earned ? "bg-green-100" : "bg-neutral-05"
                   }`}>
-                    {xpIconMap[action.icon]?.(20, action.earned ? "text-green-600" : "text-neutral-30")}
+                    {pointIconMap[action.icon]?.(20, action.earned ? "text-green-600" : "text-neutral-30")}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className={`font-semibold text-[1.4rem] leading-snug ${action.earned ? "text-neutral-90" : "text-neutral-40"}`}>
                       {action.action}
                     </p>
                     <p className={`text-[1.2rem] mt-[0.2rem] font-bold ${action.earned ? "text-green-600" : "text-neutral-30"}`}>
-                      +{action.xp.toLocaleString("vi-VN")} XP
+                      +{action.points.toLocaleString("vi-VN")} Ace Points
                     </p>
                   </div>
                   {action.earned ? (
@@ -368,8 +367,8 @@ export default function GamificationView() {
                   <VietravelIcon id="group-people-linear" size={28} className="text-white" />
                 </div>
               </div>
-              <p className="font-extrabold text-[1.8rem] text-white mb-[0.4rem]">Refer bạn bè · +800 XP / người</p>
-              <p className="text-white/70 text-[1.3rem] mb-[2rem]">Mỗi bạn đăng ký thành công = +800 XP cho bạn</p>
+              <p className="font-extrabold text-[1.8rem] text-white mb-[0.4rem]">Giới thiệu bạn bè · +300 điểm / người</p>
+              <p className="text-white/70 text-[1.3rem] mb-[2rem]">Mỗi lượt đăng ký thành công = +300 Ace Points</p>
               <button
                 onClick={() => showToast("Đã copy link giới thiệu!", "success")}
                 className="w-full py-[1.4rem] bg-white rounded-[1rem] font-bold text-[1.5rem] shadow-[rgba(0,0,0,0.2)_0px_4px_16px] hover:bg-white/90 transition-colors"
@@ -466,7 +465,7 @@ export default function GamificationView() {
                       <div>
                         <p className="font-extrabold text-[1.8rem] text-white">{tier.name}</p>
                         <p className="text-white/70 text-[1.2rem]">
-                          {tier.xpMin.toLocaleString("vi-VN")} – {tier.xpMax >= 999999 ? "∞" : tier.xpMax.toLocaleString("vi-VN")} XP
+                          {tier.pointsMin.toLocaleString("vi-VN")} – {tier.pointsMax >= 999999 ? "∞" : tier.pointsMax.toLocaleString("vi-VN")} Ace Points
                         </p>
                       </div>
                     </div>

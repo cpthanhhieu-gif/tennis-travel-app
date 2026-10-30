@@ -41,7 +41,7 @@ export default function PreTourDashboard() {
       <div className="flex items-start justify-between mb-[1.2rem]">
         <div>
           <p className="text-neutral-40 text-[1.3rem] leading-tight">
-            Thứ Sáu, 13 Tháng 6, 2026
+            Thứ Năm, 20 Tháng 5, 2027
           </p>
           <h1 className="text-[2.2rem] md:text-[3.2rem] font-bold text-neutral-90">
             Chào {mockUser.firstName} 👋
@@ -77,7 +77,7 @@ export default function PreTourDashboard() {
       </div>
 
       <p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">
-        Tour Đà Nẵng 3N2D · 13–15/06/2026 · Khởi hành sau{" "}
+        Sportcation Premium Phú Quốc 4N3D · 20/05/2027 · Khởi hành sau{" "}
         <strong className="text-brand-primary">7 ngày nữa</strong>
       </p>
 
@@ -152,7 +152,7 @@ export default function PreTourDashboard() {
                 </div>
                 <div className="flex items-center gap-[1.2rem]">
                   <span className="text-brand-primary text-[1.4rem] font-bold">
-                    +{day.totalXp} XP
+                    +{day.totalXp} Ace Points
                   </span>
                   {expandedDay === day.day ? (
                     <ChevronUp size={18} className="text-neutral-40" aria-hidden="true" />
@@ -178,7 +178,7 @@ export default function PreTourDashboard() {
                             <MapPin size={10} aria-hidden="true" />
                             {act.location}
                             {act.xp > 0 && (
-                              <span className="text-brand-light ml-[0.8rem]">+{act.xp} XP</span>
+                              <span className="text-brand-light ml-[0.8rem]">+{act.xp} Ace Points</span>
                             )}
                           </p>
                         </div>

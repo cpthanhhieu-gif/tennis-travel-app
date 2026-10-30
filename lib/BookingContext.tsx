@@ -36,11 +36,11 @@ interface BookingContextType {
 }
 
 const defaultBooking: BookingState = {
-  tourId: "dn-sbu1",
+  tourId: "dl-sbu1",
   packageId: "sbu1",
-  destination: "danang",
-  departureDate: "2026-06-13",
-  departureCode: "FESGN567-010-130626XE-H",
+  destination: "dalat",
+  departureDate: "2027-04-24",
+  departureCode: "VTR-SIG-TNS-01-DL2-240427",
   numPeople: 2,
   ntrpLevel: 0,
   ntrpLabel: "",
@@ -48,7 +48,7 @@ const defaultBooking: BookingState = {
   phone: "",
   email: "",
   notes: "",
-  totalPrice: 0,
+  totalPrice: 13800000,
 };
 
 const defaultNtrpQuizState: NtrpQuizState = {

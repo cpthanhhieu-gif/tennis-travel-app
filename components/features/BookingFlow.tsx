@@ -10,6 +10,7 @@ import BookingStep1 from "./BookingStep1";
 import BookingStep2 from "./BookingStep2";
 import BookingStep3 from "./BookingStep3";
 import BookingStep4 from "./BookingStep4";
+import { tours } from "@/lib/mock-data";
 
 const STEPS = ["Chọn gói tour", "Đánh giá NTRP", "Thông tin", "Xác nhận"];
 
@@ -17,8 +18,11 @@ export default function BookingFlow() {
   const [step, setStep] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const { booking, resetBooking } = useBooking();
+  const { booking } = useBooking();
   const router = useRouter();
+  const selectedTour = tours.find((tour) => tour.id === booking.tourId) ?? tours[0];
+  const selectedSchedule = selectedTour.departureSchedules.find((schedule) => schedule.code === booking.departureCode)
+    ?? selectedTour.departureSchedules[0];
 
   const handleBack = () => {
     if (step >= 3) {
@@ -41,7 +45,6 @@ export default function BookingFlow() {
   };
 
   const handleViewPreTour = () => {
-    resetBooking();
     router.push("/pre-tour");
   };
 
@@ -157,7 +160,7 @@ export default function BookingFlow() {
             <strong className="text-neutral-90">Nguyễn Minh Khoa</strong> bắt đầu!
           </p>
           <p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">
-            Tour Đà Nẵng 3N2D · 13–15/06/2026
+            {selectedTour.name} · {selectedTour.duration} · {selectedSchedule.dateLabel}
             <br />
             Chúng tôi sẽ liên hệ xác nhận trong vòng 24 giờ.
           </p>

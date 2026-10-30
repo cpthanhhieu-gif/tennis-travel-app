@@ -5,8 +5,7 @@ import { MapPin, Bell, Trophy, Search, AlignJustify, ChevronDown, X } from "luci
 import { mockUser } from "@/lib/mock-data";
 
 const TIER_COLOR: Record<string, string> = {
-  Bronze: "bg-amber-700",
-  Silver: "bg-slate-400",
+  Member: "bg-blue-600",
   Gold: "bg-yellow-500",
   Diamond: "bg-cyan-400",
 };

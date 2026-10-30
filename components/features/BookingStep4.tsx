@@ -9,22 +9,15 @@ import { Check } from "lucide-react";
 
 interface Props { onConfirm: () => void }
 
-const dateLabels: Record<string, string> = {
-  "2026-06-13": "Thứ Sáu, 13/06/2026",
-  "2026-06-20": "Thứ Sáu, 20/06/2026",
-  "2026-07-04": "Thứ Bảy, 04/07/2026",
-  "2026-07-11": "Thứ Bảy, 11/07/2026",
-  "2026-07-18": "Thứ Bảy, 18/07/2026",
-};
-
 export default function BookingStep4({ onConfirm }: Props) {
   const { booking } = useBooking();
   const [loading, setLoading] = useState(false);
 
   const pkg  = tourPackages.find((p) => p.id === booking.packageId) ?? tourPackages[0];
   const tour = tours.find((t) => t.id === booking.tourId) ?? tours[0];
-  const pricePerPerson = tour.departureSchedules.find((s) => s.code === booking.departureCode)?.price
-    ?? pkg.priceRange.min;
+  const selectedSchedule = tour.departureSchedules.find((s) => s.code === booking.departureCode)
+    ?? tour.departureSchedules[0];
+  const pricePerPerson = selectedSchedule.price;
   const total = pricePerPerson * booking.numPeople;
 
   const rows = [
@@ -32,7 +25,7 @@ export default function BookingStep4({ onConfirm }: Props) {
     { label: "Gói", value: pkg.name },
     { label: "Mã chuyến", value: booking.departureCode || tour.tourCode },
     { label: "Điểm đến", value: tour.destinationName },
-    { label: "Ngày khởi hành", value: dateLabels[booking.departureDate] || booking.departureDate },
+    { label: "Ngày khởi hành", value: `${selectedSchedule.dayOfWeek}, ${selectedSchedule.dateLabel}` },
     { label: "Số người", value: `${booking.numPeople} người` },
     { label: "NTRP", value: booking.ntrpLabel ? `${booking.ntrpLevel} — ${booking.ntrpLabel}` : "Chưa đánh giá" },
     { label: "Liên hệ", value: booking.name || "Nguyễn Minh Khoa" },
@@ -76,7 +69,7 @@ export default function BookingStep4({ onConfirm }: Props) {
             </span>
           </div>
           <p className="text-neutral-30 text-[1.2rem] mt-[0.4rem] text-right">
-            {formatVND(pkg.priceRange.min)} × {booking.numPeople} người
+            {formatVND(pricePerPerson)} × {booking.numPeople} người
           </p>
         </div>
       </div>

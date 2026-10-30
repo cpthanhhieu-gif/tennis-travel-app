@@ -133,10 +133,10 @@ export default function InTourLive() {
             <Zap size={20} className="text-neutral-01" aria-hidden="true" />
           </div>
           <div>
-            <p className="font-bold text-[1.6rem] text-neutral-90 mb-[0.4rem]">Chào mừng đến Đà Nẵng!</p>
+            <p className="font-bold text-[1.6rem] text-neutral-90 mb-[0.4rem]">Chào mừng đến Phú Quốc!</p>
             <p className="text-neutral-50 text-[1.4rem] leading-relaxed">
               Ngày 1 hoàn thành xuất sắc — nhận badge <strong>First Serve</strong>, tổng kết{" "}
-              <strong className="text-brand-primary">550 XP</strong> và FEI trung bình <strong>89/100</strong>.
+              <strong className="text-brand-primary">550 Ace Points</strong> và FEI trung bình <strong>89/100</strong>.
             </p>
           </div>
         </section>
@@ -189,32 +189,32 @@ export default function InTourLive() {
             <p className="font-bold text-[1.6rem] text-neutral-90 mb-[0.4rem]">Ngày cuối của hành trình</p>
             <p className="text-neutral-50 text-[1.4rem] leading-relaxed">
               Cool-down, nhận feedback 1-1 từ HLV, tự generate <strong>Share Card</strong> và lên đường về nhà với{" "}
-              <strong className="text-brand-primary">+800 XP</strong> tiềm năng.
+              <strong className="text-brand-primary">+800 Ace Points</strong> tiềm năng.
             </p>
           </div>
         </section>
       )}
 
-      {/* XP Bar */}
+      {/* Ace Points Bar */}
       <section aria-labelledby="xp-title" className="mb-[3.2rem]">
         <div className="flex items-center justify-between mb-[0.8rem]">
-          <h2 id="xp-title" className="font-bold text-[1.6rem] text-neutral-90">XP Hôm nay</h2>
+          <h2 id="xp-title" className="font-bold text-[1.6rem] text-neutral-90">Ace Points hôm nay</h2>
           <span className="text-brand-primary font-bold text-[1.4rem]">
-            {xpData.current.toLocaleString("vi-VN")} / {xpData.max.toLocaleString("vi-VN")} XP
+            {xpData.current.toLocaleString("vi-VN")} / {xpData.max.toLocaleString("vi-VN")} điểm
           </span>
         </div>
         <ProgressBar value={xpData.current} max={xpData.max} color="primary" />
         {currentDay === LIVE_DAY ? (
           <p className="text-neutral-30 text-[1.2rem] mt-[0.4rem]">
-            Cần thêm {(xpData.max - xpData.current).toLocaleString("vi-VN")} XP để hoàn thành ngày hôm nay
+            Cần thêm {(xpData.max - xpData.current).toLocaleString("vi-VN")} điểm để hoàn thành ngày hôm nay
           </p>
         ) : currentDay < LIVE_DAY ? (
           <p className="text-success text-[1.2rem] mt-[0.4rem] font-semibold">
-            Đã hoàn thành toàn bộ XP ngày {currentDay}
+            Đã hoàn thành toàn bộ Ace Points ngày {currentDay}
           </p>
         ) : (
           <p className="text-neutral-30 text-[1.2rem] mt-[0.4rem]">
-            {xpData.max.toLocaleString("vi-VN")} XP đang chờ bạn hôm nay
+            {xpData.max.toLocaleString("vi-VN")} Ace Points đang chờ bạn hôm nay
           </p>
         )}
       </section>
@@ -273,7 +273,7 @@ export default function InTourLive() {
                     <p className="text-neutral-30 text-[1.2rem]">{act.location}</p>
                     {act.xp > 0 && !isDone && (
                       <span className="text-brand-light text-[1.2rem] mt-[0.4rem] block">
-                        +{act.xp} XP
+                        +{act.xp} Ace Points
                       </span>
                     )}
                   </div>
@@ -368,7 +368,7 @@ export default function InTourLive() {
             <div className="flex gap-[1.2rem]">
               <Link href="/gamification" className="flex-1">
                 <Button variant="outline-danger" size="sm" className="w-full">
-                  Xem thành tích XP
+                  Xem thành tích Ace Points
                 </Button>
               </Link>
               <Link href="/share-card" className="flex-1">
@@ -385,7 +385,7 @@ export default function InTourLive() {
       {currentDay === LIVE_DAY && (
         <Link href="/gamification">
           <Button variant="primary" size="lg" className="w-full">
-            Xem Thành tích &amp; XP
+            Xem Ace Club &amp; Ace Points
           </Button>
         </Link>
       )}
@@ -399,7 +399,7 @@ export default function InTourLive() {
       )}
 
       <Toast
-        message="Đã cộng +30 XP cho đánh giá!"
+        message="Đã cộng +20 Ace Points cho đánh giá!"
         visible={toastVisible}
         onHide={() => setToastVisible(false)}
         type="xp"

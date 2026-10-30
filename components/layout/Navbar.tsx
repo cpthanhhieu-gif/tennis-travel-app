@@ -67,14 +67,14 @@ export default function Navbar() {
 
       {/* User info */}
       <div className="flex items-center gap-[1.2rem]">
-        <Badge variant="tier" tier="Silver">
+        <Badge variant="tier" tier={mockUser.tier}>
           <Trophy size={12} aria-hidden="true" />
-          Silver
+          {mockUser.tier}
         </Badge>
         <div className="flex items-center gap-[0.8rem] px-[1.2rem] py-[0.6rem] rounded-[0.8rem] bg-neutral-03 border border-neutral-10">
           <User size={16} className="text-brand-primary" aria-hidden="true" />
           <span className="text-[1.4rem] text-neutral-90 font-medium">{mockUser.firstName}</span>
-          <Badge variant="brand">{mockUser.xp.toLocaleString("vi-VN")} XP</Badge>
+          <Badge variant="brand">{mockUser.acePoints.toLocaleString("vi-VN")} Ace Points</Badge>
         </div>
       </div>
     </nav>

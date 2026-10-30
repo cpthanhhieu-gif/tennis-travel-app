@@ -53,7 +53,7 @@ export default function Toast({
     >
       <div className="bg-neutral-01 rounded-[4rem] px-[2rem] py-[1.2rem] shadow-[rgba(0,0,0,0.2)_0px_0px_10px] flex items-center gap-[0.8rem] text-[1.4rem] font-semibold whitespace-nowrap border border-neutral-05">
         {xp !== undefined && (
-          <span className={`font-extrabold ${accent}`}>+{xp} XP</span>
+          <span className={`font-extrabold ${accent}`}>+{xp} Ace Points</span>
         )}
         <span className="text-neutral-90">{message}</span>
       </div>

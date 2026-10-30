@@ -44,7 +44,7 @@ const BADGE_ICONS: Record<string, React.ReactNode> = {
 const TOUR_HIGHLIGHTS = [
   { emoji: "🎾", title: "2 trận thắng", desc: "Giải nội bộ Court A" },
   { emoji: "🍜", title: "8 bữa FEI", desc: "Điểm TB 89/100" },
-  { emoji: "🏝️", title: "Đà Nẵng 3N2D", desc: "13–15/06/2026" },
+  { emoji: "🏝️", title: "Phú Quốc 4N3D", desc: "20/05/2027" },
 ];
 
 const SOCIAL_PLATFORMS = [
@@ -166,7 +166,7 @@ export default function ShareCardView() {
       await navigator
         .share({
           title: "Tennis Travel Experience — Thẻ thành tích",
-          text: `${mockUser.name} đã hoàn thành Tour Đà Nẵng 3N2D với ${mockUser.xp} XP và FEI ${feiScoreData.totalFEI}/100! #TennisTravelVN`,
+          text: `${mockUser.name} đã hoàn thành Sportcation Premium Phú Quốc 4N3D với ${mockUser.acePoints} Ace Points và FEI ${feiScoreData.totalFEI}/100! #TennisTravelVN`,
           url: window.location.href,
         })
         .catch(() => {});
@@ -194,7 +194,7 @@ export default function ShareCardView() {
           </h1>
         </div>
         <p className="text-neutral-40 text-[1.4rem]">
-          Bạn đã hoàn thành <span className="font-semibold text-neutral-70">Tour Đà Nẵng 3N2D</span> · 13–15/06/2026
+          Bạn đã hoàn thành <span className="font-semibold text-neutral-70">Sportcation Premium Phú Quốc 4N3D</span> · 20/05/2027
         </p>
       </div>
 
@@ -232,7 +232,7 @@ export default function ShareCardView() {
                 <h2 style={{ color: "white", fontSize: "26px", fontWeight: 800, lineHeight: 1.1, marginBottom: "4px" }}>
                   {mockUser.name}
                 </h2>
-                <p style={{ color: "#86efac", fontSize: "12px" }}>Tour Đà Nẵng 3N2D · 13–15/06/2026</p>
+                <p style={{ color: "#86efac", fontSize: "12px" }}>Phú Quốc 4N3D · 20/05/2027</p>
               </div>
               <div style={{ width: "44px", height: "44px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)", border: "2px solid rgba(255,255,255,0.4)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <span style={{ color: "white", fontWeight: 800, fontSize: "16px" }}>{mockUser.name.charAt(0)}</span>
@@ -240,7 +240,7 @@ export default function ShareCardView() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginTop: "16px", marginBottom: "16px" }}>
               {[
-                { icon: "🏆", value: mockUser.xp.toLocaleString("vi-VN"), sub: "xp", label: "tổng hợp" },
+                { icon: "🏆", value: mockUser.acePoints.toLocaleString("vi-VN"), sub: " điểm", label: "Ace Points" },
                 { icon: "🎯", value: `${feiScoreData.totalFEI}/100`, sub: "", label: "fei score" },
                 { icon: "🎖️", value: "2", sub: "", label: "trận thắng" },
               ].map(({ icon, value, sub, label }) => (
@@ -439,7 +439,7 @@ export default function ShareCardView() {
       <div className="text-center">
         <p className="text-neutral-40 text-[1.4rem] mb-[0.4rem]">Chia sẻ lên mạng xã hội và nhận</p>
         <p className="text-brand-primary font-extrabold text-[1.6rem] flex items-center justify-center gap-[0.4rem] mb-[1.0rem]">
-          +100 XP <Share2 size={14} aria-hidden="true" />
+          +10 Ace Points <Share2 size={14} aria-hidden="true" />
         </p>
         <p className="text-neutral-40 text-[1.2rem] mb-[1.4rem]">
           🔥 47 người đã chia sẻ thẻ này tuần qua

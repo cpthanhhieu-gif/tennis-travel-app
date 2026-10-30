@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import { useBooking } from "@/lib/BookingContext";
 import { tours, tourPackages, formatVNDShort, type Tour } from "@/lib/mock-data";
@@ -18,10 +18,9 @@ const PKG_FILTERS = [
 
 const DEST_FILTERS = [
   { id: "all", label: "Tất cả" },
+  { id: "dalat",     label: "Đà Lạt" },
   { id: "danang",    label: "Đà Nẵng" },
   { id: "phuquoc",   label: "Phú Quốc" },
-  { id: "nhatrang",  label: "Nha Trang" },
-  { id: "phanthiet", label: "Phan Thiết" },
 ];
 
 const BADGE_STYLES: Record<string, string> = {
@@ -103,7 +102,7 @@ export default function BookingStep1({ onNext }: Props) {
 
   const [pkgFilter, setPkgFilter]   = useState("all");
   const [destFilter, setDestFilter] = useState("all");
-  const [selectedTourId, setSelectedTourId] = useState(booking.tourId || "dn-sbu1");
+  const [selectedTourId, setSelectedTourId] = useState(booking.tourId || "dl-sbu1");
   const [scheduleOpen, setScheduleOpen]     = useState(false);
   const [people, setPeople]                 = useState(booking.numPeople || 2);
 
@@ -116,6 +115,21 @@ export default function BookingStep1({ onNext }: Props) {
   const selectedTour = tours.find((t) => t.id === selectedTourId) ?? tours[0];
   const firstSchedule = selectedTour.departureSchedules[0];
   const [scheduleCode, setScheduleCode] = useState(booking.departureCode || firstSchedule.code);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const packageId = params.get("package");
+    const destinationId = params.get("destination");
+    const linkedTour = tours.find((tour) =>
+      (packageId ? tour.packageId === packageId : true) &&
+      (destinationId ? tour.destinationId === destinationId : true)
+    );
+    if (!linkedTour || (!packageId && !destinationId)) return;
+    setPkgFilter(packageId ?? "all");
+    setDestFilter(destinationId ?? "all");
+    setSelectedTourId(linkedTour.id);
+    setScheduleCode(linkedTour.departureSchedules[0].code);
+  }, []);
 
   const selectedSchedule =
     selectedTour.departureSchedules.find((s) => s.code === scheduleCode) ?? firstSchedule;
@@ -132,7 +146,6 @@ export default function BookingStep1({ onNext }: Props) {
   };
 
   const handleNext = () => {
-    const pkg = tourPackages.find((p) => p.id === selectedTour.packageId);
     updateBooking({
       tourId: selectedTour.id,
       packageId: selectedTour.packageId,
@@ -140,7 +153,7 @@ export default function BookingStep1({ onNext }: Props) {
       departureDate: selectedSchedule.date,
       departureCode: selectedSchedule.code,
       numPeople: people,
-      totalPrice: (pkg?.priceRange.min ?? selectedSchedule.price) * people,
+      totalPrice: selectedSchedule.price * people,
     });
     onNext();
   };

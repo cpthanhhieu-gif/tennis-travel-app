@@ -9,10 +9,9 @@ import { Clock, Users, MapPin, Check } from "lucide-react";
 const SBU_LABEL: Record<number, string> = { 1: "Leisure", 2: "Tournament", 3: "Premium" };
 
 const DEST_LABEL: Record<string, string> = {
+  dalat:     "Đà Lạt",
   danang:    "Đà Nẵng",
   phuquoc:   "Phú Quốc",
-  nhatrang:  "Nha Trang",
-  phanthiet: "Phan Thiết",
 };
 
 interface Props {

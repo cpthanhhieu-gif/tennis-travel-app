@@ -13,15 +13,14 @@ interface BadgeProps {
     | "live"
     | "tier"
     | "xp";
-  tier?: "Bronze" | "Silver" | "Gold" | "Diamond";
+  tier?: "Member" | "Gold" | "Diamond";
   children: React.ReactNode;
   className?: string;
   pulse?: boolean;
 }
 
 const tierStyles: Record<string, string> = {
-  Bronze: "bg-[#FFE0C0] text-[#7A3800]",
-  Silver: "bg-[#E8E8E8] text-[#3D3D3D]",
+  Member: "bg-[#E6F2FF] text-[#004A82]",
   Gold:   "bg-[#FFF3CC] text-[#7A5C00]",
   Diamond:"bg-purple-light text-purple",
 };

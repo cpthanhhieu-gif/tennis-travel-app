@@ -10,10 +10,10 @@ export default function DestinationsSection() {
       {/* Header */}
       <div className="px-[1.6rem] mb-[1.6rem]">
         <h2 id="destinations-title" className="text-[1.8rem] font-bold text-neutral-90">
-          Điểm đến <span className="text-brand-primary">Pilot 2026</span>
+          Điểm đến <span className="text-brand-primary">V2 · 2027</span>
         </h2>
         <p className="text-neutral-40 text-[1.3rem] mt-[0.3rem]">
-          Ra mắt tháng 6/2026 · Đặt sớm nhận ưu đãi
+          Mở bán chính thức từ tháng 4/2027
         </p>
       </div>
 

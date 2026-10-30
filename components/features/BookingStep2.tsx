@@ -4,7 +4,7 @@ import { useState as useLocalState } from "react";
 import Button from "@/components/ui/Button";
 import { Target, AlertTriangle, CheckCircle2, ChevronLeft } from "lucide-react";
 import { useBooking } from "@/lib/BookingContext";
-import { ntrpQuiz, getNtrpLevel, tourPackages } from "@/lib/mock-data";
+import { ntrpQuiz, getNtrpLevel, tourPackages, tours } from "@/lib/mock-data";
 
 interface Props { onNext: () => void }
 
@@ -35,9 +35,15 @@ export default function BookingStep2({ onNext }: Props) {
   };
 
   const handleSwitchPackage = (recommendedId: string, recommendedPkgData: typeof tourPackages[0]) => {
+    const recommendedTour = tours.find((tour) => tour.packageId === recommendedId) ?? tours[0];
+    const recommendedSchedule = recommendedTour.departureSchedules[0];
     updateBooking({
+      tourId: recommendedTour.id,
       packageId: recommendedId,
-      totalPrice: recommendedPkgData.priceRange.min * booking.numPeople,
+      destination: recommendedTour.destinationId,
+      departureDate: recommendedSchedule.date,
+      departureCode: recommendedSchedule.code,
+      totalPrice: recommendedSchedule.price * booking.numPeople,
     });
     updateNtrpQuizState({ packageDecision: true });
   };

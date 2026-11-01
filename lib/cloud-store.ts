@@ -29,4 +29,14 @@ export async function writeDocument(name:string,value:unknown){
 }
 export async function roomExists(room:string){await init();const sql=context.getStore()?.sql??database();const rows=await sql`SELECT key FROM tennis_demo_documents WHERE key=${room+":room"}`;return !!rows.length;}
 
-export async function apiStorage(req:NextRequest,fn:()=>Promise<Response>):Promise<Response>{try{return await withStorage(req,fn);}catch{return Response.json({error:"Chưa kết nối được cơ sở dữ liệu Demo. Kiểm tra DATABASE_URL và kết nối Neon trên Vercel."},{status:503,headers:{"Cache-Control":"no-store"}});}}
+export async function apiStorage(req:NextRequest,fn:()=>Promise<Response>):Promise<Response>{
+ try{return await withStorage(req,fn);}catch(error){
+ const missing=cloudMode()&&!process.env.DATABASE_URL;
+ const code=missing?"DATABASE_NOT_CONFIGURED":"DATABASE_UNAVAILABLE";
+ // Log only a bounded error code; connection strings and credentials must never appear in logs.
+ const dbCode=(error as {code?:unknown})?.code;
+ const detailCode=typeof dbCode==="string"&&/^[A-Z0-9_]{1,40}$/.test(dbCode)?dbCode:"UNKNOWN";
+ console.error("Demo storage unavailable",{code,dbCode:detailCode});
+ return Response.json({code,detailCode,error:missing?"Bản triển khai này chưa có DATABASE_URL. Kết nối Neon vào đúng môi trường Production hoặc Preview, rồi Redeploy bản mới.":"Chưa kết nối được dữ liệu Demo. Kiểm tra kết nối Neon và DATABASE_URL của bản triển khai này trên Vercel."},{status:503,headers:{"Cache-Control":"no-store"}});
+ }
+}

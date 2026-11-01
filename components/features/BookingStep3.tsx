@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import PremiumRequestFields from "./PremiumRequestFields";
 import {validPremiumRequest} from "@/lib/premium-request";
 import Button from "@/components/ui/Button";
@@ -17,8 +17,28 @@ export default function BookingStep3({ onNext }: Props) {
   const [notes, setNotes] = useState(booking.notes || "");
   const [submitted, setSubmitted] = useState(false);
 
+  const edited=useRef({name:false,phone:false,email:false});
+  const currentContact=useRef({name,phone,email});
+  currentContact.current={name,phone,email};
+  const [autoFilled,setAutoFilled]=useState(false);
   const [savedContact,setSavedContact]=useState<{name:string;phone:string;email:string}|null>(null);
-  useEffect(()=>{fetch("/api/local").then(r=>r.ok?r.json():null).then(d=>setSavedContact(d?.profile??null)).catch(()=>{});},[]);
+  useEffect(()=>{let active=true;
+    fetch("/api/local",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>{
+      if(!active)return;
+      const profile=d?.profile;
+      setSavedContact(profile??null);
+      if(!profile)return;
+      const patch:Partial<{name:string;phone:string;email:string}>={};
+      for(const key of ["name","phone","email"] as const){
+        if(!edited.current[key]&&!currentContact.current[key].trim()&&typeof profile[key]==="string"&&profile[key].trim())patch[key]=profile[key];
+      }
+      if(patch.name!==undefined)setName(patch.name);
+      if(patch.phone!==undefined)setPhone(patch.phone);
+      if(patch.email!==undefined)setEmail(patch.email);
+      if(Object.keys(patch).length){updateBooking(patch);setAutoFilled(true);}
+    }).catch(()=>{});
+    return()=>{active=false;};
+  },[updateBooking]);
   const cleanPhone = phone.replace(/[\s().-]/g, "");
   const errors = {
     name: name.trim() && name.trim().length <= 100 ? "" : "Nhập họ và tên từ 1 đến 100 ký tự.",
@@ -49,6 +69,7 @@ export default function BookingStep3({ onNext }: Props) {
         {booking.packageId === "sbu2" ? "Cung cấp liên hệ đại diện để nhận báo giá; hồ sơ từng thành viên được bổ sung sau." : "Thông tin để chúng tôi liên hệ xác nhận tour của bạn"}
       </p>
 
+      {autoFilled&&<p role="status">Đã tự điền thông tin từ hồ sơ. Bạn kiểm tra lại và bổ sung các mục còn thiếu trước khi tiếp tục.</p>}
       {savedContact&&<button type="button" className="ds-link mb-[1.6rem]" onClick={()=>{setName(savedContact.name);setPhone(savedContact.phone);setEmail(savedContact.email);updateBooking({name:savedContact.name,phone:savedContact.phone,email:savedContact.email});}}>Dùng liên hệ đã lưu trong hồ sơ</button>}
       <div className="booking-contact-fields">
         <Input
@@ -56,7 +77,7 @@ export default function BookingStep3({ onNext }: Props) {
           id="name"
           error={submitted ? errors.name : undefined}
           value={name}
-          onChange={(e) => {setName(e.target.value);updateBooking({name:e.target.value});}}
+          onChange={(e) => {edited.current.name=true;setName(e.target.value);updateBooking({name:e.target.value});}}
           placeholder="Nguyễn Minh Khoa"
           required
           autoComplete="name"
@@ -67,7 +88,7 @@ export default function BookingStep3({ onNext }: Props) {
           error={submitted ? errors.phone : undefined}
           type="tel"
           value={phone}
-          onChange={(e) => {setPhone(e.target.value);updateBooking({phone:e.target.value});}}
+          onChange={(e) => {edited.current.phone=true;setPhone(e.target.value);updateBooking({phone:e.target.value});}}
           placeholder="0901 234 567"
           required
           autoComplete="tel"
@@ -78,7 +99,7 @@ export default function BookingStep3({ onNext }: Props) {
           error={submitted ? errors.email : undefined}
           type="email"
           value={email}
-          onChange={(e) => {setEmail(e.target.value);updateBooking({email:e.target.value});}}
+          onChange={(e) => {edited.current.email=true;setEmail(e.target.value);updateBooking({email:e.target.value});}}
           placeholder="email@example.com"
           required
           autoComplete="email"

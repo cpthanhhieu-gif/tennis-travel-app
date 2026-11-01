@@ -31,6 +31,7 @@
 
 ## Kiểm tra
 
+- node scripts/check-cloud-json.cjs (kiểm tra binding JSON và đọc dữ liệu cũ bằng kho thay thế, không phải kết nối Neon thật)
 - node scripts/check-demo-access.cjs (kiểm tra quyền API với kho dữ liệu thay thế trong bộ nhớ; không kiểm tra kết nối PostgreSQL thật)
 - node scripts/check-demo-auth.cjs
 - node scripts/check-group-request.cjs

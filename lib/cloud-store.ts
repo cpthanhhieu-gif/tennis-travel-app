@@ -20,11 +20,15 @@ export async function withStorage<T>(req:NextRequest,fn:()=>Promise<T>):Promise<
 }
 function key(name:string){return name.startsWith("global/")?name:`${currentRoom()}:${name}`;}
 export async function readDocument<T>(name:string):Promise<T|null>{
- if(cloudMode()){await init();const sql=context.getStore()?.sql??database();const rows=await sql`SELECT data FROM tennis_demo_documents WHERE key=${key(name)}`;return rows[0]?.data as T??null;}
+ if(cloudMode()){await init();const sql=context.getStore()?.sql??database();const rows=await sql`SELECT data FROM tennis_demo_documents WHERE key=${key(name)}`;const data=rows[0]?.data;
+ // Earlier deployments encoded the JSON payload twice. Decode those documents
+ // on read; the next successful save writes the corrected JSONB representation.
+ if(typeof data==="string"){try{const decoded=JSON.parse(data);if(decoded===null||typeof decoded==="object")return decoded as T;}catch{/* Leave a genuine JSON string unchanged. */}}
+ return data as T??null;}
  try{return JSON.parse(await readFile(path.join(process.cwd(),".local-data",name+".json"),"utf8"));}catch(e){if((e as NodeJS.ErrnoException).code==="ENOENT")return null;throw e;}
 }
 export async function writeDocument(name:string,value:unknown){
- if(cloudMode()){await init();const sql=context.getStore()?.sql??database();await sql`INSERT INTO tennis_demo_documents (key,data) VALUES (${key(name)},${JSON.stringify(value)}::jsonb) ON CONFLICT (key) DO UPDATE SET data=EXCLUDED.data`;return;}
+ if(cloudMode()){await init();const sql=context.getStore()?.sql??database();await sql`INSERT INTO tennis_demo_documents (key,data) VALUES (${key(name)},${sql.json(value as postgres.JSONValue)}::jsonb) ON CONFLICT (key) DO UPDATE SET data=EXCLUDED.data`;return;}
  const file=path.join(process.cwd(),".local-data",name+".json");await mkdir(path.dirname(file),{recursive:true});await writeFile(file+".tmp",JSON.stringify(value),{mode:0o600});await rename(file+".tmp",file);
 }
 export async function roomExists(room:string){await init();const sql=context.getStore()?.sql??database();const rows=await sql`SELECT key FROM tennis_demo_documents WHERE key=${room+":room"}`;return !!rows.length;}

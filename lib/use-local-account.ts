@@ -22,5 +22,5 @@ export function useLocalAccount(){
  async function refresh(silent=false){if(acting.current)return;const version=++requestVersion.current;try{const r=await fetch("/api/local",{cache:"no-store"});const next=await r.json();if(!r.ok)throw Error(next.error||"Không tải được dữ liệu");if(version!==requestVersion.current||acting.current)return;setData(next);if(!silent){setError("");setNeedsLogin(false);}}catch(e){if(!silent)setError(e instanceof Error?e.message:"Không tải được dữ liệu. Vui lòng thử lại.");}}
  useEffect(()=>{void refresh();const timer=setInterval(()=>{if(document.visibilityState==="visible")void refresh(true);},5000);return()=>clearInterval(timer);},[]);
  async function act(body:object){if(acting.current)return false;acting.current=true;requestVersion.current++;setBusy(true);setError("");try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const d=await r.json();if(r.status===401)setNeedsLogin(true);if(!r.ok)throw Error(d.error);setData(d);return true;}catch(e){setError(requestErrorMessage(e));return false;}finally{acting.current=false;setBusy(false);}}
- return {data,error,busy,refresh:()=>refresh(),act,needsLogin};
+ return {data,error,busy,refresh:()=>refresh(),act,needsLogin,clearError:()=>setError("")};
 }

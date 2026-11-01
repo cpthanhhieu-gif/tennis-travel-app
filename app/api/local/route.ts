@@ -6,7 +6,7 @@ import {type PremiumRequest,validPremiumRequest} from "@/lib/premium-request";
 import {publishGroupPlan} from "@/lib/group-plans";
 import {scenarioKey,ensureScenario,resetScenario} from "@/lib/demo-store";
 import {isScenarioId} from "@/lib/demo-scope";
-import {latestPreparation,preparationReady,type PreparationFields} from "@/lib/preparation";
+import {latestPreparation,preparationReady,checkInMissing,type PreparationFields} from "@/lib/preparation";
 import {FEI_CRITERIA,participants,surveyMeals,validFei,feiMean,type PilotFields} from "@/lib/pilot";
 import {coupleTotal,companionRate} from "@/lib/couple-pricing";
 import { NextRequest, NextResponse } from "next/server";
@@ -106,7 +106,9 @@ async function postLocal(req:NextRequest){
    const previous=latestPreparation(o,person.id);
    if(!previous||["operational","marketing","photo","parq"].some(k=>previous[k as keyof typeof previous]!==next[k as keyof typeof next])){o.preparation??=[];o.preparation.push(next);o.checkInPasses=o.checkInPasses?.filter(x=>x.participant!==person.id);}
   }else{
-   if(o.paid<o.deposit||requestBlocked(o)||!preparationReady(o,person.id,person.player))return NextResponse.json({error:"Cần đủ cọc, đồng thuận và hoàn tất khai báo chuẩn bị trước check-in"},{status:409});
+   if(requestBlocked(o))return NextResponse.json({error:"Yêu cầu chuyến đi còn chờ xử lý. Xem tab Tổng quan trước khi check-in."},{status:409});
+   const missing=checkInMissing(o,person.id,person.player);
+   if(missing.length)return NextResponse.json({error:`Chưa thể lấy mã check-in. Cần bổ sung: ${missing.join("; ")}.`,missing},{status:409});
    o.checkInPasses??=[];
    if(b.action==="checkInPass"){
     let pass=o.checkInPasses.find(p=>p.participant===person.id&&Date.parse(p.expiresAt)>Date.now());if(!pass){pass={participant:person.id,token:randomUUID(),expiresAt:new Date(Date.now()+24*3600000).toISOString()};o.checkInPasses=o.checkInPasses.filter(x=>x.participant!==person.id);o.checkInPasses.push(pass);}

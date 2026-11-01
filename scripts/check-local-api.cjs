@@ -37,6 +37,7 @@ for(const [pkg,people,total,deposit,status] of [['sbu2',2,25800000,12900000,'Ch�
  const t=tours.find(t=>t.packageId===pkg);const d=t.departureSchedules[0];
  const r=await post({action:'book',key:pkg,booking:{tourId:t.id,departureCode:d.code,numPeople:people,name:'QA '+pkg}});assert.equal(r.status,200);const v=(await r.json()).order;assert.equal(v.total,total);assert.equal(v.deposit,deposit);assert.equal(v.status,status);assert.equal((await post({action:'pay',id:v.id,result:'success'})).status,409);
  assert.equal((await post({action:'acceptOffer',id:v.id,offerId:'missing'})).status,409);
+ if(pkg==='sbu2'){assert.equal((await post({action:'offer',id:v.id})).status,409);assert.equal((await post({action:'approveGroupQuote',source:'test-controls',id:v.id,fixed:0,perPerson:total/people,options:'Không',sourceNote:'QA approved quote'})).status,200);}
  const prepared=await (await post({action:'offer',id:v.id})).json();const offer=prepared.orders.find(o=>o.id===v.id).offer;assert.equal(offer.total,total);assert.equal(offer.deposit,deposit);
  assert.equal((await post({action:'pay',id:v.id,result:'success'})).status,409);
  assert.equal((await post({action:'acceptOffer',id:v.id,offerId:'wrong'})).status,409);
@@ -152,6 +153,7 @@ assert.equal((await post({action:'supplement',id:info.id,response:' '})).status,
 const supplied=await (await post({action:'supplement',id:info.id,response:'Đoàn đến 09:00; liên hệ đại diện đã cung cấp.'})).json();assert.equal(requestBlocked(supplied.orders.find(o=>o.id===info.id)),false);
 const duplicateSupply=await (await post({action:'supplement',id:info.id,response:'Retry'})).json();assert.equal(duplicateSupply.orders.find(o=>o.id===info.id).history.length,3);
 assert.equal((await post({action:'supplement',id:declined.id,response:'abc'})).status,409);
+if(tours.find(t=>t.id===info.tourId)?.packageId==='sbu2')assert.equal((await post({action:'approveGroupQuote',source:'test-controls',id:info.id,fixed:0,perPerson:info.total/info.numPeople,options:'Không',sourceNote:'QA approved quote'})).status,200);
 const reopened=await (await post({action:'offer',id:info.id})).json();const proposal=reopened.orders.find(o=>o.id===info.id).offer;
 await post({action:'acceptOffer',id:info.id,offerId:proposal.id});
 await post({action:'pay',id:info.id,result:'failed'});await post({action:'pay',id:info.id,result:'success'});const repeatedPayment=await (await post({action:'pay',id:info.id,result:'success'})).json();
@@ -165,6 +167,7 @@ for(const [pkg,total] of [['sbu1',12300000],['sbu2',22800000],['sbu3',52800000]]
  assert.equal((await post({action:'book',key:'couple-'+pkg,booking:c})).status,200);
  assert.equal((await post({action:'book',key:'couple-'+pkg,booking:{...c,numCompanions:0}})).status,409);
  for(const invalid of [-1,2,1.5,'1'])assert.equal((await post({action:'book',key:'invalid-couple-'+pkg+invalid,booking:{...c,numCompanions:invalid}})).status,400);
+ if(pkg==='sbu2')assert.equal((await post({action:'approveGroupQuote',source:'test-controls',id:result.order.id,fixed:0,perPerson:total/2,options:'Không',sourceNote:'QA approved quote'})).status,200);
  if(pkg!=='sbu1'){const offered=await (await post({action:'offer',id:result.order.id})).json();assert.equal(offered.orders.find(o=>o.id===result.order.id).offer.total,total);}
  const read=await (await api.GET(new NextRequest('http://localhost:8081/api/local',{headers:{cookie}}))).json();assert.equal(read.orders.find(o=>o.id===result.order.id).numCompanions,1);
 }

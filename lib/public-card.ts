@@ -1,4 +1,3 @@
-import {cookies} from "next/headers";import {storeDirectory} from "./demo-store";
-import {readFile} from "node:fs/promises";import path from "node:path";import {tours} from "./mock-data";
+import {readDocument} from "./cloud-store";
 export type PublicCard={alias:string;packageId:string;tourName:string;completedAt:string;expiresAt:string};
-export async function getPublicCard(token:string):Promise<PublicCard|null>{if(!/^[a-f0-9-]{36}$/.test(token))return null;try{const s=JSON.parse(await readFile(path.join(storeDirectory((await cookies()).get("tt-scenario")?.value),"store.json"),"utf8"));const o=s.orders.find((o:{publication?:{token:string;expiresAt:string};completedAt?:string})=>o.completedAt&&o.publication?.token===token&&Date.parse(o.publication.expiresAt)>Date.now());if(!o)return null;const t=tours.find(t=>t.id===o.tourId);if(!t)return null;return {alias:o.publication.alias,packageId:t.packageId,tourName:t.name,completedAt:o.completedAt,expiresAt:o.publication.expiresAt};}catch(e){if((e as NodeJS.ErrnoException).code==="ENOENT")return null;throw e;}}
+export async function getPublicCard(token:string):Promise<PublicCard|null>{if(!/^[a-f0-9-]{36}$/.test(token))return null;const card=await readDocument<PublicCard>(`global/cards/${token}`);return card&&Date.parse(card.expiresAt)>Date.now()?card:null;}

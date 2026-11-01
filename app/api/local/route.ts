@@ -1,16 +1,16 @@
+import {readDocument,writeDocument,apiStorage,cloudMode,currentRoom,roomExists} from "@/lib/cloud-store";
+import {isAdmin} from "@/lib/demo-auth";
 import {type OperationDetails,type OfferVersion,validOperations} from "@/lib/operations";
 import {type GroupRequest,type GroupQuote,validGroupRequest} from "@/lib/group-request";
 import {type PremiumRequest,validPremiumRequest} from "@/lib/premium-request";
 import {publishGroupPlan} from "@/lib/group-plans";
-import {storeDirectory,ensureScenario,resetScenario} from "@/lib/demo-store";
+import {scenarioKey,ensureScenario,resetScenario} from "@/lib/demo-store";
 import {isScenarioId} from "@/lib/demo-scope";
 import {latestPreparation,preparationReady,type PreparationFields} from "@/lib/preparation";
 import {FEI_CRITERIA,participants,surveyMeals,validFei,feiMean,type PilotFields} from "@/lib/pilot";
 import {coupleTotal,companionRate} from "@/lib/couple-pricing";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID, createHash } from "node:crypto";
-import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
-import path from "node:path";
 import { packageCapacity, tours, ntrpQuiz, getNtrpLevel } from "@/lib/mock-data";
 import { awardOnce, type PointEntry } from "@/lib/ace-points";
 import {tripItinerary,validChecklistItem} from "@/lib/trip-itinerary";
@@ -25,20 +25,24 @@ type Store = {sessions: Record<string,number>; orders:Order[];ledger:PointEntry[
 
 let queue:Promise<unknown>=Promise.resolve();
 async function load(scope?:string):Promise<Store>{
- const dir=storeDirectory(scope);if(isScenarioId(scope))await ensureScenario(scope);
+ if(isScenarioId(scope))await ensureScenario(scope);
  try{
-  const s=JSON.parse(await readFile(path.join(dir,"store.json"),"utf8")) as Store;
+  const s=(await readDocument<Store>(scenarioKey(scope)))??{sessions:{},orders:[],ledger:[]};
   if(!s.ledger){s.ledger=[];for(const o of s.orders){if(o.points>0)s.ledger.push({key:`${o.id}:opening`,orderId:o.id,kind:"opening",amount:o.points,createdAt:new Date().toISOString()});}}
   return s;
  }catch(e){if((e as NodeJS.ErrnoException).code==="ENOENT")return {sessions:{},orders:[],ledger:[]};throw e;}
 }
-async function save(s:Store,scope?:string){const dir=storeDirectory(scope);await mkdir(dir,{recursive:true});await writeFile(path.join(dir,"store.tmp"),JSON.stringify(s),{mode:0o600});await rename(path.join(dir,"store.tmp"),path.join(dir,"store.json"));}
+async function save(s:Store,scope?:string){await writeDocument(scenarioKey(scope),s);for(const o of s.orders){if(o.publication){const t=tours.find(t=>t.id===o.tourId);await writeDocument(`global/cards/${o.publication.token}`,{alias:o.publication.alias,packageId:t?.packageId,tourName:t?.name,completedAt:o.completedAt,expiresAt:o.publication.expiresAt});}}}
 const hash=(s:string)=>createHash("sha256").update(s).digest("hex");
 function view(s:Store){return {account:s.profile??{name:"Tennis Member"},orders:s.orders,points:s.ledger.reduce((n,e)=>n+e.amount,0),ledger:s.ledger,profile:s.profile??null,ntrpProfile:s.ntrpProfile??null};}
-export async function GET(req:NextRequest){await queue;const scope=req.cookies.get("tt-scenario")?.value;const s=await load(scope);const token=req.cookies.get("tt-session")?.value;return NextResponse.json(token&&s.sessions[hash(token)]>Date.now()?view(s):{account:null,orders:[],points:0},{headers:{"Cache-Control":"no-store"}});}
-export async function POST(req:NextRequest){
+async function getLocal(req:NextRequest){await queue;const scope=req.cookies.get("tt-scenario")?.value;const s=await load(scope);const token=req.cookies.get("tt-session")?.value;return NextResponse.json(token&&s.sessions[hash(token)]>Date.now()?view(s):{account:null,orders:[],points:0},{headers:{"Cache-Control":"no-store"}});}
+async function postLocal(req:NextRequest){
  if(req.headers.get("origin")!==req.nextUrl.origin)return NextResponse.json({error:"Yêu cầu không hợp lệ"},{status:403});
- const run=async()=>{try{const b=await req.json();let scope=req.cookies.get("tt-scenario")?.value;
+ const run=async()=>{try{const b=await req.json();
+ if(cloudMode()&&(!/^[a-f0-9-]{36}$/.test(currentRoom())||!await roomExists(currentRoom())))return NextResponse.json({error:"Mở link phiên demo do người trình diễn cung cấp."},{status:403});
+ const privileged=["demoSelect","demoReset","demoOperate","seedRequestExamples","checkIn","saveOperations","sendOfferVersion","approveGroupQuote","publishGroupPlan","replyPremiumRevision","offer","updateActivity","assignTrainingGroup","resolveGroupChange","pay","start","complete"];
+ if((privileged.includes(b.action)||b.source==="test-controls"||b.source==="operations")&&!isAdmin(req))return NextResponse.json({error:"Cần đăng nhập quản trị Demo để thực hiện thao tác này."},{status:403});
+ let scope=req.cookies.get("tt-scenario")?.value;
  if(b.action==="demoSelect"||b.action==="demoReset"){
   if(b.scenario!=="legacy"&&!isScenarioId(b.scenario))return NextResponse.json({error:"Kịch bản không hợp lệ"},{status:400});
   scope=b.scenario==="legacy"?undefined:b.scenario;
@@ -133,7 +137,7 @@ export async function POST(req:NextRequest){
  }
  if(b.action==="publishCard"||b.action==="revokeCard"){
   const o=s.orders.find(o=>o.id===b.id);if(!o)return NextResponse.json({error:"Không tìm thấy chuyến"},{status:404});
-  if(b.action==="revokeCard"){delete o.publication;await save(s,scope);return NextResponse.json(view(s));}
+  if(b.action==="revokeCard"){if(o.publication)await writeDocument(`global/cards/${o.publication.token}`,null);delete o.publication;await save(s,scope);return NextResponse.json(view(s));}
   if(!o.completedAt)return NextResponse.json({error:"Chỉ chia sẻ chuyến đã hoàn thành"},{status:409});
   if(b.consent!==true||typeof b.alias!=="string"||!b.alias.trim()||b.alias.trim().length>60)return NextResponse.json({error:"Nhập tên hiển thị tối đa 60 ký tự và đồng ý tạo liên kết công khai"},{status:400});
   if(!o.publication||Date.parse(o.publication.expiresAt)<=Date.now()||o.publication.alias!==b.alias.trim())o.publication={token:randomUUID(),alias:b.alias.trim(),createdAt:new Date().toISOString(),expiresAt:new Date(Date.now()+30*86400000).toISOString()};
@@ -312,6 +316,9 @@ export async function POST(req:NextRequest){
  }
  return NextResponse.json({error:"Thao tác không hỗ trợ"},{status:400});
  }catch(error){console.error("Local API failed", error);return NextResponse.json({error:"Không xử lý được yêu cầu. Vui lòng thử lại."},{status:500});}};
- const result=queue.then(run,run);queue=result.then(()=>{},()=>{});return result;
+ if(cloudMode())return run();const result=queue.then(run,run);queue=result.then(()=>{},()=>{});return result;
 }
 
+
+export async function GET(req:NextRequest){return apiStorage(req,()=>getLocal(req));}
+export async function POST(req:NextRequest){return apiStorage(req,()=>postLocal(req));}

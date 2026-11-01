@@ -1,0 +1,17 @@
+const ts=require('typescript'),fs=require('fs'),path=require('path'),Module=require('module'),assert=require('node:assert/strict');
+const root=process.cwd();let room='room-a';
+const filename=path.join(root,'lib/demo-auth.ts');const m=new Module(filename,module);m.filename=filename;m.paths=module.paths;
+const original=m.require.bind(m);m.require=id=>id==='./cloud-store'?{cloudMode:()=>true,currentRoom:()=>room}:original(id);
+m._compile(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText,filename);
+const {adminToken,isAdmin,passwordMatches}=m.exports;
+const req=value=>({cookies:{get:()=>value?{value}:undefined}});
+process.env.DEMO_ADMIN_PASSWORD='test-password-for-auth-only';
+assert.equal(passwordMatches('wrong'),false);assert.equal(passwordMatches(process.env.DEMO_ADMIN_PASSWORD),true);
+assert.equal(isAdmin(req()),false);
+const token=adminToken(room,Date.now()+60000);assert.equal(isAdmin(req(token)),true);
+assert.equal(isAdmin(req(token.slice(0,-1)+'z')),false);
+room='room-b';assert.equal(isAdmin(req(token)),false);room='room-a';
+assert.equal(isAdmin(req(adminToken(room,Date.now()-1))),false);
+assert.equal(isAdmin(req(adminToken(room,Date.now()+86400000*2))),false);
+delete process.env.DEMO_ADMIN_PASSWORD;assert.equal(isAdmin(req(token)),false);assert.equal(passwordMatches(''),false);
+console.log('PASS demo authentication: password, missing cookie, signature tampering, room isolation, expiry, missing configuration');

@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/local-data/
+/.local-data/
+/.next-before-navigation-20261031/
+
+.next-verify-coaches/

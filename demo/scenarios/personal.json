@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "kind": "scenario-definition",
+  "scope": "demo-local",
+  "automaticActions": [],
+  "rules": [
+    "Chỉ nạp bối cảnh ban đầu; không tự gửi yêu cầu, chấp thuận, thanh toán, khai đồng thuận hoặc phản hồi.",
+    "Dữ liệu riêng của kịch bản không được xuất hiện trong kịch bản khác.",
+    "Giá, lịch, điều kiện và hạng tham chiếu danh mục chung khi triển khai seed; không sao chép công thức.",
+    "Mọi giao dịch và phản hồi vận hành trong demo đều là mô phỏng."
+  ],
+  "id": "personal",
+  "name": "Cá nhân — chọn đúng tour",
+  "problem": "Khách chưa biết trình độ, lịch và chi phí có phù hợp với mình.",
+  "goal": "Tự chọn Leisure phù hợp và hiểu trạng thái đặt chỗ, bước tiếp theo.",
+  "entryPath": "/?package=sbu1",
+  "entryIntent": "Màn Khám phá, nhấn mạnh Leisure; tham số lọc cần được kết nối ở bước triển khai.",
+  "initialData": {
+    "account": {
+      "alias": "Khách Cá nhân Demo",
+      "ntrp": null
+    },
+    "packageId": "sbu1",
+    "participants": {
+      "players": 1,
+      "companions": 0
+    },
+    "orders": [],
+    "bookingDraft": null,
+    "points": 0,
+    "ledger": []
+  },
+  "steps": [
+    "Xem gói Leisure, lịch và điều kiện.",
+    "Chọn lịch và một người chơi.",
+    "Tự đánh giá NTRP, nhập liên hệ và xem lại.",
+    "Gửi đặt chỗ; mở Hành trình để kiểm tra trạng thái và cọc."
+  ],
+  "completionSignals": [
+    "Có đúng một booking Leisure do người thử tự tạo.",
+    "Gói, ngày, số khách và tổng tiền nhất quán giữa Booking và Hành trình.",
+    "Người thử xác định được tình trạng xác nhận và khoản cần thanh toán."
+  ],
+  "mustRemainForUser": [
+    "Chọn ngày",
+    "Trả lời NTRP",
+    "Nhập liên hệ",
+    "Gửi đặt chỗ",
+    "Thanh toán mô phỏng nếu muốn tiếp tục"
+  ],
+  "operatorEvents": []
+}

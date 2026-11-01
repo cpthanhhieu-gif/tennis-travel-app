@@ -1,12 +1,12 @@
 import PageWrapper from "@/components/layout/PageWrapper";
-import GamificationView from "@/components/features/GamificationView";
+import AceClubDashboard from "@/components/features/AceClubDashboard";
 
 export const metadata = { title: "Ace Club & Ace Points — Tennis Travel Experience" };
 
 export default function GamificationPage() {
   return (
     <PageWrapper>
-      <GamificationView />
+      <AceClubDashboard />
     </PageWrapper>
   );
 }

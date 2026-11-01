@@ -1,13 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Mulish } from "next/font/google";
 import "./globals.css";
-
-const mulish = Mulish({
-  variable: "--font-mulish",
-  subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -26,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${mulish.variable} h-full`}>
+    <html lang="vi" className="h-full">
       <body className="text-neutral-90">
         {children}
       </body>

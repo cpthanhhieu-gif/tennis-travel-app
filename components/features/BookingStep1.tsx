@@ -1,11 +1,13 @@
 "use client";
 
-import Image from "next/image";
+import {coupleTotal,companionRate} from "@/lib/couple-pricing";
 import { useEffect, useState } from "react";
+import GroupRequestFields from "./GroupRequestFields";
+import {validGroupRequest} from "@/lib/group-request";
 import Button from "@/components/ui/Button";
 import { useBooking } from "@/lib/BookingContext";
-import { tours, tourPackages, formatVNDShort, type Tour } from "@/lib/mock-data";
-import { Check, Hash, ChevronDown, Calendar, MapPin, Clock, Target } from "lucide-react";
+import { tours, packageCapacity, formatVNDShort, type Tour } from "@/lib/mock-data";
+import { Check, Calendar, MapPin } from "lucide-react";
 
 interface Props { onNext: () => void }
 
@@ -23,87 +25,15 @@ const DEST_FILTERS = [
   { id: "phuquoc",   label: "Phú Quốc" },
 ];
 
-const BADGE_STYLES: Record<string, string> = {
-  "Phổ biến":   "bg-brand-tint text-brand-primary border-brand-light",
-  "Hot":        "bg-yellow-light text-yellow-dark border-yellow-accent/40",
-  "Mới":        "bg-success-light text-success border-success/30",
-  "Còn ít chỗ": "bg-error-light text-error border-error/30",
-};
-
-const PKG_COLORS: Record<string, string> = {
-  sbu1: "bg-[#1e3a5f] text-white",
-  sbu2: "bg-[#b45309] text-white",
-  sbu3: "bg-[#7c3aed] text-white",
-};
-
-function DepartureList({
-  tour,
-  selectedCode,
-  onSelect,
-}: {
-  tour: Tour;
-  selectedCode: string;
-  onSelect: (code: string) => void;
-}) {
-  return (
-    <div className="mt-[0.8rem] rounded-[0.8rem] border border-neutral-10 overflow-hidden shadow-[rgba(0,0,0,0.06)_0px_4px_12px]">
-      <div className="bg-neutral-03 px-[1.6rem] pt-[1rem] pb-[1.2rem] border-b border-neutral-10">
-        <div className="w-[3.2rem] h-[0.4rem] rounded-full bg-neutral-10 mx-auto mb-[1rem]" aria-hidden="true" />
-        <p className="font-bold text-[1.4rem] text-neutral-90">Lịch trình khởi hành</p>
-      </div>
-      <div className="bg-neutral-01 divide-y divide-neutral-10">
-        {tour.departureSchedules.map((s) => {
-          const isSel = s.code === selectedCode;
-          return (
-            <article
-              key={s.code}
-              className={`px-[1.6rem] py-[1.2rem] transition-colors ${isSel ? "bg-brand-tint" : "hover:bg-neutral-03"}`}
-            >
-              <div className="flex items-center justify-between mb-[0.6rem]">
-                <div className="flex items-baseline gap-[0.6rem]">
-                  <span className="font-bold text-[1.5rem] text-neutral-90">{s.dateLabel}</span>
-                  <span className="text-neutral-40 text-[1.2rem]">{s.dayOfWeek}</span>
-                </div>
-                <span className="font-bold text-[1.4rem] text-brand-secondary whitespace-nowrap">
-                  {formatVNDShort(s.price)}
-                </span>
-              </div>
-              <div className="h-[1px] bg-neutral-10 mb-[0.6rem]" />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-[0.4rem]">
-                  <Hash size={11} className="text-neutral-30 shrink-0" />
-                  <span className="text-neutral-30 text-[1.1rem] font-mono">{s.code}</span>
-                </div>
-                {isSel ? (
-                  <div className="flex items-center gap-[0.4rem] text-brand-primary">
-                    <Check size={13} />
-                    <span className="text-[1.2rem] font-semibold">Đã chọn</span>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => onSelect(s.code)}
-                    className="px-[1.2rem] py-[0.5rem] rounded-[0.6rem] border border-neutral-10 text-neutral-50 text-[1.2rem] font-semibold hover:border-brand-primary hover:text-brand-primary hover:bg-brand-tint transition-all min-h-[34px]"
-                  >
-                    Chọn
-                  </button>
-                )}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 export default function BookingStep1({ onNext }: Props) {
-  const { booking, updateBooking } = useBooking();
+  const { booking, updateBooking, restoredDraft } = useBooking();
 
+  const [groupError,setGroupError]=useState(false);
+  const [changeTour,setChangeTour]=useState(false);
   const [pkgFilter, setPkgFilter]   = useState("all");
   const [destFilter, setDestFilter] = useState("all");
   const [selectedTourId, setSelectedTourId] = useState(booking.tourId || "dl-sbu1");
-  const [scheduleOpen, setScheduleOpen]     = useState(false);
+  const [companions,setCompanions]=useState(booking.numCompanions??0);
   const [people, setPeople]                 = useState(booking.numPeople || 2);
 
   const filtered = tours.filter((t) => {
@@ -113,10 +43,12 @@ export default function BookingStep1({ onNext }: Props) {
   });
 
   const selectedTour = tours.find((t) => t.id === selectedTourId) ?? tours[0];
+  const maxPeople = packageCapacity(selectedTour.packageId);
   const firstSchedule = selectedTour.departureSchedules[0];
   const [scheduleCode, setScheduleCode] = useState(booking.departureCode || firstSchedule.code);
 
   useEffect(() => {
+    if(restoredDraft)return;
     const params = new URLSearchParams(window.location.search);
     const packageId = params.get("package");
     const destinationId = params.get("destination");
@@ -125,27 +57,35 @@ export default function BookingStep1({ onNext }: Props) {
       (destinationId ? tour.destinationId === destinationId : true)
     );
     if (!linkedTour || (!packageId && !destinationId)) return;
+    const linkedSchedule = linkedTour.departureSchedules.find(s => s.code === params.get("departure")) ?? linkedTour.departureSchedules[0];
+    if(packageId==="sbu3"&&params.get("couple")==="1"){setPeople(2);setCompanions(1);}
     setPkgFilter(packageId ?? "all");
     setDestFilter(destinationId ?? "all");
+    updateBooking({tourId:linkedTour.id,packageId:linkedTour.packageId,destination:linkedTour.destinationId,departureCode:linkedSchedule.code,departureDate:linkedSchedule.date,numCompanions:companions,totalPrice:coupleTotal(linkedTour.packageId,linkedSchedule.price,people,companions)});
     setSelectedTourId(linkedTour.id);
-    setScheduleCode(linkedTour.departureSchedules[0].code);
+    setScheduleCode(linkedSchedule.code);
   }, []);
 
   const selectedSchedule =
     selectedTour.departureSchedules.find((s) => s.code === scheduleCode) ?? firstSchedule;
 
+  useEffect(()=>{updateBooking({tourId:selectedTour.id,packageId:selectedTour.packageId,destination:selectedTour.destinationId,departureDate:selectedSchedule.date,departureCode:selectedSchedule.code,numPeople:people,numCompanions:companions,totalPrice:coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions)});},[selectedTourId,scheduleCode,people,companions,updateBooking]);
+
   const handleSelectTour = (tour: Tour) => {
+    updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions)});
     setSelectedTourId(tour.id);
     setScheduleCode(tour.departureSchedules[0].code);
-    setScheduleOpen(true);
+    setChangeTour(false);
   };
 
   const handleSelectSchedule = (code: string) => {
     setScheduleCode(code);
-    setScheduleOpen(false);
+
   };
 
   const handleNext = () => {
+    if(selectedTour.packageId==="sbu2"&&!validGroupRequest(booking.groupRequest)){setGroupError(true);requestAnimationFrame(()=>{const field=document.querySelector<HTMLElement>('.premium-request-fields [aria-invalid="true"]');field?.focus({preventScroll:true});field?.scrollIntoView({behavior:"smooth",block:"center"});});return;}
+    if(!Number.isInteger(people)||!Number.isInteger(companions)||people<1||companions<0||people-companions<1||people > maxPeople)return;
     updateBooking({
       tourId: selectedTour.id,
       packageId: selectedTour.packageId,
@@ -153,281 +93,51 @@ export default function BookingStep1({ onNext }: Props) {
       departureDate: selectedSchedule.date,
       departureCode: selectedSchedule.code,
       numPeople: people,
-      totalPrice: selectedSchedule.price * people,
+      numCompanions: companions,
+      totalPrice: coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions),
     });
+    if(selectedTour.packageId==="sbu2"&&booking.groupRequest)updateBooking({numPeople:booking.groupRequest.max,numCompanions:booking.groupRequest.companions,totalPrice:coupleTotal(selectedTour.packageId,selectedSchedule.price,booking.groupRequest.max,booking.groupRequest.companions)});
     onNext();
   };
 
   return (
-    <div>
-      <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[2rem]">
-        Chọn tour &amp; ngày đi
-      </h2>
-
-      {/* Filter chips — Package */}
-      <div className="mb-[1.2rem]">
-        <p className="text-[1.2rem] font-semibold text-neutral-40 mb-[0.8rem] uppercase tracking-wide">
-          Loại tour
-        </p>
-        <div className="flex gap-[0.8rem] flex-wrap">
-          {PKG_FILTERS.map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setPkgFilter(f.id)}
-              className={`px-[1.4rem] py-[0.6rem] rounded-full text-[1.3rem] font-semibold border transition-all min-h-[34px] ${
-                pkgFilter === f.id
-                  ? "bg-brand-primary text-neutral-01 border-brand-primary"
-                  : "bg-neutral-01 text-neutral-50 border-neutral-10 hover:border-brand-light hover:text-brand-primary"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+    <div className="booking-config">
+      <div className="booking-selected"><div><span className="ds-eyebrow">TOUR ĐÃ CHỌN</span><h2>{selectedTour.name}</h2><p>{selectedTour.destinationName} · {selectedTour.duration} · {selectedTour.ntrpLabel}</p></div><button type="button" aria-expanded={changeTour} className="ui-text-button" onClick={()=>setChangeTour(!changeTour)}>{changeTour?"Đóng":"Đổi tour"}</button></div>
+      {changeTour && <section className="booking-change-tour" aria-label="Đổi tour">
+        <h3>Chọn trải nghiệm</h3>
+        <div className="booking-tour-filters">
+          <label>Loại trải nghiệm<select value={pkgFilter} onChange={e=>setPkgFilter(e.target.value)}>{PKG_FILTERS.map(f=><option key={f.id} value={f.id}>{f.label}</option>)}</select></label>
+          <label>Điểm đến<select value={destFilter} onChange={e=>setDestFilter(e.target.value)}>{DEST_FILTERS.map(f=><option key={f.id} value={f.id}>{f.label}</option>)}</select></label>
         </div>
-      </div>
-
-      {/* Filter chips — Destination */}
-      <div className="mb-[2rem]">
-        <p className="text-[1.2rem] font-semibold text-neutral-40 mb-[0.8rem] uppercase tracking-wide">
-          Điểm đến
-        </p>
-        <div className="flex gap-[0.8rem] flex-wrap">
-          {DEST_FILTERS.map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setDestFilter(f.id)}
-              className={`px-[1.4rem] py-[0.6rem] rounded-full text-[1.3rem] font-semibold border transition-all min-h-[34px] ${
-                destFilter === f.id
-                  ? "bg-brand-primary text-neutral-01 border-brand-primary"
-                  : "bg-neutral-01 text-neutral-50 border-neutral-10 hover:border-brand-light hover:text-brand-primary"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Result count */}
-      <p className="text-neutral-40 text-[1.3rem] mb-[1.6rem]">
-        {filtered.length} tour phù hợp
-      </p>
-
-      {/* Tour catalog */}
-      <div className="space-y-[1.2rem] mb-[2.4rem]">
-        {filtered.length === 0 && (
-          <div className="text-center py-[4rem] text-neutral-30 text-[1.4rem]">
-            Không có tour phù hợp với bộ lọc này.
-          </div>
-        )}
-
-        {filtered.map((tour) => {
-          const isSelected = tour.id === selectedTourId;
-          const pkgInfo = tourPackages.find((p) => p.id === tour.packageId);
-
-          return (
-            <div key={tour.id}>
-              <article
-                className={`rounded-[0.8rem] border-2 overflow-hidden transition-all duration-200 ${
-                  isSelected
-                    ? "border-brand-primary shadow-[rgba(0,74,130,0.15)_0px_4px_16px]"
-                    : "border-neutral-10 hover:border-brand-light"
-                }`}
-              >
-                {/* Image — full width, fixed height */}
-                <div className="relative h-[13rem] w-full">
-                  <Image
-                    src={tour.image}
-                    alt={tour.name}
-                    fill
-                    className="object-cover"
-                    sizes="311px"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,14,26,0.55)] via-transparent to-transparent" />
-                  {/* Top-left: package type badge */}
-                  <div className={`absolute top-[0.8rem] left-[0.8rem] px-[0.8rem] py-[0.3rem] rounded-[0.4rem] text-[1.1rem] font-bold ${PKG_COLORS[tour.packageId]}`}>
-                    {pkgInfo?.name}
-                  </div>
-                  {/* Top-right: status badge */}
-                  {tour.badge && (
-                    <span className={`absolute top-[0.8rem] right-[0.8rem] px-[0.8rem] py-[0.3rem] rounded-full border text-[1.1rem] font-semibold ${BADGE_STYLES[tour.badge]}`}>
-                      {tour.badge}
-                    </span>
-                  )}
-                  {/* Bottom overlay: destination + price */}
-                  <div className="absolute bottom-0 left-0 right-0 px-[1.2rem] py-[1rem] flex items-end justify-between">
-                    <div className="flex items-center gap-[0.4rem]">
-                      <MapPin size={12} className="text-neutral-03 shrink-0" aria-hidden="true" />
-                      <span className="text-neutral-03 text-[1.2rem] font-semibold">{tour.destinationName}</span>
-                      <span className="text-neutral-30 text-[1.1rem] ml-[0.2rem]">· {tour.duration}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-neutral-30 text-[1rem]">từ </span>
-                      <span className="font-extrabold text-[1.4rem] text-neutral-01">
-                        {formatVNDShort(tour.departureSchedules[0].price)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="bg-neutral-01 px-[1.2rem] pt-[1rem] pb-[1.2rem]">
-                  {/* Title */}
-                  <p className="font-bold text-[1.5rem] text-neutral-90 leading-snug mb-[0.6rem]">
-                    {tour.name}
-                  </p>
-
-                  {/* Resort — full name, no truncation */}
-                  <div className="flex items-start gap-[0.4rem] mb-[0.6rem]">
-                    <MapPin size={12} className="text-neutral-30 shrink-0 mt-[0.2rem]" aria-hidden="true" />
-                    <span className="text-neutral-40 text-[1.2rem] leading-tight">{tour.resort}</span>
-                  </div>
-
-                  {/* Meta chips */}
-                  <div className="flex flex-wrap gap-[0.6rem] mb-[1rem]">
-                    <div className="flex items-center gap-[0.3rem] bg-neutral-03 rounded-full px-[0.8rem] py-[0.3rem]">
-                      <Clock size={11} className="text-neutral-40" aria-hidden="true" />
-                      <span className="text-neutral-50 text-[1.1rem] font-medium">{tour.duration}</span>
-                    </div>
-                    <div className="flex items-center gap-[0.3rem] bg-neutral-03 rounded-full px-[0.8rem] py-[0.3rem]">
-                      <Target size={11} className="text-neutral-40" aria-hidden="true" />
-                      <span className="text-neutral-50 text-[1.1rem] font-medium">{tour.ntrpLabel}</span>
-                    </div>
-                  </div>
-
-                  {/* Highlights — selected only */}
-                  {isSelected && (
-                    <div className="flex flex-wrap gap-x-[1.2rem] gap-y-[0.3rem] mb-[1rem] pb-[1rem] border-b border-neutral-10">
-                      {tour.highlights.map((h) => (
-                        <span key={h} className="flex items-center gap-[0.4rem] text-brand-primary text-[1.2rem]">
-                          <Check size={11} aria-hidden="true" />
-                          {h}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Price + CTA */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-neutral-30 text-[1.2rem]">Từ </span>
-                      <span className="font-extrabold text-[1.8rem] text-brand-secondary">
-                        {formatVNDShort(tour.departureSchedules[0].price)}
-                      </span>
-                      <span className="text-neutral-30 text-[1.2rem]">/người</span>
-                    </div>
-                    {isSelected ? (
-                      <div className="flex items-center gap-[0.4rem] text-brand-primary text-[1.3rem] font-semibold">
-                        <Check size={14} />
-                        Đã chọn
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleSelectTour(tour)}
-                        className="px-[1.6rem] py-[0.8rem] rounded-[0.6rem] bg-brand-primary text-neutral-01 text-[1.3rem] font-semibold hover:bg-[#003DA8] transition-colors min-h-[40px]"
-                      >
-                        Chọn tour
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </article>
-
-              {/* Departure schedule — inline below selected card */}
-              {isSelected && (
-                <div className="mt-[0.8rem]">
-                  <button
-                    type="button"
-                    onClick={() => setScheduleOpen((v) => !v)}
-                    aria-expanded={scheduleOpen}
-                    className={`w-full flex items-center justify-between gap-[1.2rem] px-[1.4rem] py-[1.2rem] rounded-[0.8rem] border-2 transition-all min-h-[44px] ${
-                      scheduleOpen
-                        ? "border-brand-primary bg-brand-tint"
-                        : "border-neutral-10 bg-neutral-03 hover:border-brand-light"
-                    }`}
-                  >
-                    <div className="flex items-center gap-[1rem] min-w-0">
-                      <Calendar size={15} className="text-brand-primary shrink-0" />
-                      <div className="text-left min-w-0">
-                        <div className="flex items-baseline gap-[0.6rem] flex-wrap">
-                          <span className="font-bold text-[1.4rem] text-neutral-90 whitespace-nowrap">
-                            {selectedSchedule.dateLabel}
-                          </span>
-                          <span className="text-neutral-40 text-[1.2rem] whitespace-nowrap">
-                            {selectedSchedule.dayOfWeek}
-                          </span>
-                        </div>
-                        <p className="text-brand-secondary font-semibold text-[1.2rem]">
-                          {formatVNDShort(selectedSchedule.price)}/người
-                        </p>
-                        <p className="text-neutral-30 text-[1rem] font-mono truncate">
-                          {selectedSchedule.code}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center shrink-0">
-                      <ChevronDown
-                        size={16}
-                        className={`text-neutral-40 transition-transform duration-200 ${scheduleOpen ? "rotate-180" : ""}`}
-                      />
-                    </div>
-                  </button>
-
-                  {scheduleOpen && (
-                    <DepartureList
-                      tour={selectedTour}
-                      selectedCode={scheduleCode}
-                      onSelect={handleSelectSchedule}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* People counter */}
-      <div className="mb-[3.2rem]">
-        <label htmlFor="num-people" className="block text-[1.4rem] font-bold text-neutral-50 mb-[1.2rem]">
-          Số người tham gia
-        </label>
-        <div className="flex items-center gap-[1.6rem]">
-          <button
-            type="button"
-            onClick={() => setPeople(Math.max(1, people - 1))}
-            className="w-[4.4rem] h-[4.4rem] rounded-full bg-neutral-03 border border-neutral-10 text-neutral-90 font-bold text-[2rem] hover:bg-brand-tint hover:border-brand-light focus:outline-none focus:ring-2 focus:ring-brand-primary transition-colors"
-            aria-label="Giảm số người"
-          >
-            −
-          </button>
-          <input
-            id="num-people"
-            type="number"
-            min={1}
-            max={20}
-            value={people}
-            onChange={(e) => setPeople(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
-            className="w-[8rem] text-center px-[1.2rem] py-[1.2rem] rounded-[0.8rem] bg-neutral-03 text-neutral-90 font-bold text-[1.8rem] focus:outline-none focus:ring-2 focus:ring-brand-light min-h-[44px] border-0"
-          />
-          <button
-            type="button"
-            onClick={() => setPeople(Math.min(20, people + 1))}
-            className="w-[4.4rem] h-[4.4rem] rounded-full bg-neutral-03 border border-neutral-10 text-neutral-90 font-bold text-[2rem] hover:bg-brand-tint hover:border-brand-light focus:outline-none focus:ring-2 focus:ring-brand-primary transition-colors"
-            aria-label="Tăng số người"
-          >
-            +
-          </button>
-          <span className="text-neutral-30 text-[1.4rem]">(tối đa 20)</span>
-        </div>
-      </div>
-
-      <Button variant="primary" size="lg" className="w-full" onClick={handleNext}>
-        Tiếp tục — Đánh giá NTRP
-      </Button>
+        <p className="booking-field-help" role="status">{filtered.length} tour phù hợp</p>
+        <div className="booking-tour-options">{filtered.map(tour=><button type="button" key={tour.id} aria-pressed={tour.id===selectedTourId} onClick={()=>handleSelectTour(tour)}>
+          <span><strong>{tour.name}</strong><small><MapPin size={16} aria-hidden="true"/>{tour.destinationName} · {tour.duration}</small><small>{tour.ntrpLabel}</small></span>
+          <span><b>{formatVNDShort(Math.min(...tour.departureSchedules.map(d=>d.price)))}</b><small>Từ / người chơi</small>{tour.id===selectedTourId&&<small><Check size={16} aria-hidden="true"/>Đã chọn</small>}</span>
+        </button>)}</div>
+        {!filtered.length&&<p className="booking-field-help">Thử chọn điểm đến hoặc loại trải nghiệm khác.</p>}
+      </section>}
+      <fieldset className="booking-departures"><legend><Calendar size={20} aria-hidden="true"/> Ngày khởi hành</legend>
+        <p className="booking-field-help" id="departure-help">Chọn một ngày đi. Giá hiển thị cho một người chơi tennis.</p>
+        <div>{selectedTour.departureSchedules.map(d=><label key={d.code} className={selectedSchedule.code===d.code?"is-selected":""}>
+          <input type="radio" name="departure" value={d.code} checked={selectedSchedule.code===d.code} aria-describedby="departure-help" onChange={()=>handleSelectSchedule(d.code)}/>
+          <span className="booking-departure-info"><strong>{d.dateLabel}</strong><small>{d.dayOfWeek}</small><small className="booking-departure-code">Mã lịch: {d.code}</small></span>
+          <span className="booking-departure-price"><b>{formatVNDShort(d.price)}</b><small>/ người chơi</small>{selectedSchedule.code===d.code&&<small className="booking-selection-status"><Check size={16} aria-hidden="true"/>Đã chọn</small>}</span>
+        </label>)}</div>
+      </fieldset>
+      {selectedTour.packageId==="sbu2"&&<><GroupRequestFields showErrors={groupError}/></>}
+      {selectedTour.packageId!=="sbu2"&&<section className="mb-[3.2rem]" aria-labelledby="couple-heading">
+        <h3 id="couple-heading" className="text-[2rem] font-bold">Ai cùng tham gia?</h3>
+        <div className="ds-summary-row"><label htmlFor="num-players">Người chơi tennis</label><input id="num-players" type="number" min={1} max={maxPeople-companions} value={people-companions} className="border p-[1.2rem] w-[9rem] text-[1.6rem]" onChange={event=>setPeople(Math.max(1,Math.min(maxPeople-companions,parseInt(event.target.value)||1))+companions)}/></div>
+        <p className="text-[1.4rem]">Giá người chơi: {selectedSchedule.price.toLocaleString("vi-VN")}đ/người.</p>
+        <div className="ds-summary-row"><label htmlFor="num-companions">Người đi cùng không chơi</label><input id="num-companions" type="number" min={0} max={Math.max(0,maxPeople-(people-companions))} value={companions} className="border p-[1.2rem] w-[9rem] text-[1.6rem]" onChange={event=>{const players=people-companions;const next=Math.max(0,Math.min(Math.max(0,maxPeople-players),parseInt(event.target.value)||0));setCompanions(next);setPeople(players+next);}}/></div>
+        <p className="text-[1.4rem]">Couple Mode: {companionRate(selectedTour.packageId).toLocaleString("vi-VN")}đ/người, chung phòng. Không bao gồm sân và HLV; không cần NTRP cho người đi cùng.</p>
+        <details className="booking-companion-details"><summary>Hoạt động & điều kiện người đi cùng</summary><p className="text-[1.4rem]">{selectedTour.packageId==="sbu3"?"Nghỉ dưỡng, spa, ẩm thực và tham quan theo phương án; có thể cùng cooking class, gala và cổ vũ Ace Cup.":"Nghỉ dưỡng, ẩm thực và tham quan theo phương án. Spa và hoạt động cụ thể cần xác nhận theo chuyến."} Hoạt động tùy chọn và phụ thu phòng được báo giá riêng.</p></details>
+        <p className="mt-[1.6rem]">Tổng: {people} khách · {people-companions} người chơi + {companions} người đi cùng (tối đa {maxPeople}). Cần ít nhất một người chơi.</p>
+      </section>}
+      {people > maxPeople && <p role="alert">Gói này tối đa {maxPeople} khách. Vui lòng điều chỉnh số người trước khi tiếp tục.</p>}
+      <div className="booking-continue">{groupError&&selectedTour.packageId==="sbu2"&&!validGroupRequest(booking.groupRequest)&&<p role="alert" className="booking-field-error">Chưa thể tiếp tục. Vui lòng bổ sung hoặc sửa các ô được đánh dấu phía trên.</p>}<div><span>{selectedTour.packageId==="sbu2"?`Quy mô dự kiến · ${booking.groupRequest?.min??12}–${booking.groupRequest?.max??16} khách`:`Tổng dự kiến · ${people} khách`}</span><strong>{selectedTour.packageId==="sbu2"?"Chờ báo giá đoàn":`${coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions).toLocaleString("vi-VN")} ₫`}</strong></div><Button variant="primary" size="lg" className="w-full" disabled={people > maxPeople} onClick={handleNext}>
+        {selectedTour.packageId === "sbu2" ? "Tiếp tục — Liên hệ đại diện" : "Tiếp tục — Đánh giá NTRP"}
+      </Button></div>
     </div>
   );
 }

@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-31T14:33:48.282Z",
+  "results": [
+    "Cá nhân: tạo booking và cọc mô phỏng",
+    "Cặp đôi: 1+1, phương án, chấp thuận, cọc",
+    "A→B→A, tải lại giữ dữ liệu; booking khác vùng bị chặn",
+    "Reset A không ảnh hưởng B",
+    "CLB: bổ sung → báo giá → cọc → đổi sân, không trùng thông báo",
+    "Sau tour: FEI +20, chia sẻ +10, không cộng lặp, ledger khớp",
+    "Bàn giao: 4 kịch bản về dữ liệu gốc; legacy nguyên byte"
+  ]
+}

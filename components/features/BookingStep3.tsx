@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import PremiumRequestFields from "./PremiumRequestFields";
+import {validPremiumRequest} from "@/lib/premium-request";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useBooking } from "@/lib/BookingContext";
@@ -9,33 +11,52 @@ interface Props { onNext: () => void }
 
 export default function BookingStep3({ onNext }: Props) {
   const { booking, updateBooking } = useBooking();
-  const [name, setName] = useState(booking.name || "Nguyễn Minh Khoa");
-  const [phone, setPhone] = useState(booking.phone || "0901 234 567");
-  const [email, setEmail] = useState(booking.email || "minhkhoa@gmail.com");
+  const [name, setName] = useState(booking.name || "");
+  const [phone, setPhone] = useState(booking.phone || "");
+  const [email, setEmail] = useState(booking.email || "");
   const [notes, setNotes] = useState(booking.notes || "");
+  const [submitted, setSubmitted] = useState(false);
 
-  const isValid = name.trim() && phone.trim() && email.trim();
+  const [savedContact,setSavedContact]=useState<{name:string;phone:string;email:string}|null>(null);
+  useEffect(()=>{fetch("/api/local").then(r=>r.ok?r.json():null).then(d=>setSavedContact(d?.profile??null)).catch(()=>{});},[]);
+  const cleanPhone = phone.replace(/[\s().-]/g, "");
+  const errors = {
+    name: name.trim() && name.trim().length <= 100 ? "" : "Nhập họ và tên từ 1 đến 100 ký tự.",
+    phone: /^(?:0\d{9,10}|\+[1-9]\d{7,14})$/.test(cleanPhone)
+      ? "" : "Nhập số điện thoại hợp lệ (ví dụ 0901234567 hoặc +84901234567).",
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+      ? "" : "Vui lòng nhập email đúng định dạng.",
+  };
 
   const handleNext = () => {
-    updateBooking({ name, phone, email, notes });
+    setSubmitted(true);
+    const invalidField = (["name", "phone", "email"] as const).find(key => errors[key]);
+    if (invalidField) {
+      document.getElementById(invalidField)?.focus();
+      return;
+    }
+    if(booking.packageId==="sbu3") {const request=booking.premiumRequest??{desiredDate:booking.departureDate,flexibility:"Đúng ngày",priority:"Nghỉ dưỡng",services:[]};if(!validPremiumRequest(request)){requestAnimationFrame(()=>document.getElementById("premium-date-error")?.focus());return;}updateBooking({premiumRequest:request});}
+    updateBooking({ name: name.trim(), phone: cleanPhone, email: email.trim(), notes });
     onNext();
   };
 
   return (
-    <div>
+    <form className="booking-contact" noValidate onSubmit={(event) => { event.preventDefault(); handleNext(); }}>
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.8rem]">
-        Thông tin cá nhân
+        {booking.packageId === "sbu2" ? "Liên hệ đại diện đoàn" : "Thông tin cá nhân"}
       </h2>
       <p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">
-        Thông tin để chúng tôi liên hệ xác nhận tour của bạn
+        {booking.packageId === "sbu2" ? "Cung cấp liên hệ đại diện để nhận báo giá; hồ sơ từng thành viên được bổ sung sau." : "Thông tin để chúng tôi liên hệ xác nhận tour của bạn"}
       </p>
 
-      <div className="space-y-[2rem] mb-[3.2rem]">
+      {savedContact&&<button type="button" className="ds-link mb-[1.6rem]" onClick={()=>{setName(savedContact.name);setPhone(savedContact.phone);setEmail(savedContact.email);updateBooking({name:savedContact.name,phone:savedContact.phone,email:savedContact.email});}}>Dùng liên hệ đã lưu trong hồ sơ</button>}
+      <div className="booking-contact-fields">
         <Input
           label="Họ và tên"
           id="name"
+          error={submitted ? errors.name : undefined}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {setName(e.target.value);updateBooking({name:e.target.value});}}
           placeholder="Nguyễn Minh Khoa"
           required
           autoComplete="name"
@@ -43,9 +64,10 @@ export default function BookingStep3({ onNext }: Props) {
         <Input
           label="Số điện thoại"
           id="phone"
+          error={submitted ? errors.phone : undefined}
           type="tel"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => {setPhone(e.target.value);updateBooking({phone:e.target.value});}}
           placeholder="0901 234 567"
           required
           autoComplete="tel"
@@ -53,9 +75,10 @@ export default function BookingStep3({ onNext }: Props) {
         <Input
           label="Email"
           id="email"
+          error={submitted ? errors.email : undefined}
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {setEmail(e.target.value);updateBooking({email:e.target.value});}}
           placeholder="email@example.com"
           required
           autoComplete="email"
@@ -80,15 +103,15 @@ export default function BookingStep3({ onNext }: Props) {
         </div>
       </div>
 
-      <Button
+      {booking.packageId==="sbu3"&&<><PremiumRequestFields/>{submitted&&booking.premiumRequest&&!validPremiumRequest(booking.premiumRequest)&&<p id="premium-date-error" tabIndex={-1} role="alert">Kiểm tra ngày mong muốn và lựa chọn Premium.</p>}</>}
+      <div className="booking-step-action"><p>Kiểm tra thông tin và giá trước khi gửi.</p><Button
         variant="primary"
         size="lg"
         className="w-full"
-        onClick={handleNext}
-        disabled={!isValid}
+        type="submit"
       >
-        Tiếp tục — Xem xác nhận
-      </Button>
-    </div>
+        Tiếp tục — Xem lại thông tin
+      </Button></div>
+    </form>
   );
 }

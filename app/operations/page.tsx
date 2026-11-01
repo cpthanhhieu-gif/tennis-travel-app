@@ -1,0 +1,1 @@
+import PageWrapper from "@/components/layout/PageWrapper";import OperationsDashboard from "@/components/features/OperationsDashboard";export default function Page(){return <PageWrapper><OperationsDashboard/></PageWrapper>}

@@ -79,7 +79,7 @@ function MilestoneTrack({ current, min, max }: { current: number; min: number; m
     <div className="pt-[0.4rem] pb-[1.2rem]">
       <div className="relative flex items-center" style={{ height: "2.8rem" }}>
         <div className="absolute left-0 right-0 h-[0.5rem] bg-white/30 rounded-full" style={{ top: "50%", transform: "translateY(-50%)" }} />
-        <div className="absolute left-0 h-[0.5rem] bg-white rounded-full transition-all duration-700 shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+        <div className="absolute left-0 h-[0.5rem] bg-white rounded-full transition-all duration-700 shadow-none"
           style={{ width: `${pct}%`, top: "50%", transform: "translateY(-50%)" }} />
         {milestones.map((xp, i) => {
           const dotPct = ((xp - min) / range) * 100;
@@ -88,12 +88,12 @@ function MilestoneTrack({ current, min, max }: { current: number; min: number; m
             <div key={xp} className="absolute flex items-center justify-center"
               style={{ left: `${dotPct}%`, transform: "translateX(-50%)", top: "50%", marginTop: "-0.9rem" }}>
               <div className={`w-[1.8rem] h-[1.8rem] rounded-full border-2 transition-all duration-500 ${
-                passed ? "bg-white border-white shadow-[0_0_6px_rgba(255,255,255,0.9)]" : "bg-white/20 border-white/50"
+                passed ? "bg-white border-white shadow-none" : "bg-white/20 border-white/50"
               }`} />
             </div>
           );
         })}
-        <div className="absolute w-[2.6rem] h-[2.6rem] rounded-full bg-white border-[3px] border-white/50 shadow-[0_0_0_3px_rgba(255,255,255,0.4)] transition-all duration-700"
+        <div className="absolute w-[2.6rem] h-[2.6rem] rounded-full bg-white border-[3px] border-white/50 shadow-none transition-all duration-700"
           style={{ left: `${pct}%`, transform: "translateX(-50%)", top: "50%", marginTop: "-1.3rem" }}
           aria-label={`${current.toLocaleString("vi-VN")} Ace Points`} />
       </div>
@@ -103,7 +103,7 @@ function MilestoneTrack({ current, min, max }: { current: number; min: number; m
           const passed = current >= xp;
           return (
             <span key={xp}
-              className={`absolute text-[1.0rem] whitespace-nowrap font-semibold transition-colors ${passed ? "text-white" : "text-white/50"}`}
+              className={`absolute text-[1.2rem] whitespace-nowrap font-semibold transition-colors ${passed ? "text-white" : "text-white/50"}`}
               style={{ left: `${dotPct}%`, transform: i === 0 ? "none" : i === milestones.length - 1 ? "translateX(-100%)" : "translateX(-50%)" }}>
               {(xp / 1000).toFixed(xp % 1000 === 0 ? 0 : 1)}k
             </span>
@@ -141,7 +141,7 @@ function useCountUp(target: number, duration = 1500) {
 const tourTotalXp = danangItinerary.reduce((s, d) => s + d.totalXp, 0);
 
 export default function GamificationView() {
-  const xpCount = useCountUp(mockUser.acePoints, 1500);
+  const xpCount = mockUser.acePoints;
   const [activeTab, setActiveTab] = useState<"xp" | "badges" | "tiers" | "fei">("xp");
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "info" | "xp"; xp?: number }>({
     visible: false, message: "", type: "info",
@@ -168,14 +168,15 @@ export default function GamificationView() {
   ];
 
   return (
-    <div className="min-h-screen pb-[9.6rem] max-w-3xl mx-auto">
+    <div className="ds-club min-h-screen pb-[9.6rem] max-w-3xl mx-auto">
 
       {/* ── Hero Profile Banner ── */}
-      <section aria-labelledby="profile-title" className={`bg-gradient-to-br ${gradient} px-[2rem] pt-[6.4rem] pb-[3.2rem]`}>
+      <p className="ds-demo-note">ACE CLUB / DỮ LIỆU MẪU · Điểm và quyền lợi đang minh họa.</p>
+      <section aria-labelledby="profile-title" className={`bg-[#103E30] px-[2rem] pt-[3.2rem] pb-[3.2rem]`}>
         <div className="flex items-start gap-[1.6rem] mb-[2.4rem]">
           {/* Avatar with tier ring */}
           <div className="relative shrink-0">
-            <div className="w-[7.2rem] h-[7.2rem] rounded-full bg-white/20 backdrop-blur-sm border-[3px] border-white/60 flex items-center justify-center text-white text-[2.8rem] font-extrabold shadow-[0_4px_24px_rgba(0,0,0,0.25)]">
+            <div className="w-[7.2rem] h-[7.2rem] rounded-full bg-white/20 backdrop-blur-sm border-[3px] border-white/60 flex items-center justify-center text-white text-[2.8rem] font-extrabold shadow-none">
               {mockUser.firstName.charAt(0)}
             </div>
             <div className="absolute -bottom-[0.4rem] -right-[0.4rem] w-[2.4rem] h-[2.4rem] rounded-full bg-white flex items-center justify-center shadow-sm">
@@ -216,7 +217,7 @@ export default function GamificationView() {
             </div>
             {nextTier && (
               <div className="text-right bg-white/10 backdrop-blur-sm rounded-[1rem] px-[1.4rem] py-[0.8rem] border border-white/20">
-                <p className="text-white/60 text-[1.1rem] uppercase tracking-wide">Lên {nextTier.name}</p>
+                <p className="text-white/60 text-[1.2rem] uppercase tracking-wide">Lên {nextTier.name}</p>
                 <p className="text-white font-extrabold text-[1.8rem]">
                   {xpToNext.toLocaleString("vi-VN")} điểm
                 </p>
@@ -236,9 +237,9 @@ export default function GamificationView() {
             <div key={s.label} className="bg-white/15 backdrop-blur-sm border border-white/20 rounded-[1rem] px-[1.2rem] py-[1rem] text-center">
               <p className="text-[1.4rem] mb-[0.2rem]">{s.emoji}</p>
               <p className="text-white font-extrabold text-[1.8rem] leading-none">
-                {s.value}<span className="text-white/60 font-normal text-[1.1rem]">{s.unit}</span>
+                {s.value}<span className="text-white/60 font-normal text-[1.2rem]">{s.unit}</span>
               </p>
-              <p className="text-white/60 text-[1.0rem] mt-[0.2rem]">{s.label}</p>
+              <p className="text-white/60 text-[1.2rem] mt-[0.2rem]">{s.label}</p>
             </div>
           ))}
         </div>
@@ -266,14 +267,14 @@ export default function GamificationView() {
 
       {/* ── Pill Tabs ── */}
       <div className="px-[1.6rem] pt-[1.6rem] pb-[0.8rem]">
-        <div className="flex gap-[0.8rem] bg-neutral-05 rounded-[1.2rem] p-[0.4rem]" role="tablist">
+        <div className="flex gap-[0.8rem] bg-neutral-05 rounded-[0.8rem] p-[0.4rem]" role="tablist">
           {TABS.map(({ key, label }) => {
             const active = activeTab === key;
             return (
               <button key={key} role="tab" aria-selected={active}
                 onClick={() => setActiveTab(key)}
                 className={`flex-1 py-[1rem] px-[0.4rem] text-[1.3rem] font-semibold rounded-[1rem] transition-all duration-200 min-h-[44px] focus:outline-none ${
-                  active ? "bg-neutral-01 text-brand-primary shadow-[rgba(0,0,0,0.08)_0px_1px_4px]" : "text-neutral-40 hover:text-neutral-70"
+                  active ? "bg-neutral-01 text-brand-primary shadow-none" : "text-neutral-40 hover:text-neutral-70"
                 }`}>
                 {label}
               </button>
@@ -289,7 +290,7 @@ export default function GamificationView() {
           <section aria-label="Chi tiết Ace Points">
 
             {/* Tour breakdown card */}
-            <div className="bg-neutral-01 rounded-[1.2rem] border border-neutral-10 shadow-[rgba(0,0,0,0.06)_0px_2px_12px] p-[2rem] mb-[2rem]">
+            <div className="bg-neutral-01 rounded-[0.8rem] border border-[#CCD7C8] shadow-none p-[2rem] mb-[2rem]">
               <div className="flex items-center justify-between mb-[1.6rem]">
                 <h2 className="font-bold text-neutral-90 text-[1.5rem]">📍 Hoạt động hành trình — Ace Points</h2>
                 <span className="inline-flex items-center gap-[0.4rem] px-[1.2rem] py-[0.4rem] bg-brand-tint rounded-full text-brand-primary font-extrabold text-[1.4rem]">
@@ -305,11 +306,11 @@ export default function GamificationView() {
                     }`}>N{day.day}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-neutral-90 text-[1.4rem] font-semibold truncate">{day.title}</p>
-                      <p className="text-neutral-40 text-[1.1rem]">{day.dateLabel.split(",")[0]}</p>
+                      <p className="text-neutral-40 text-[1.2rem]">{day.dateLabel.split(",")[0]}</p>
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="text-brand-secondary font-extrabold text-[1.5rem]">+{day.totalXp.toLocaleString("vi-VN")}</p>
-                      <p className="text-neutral-30 text-[1.0rem]">điểm</p>
+                      <p className="text-neutral-40 text-[1.2rem]">điểm</p>
                     </div>
                   </div>
                 ))}
@@ -322,10 +323,10 @@ export default function GamificationView() {
               {pointActions.map((action) => (
                 <button
                   key={action.action}
-                  className={`w-full flex items-center gap-[1.4rem] p-[1.6rem] rounded-[1.2rem] border text-left transition-all duration-200 focus:outline-none ${
+                  className={`w-full flex items-center gap-[1.4rem] p-[1.6rem] rounded-[0.8rem] border text-left transition-all duration-200 focus:outline-none ${
                     action.earned
-                      ? "bg-neutral-01 border-green-200 shadow-[rgba(16,185,129,0.08)_0px_2px_8px] hover:shadow-[rgba(16,185,129,0.14)_0px_4px_16px]"
-                      : "bg-neutral-03 border-neutral-10 hover:bg-neutral-05 cursor-pointer"
+                      ? "bg-neutral-01 border-green-200 shadow-none hover:shadow-none"
+                      : "bg-[#F4F6F1] border-[#CCD7C8] hover:bg-neutral-05 cursor-pointer"
                   }`}
                   onClick={() => {
                     if (!action.earned) {
@@ -337,22 +338,22 @@ export default function GamificationView() {
                   <span className={`shrink-0 flex items-center justify-center w-[4.4rem] h-[4.4rem] rounded-[1rem] ${
                     action.earned ? "bg-green-100" : "bg-neutral-05"
                   }`}>
-                    {pointIconMap[action.icon]?.(20, action.earned ? "text-green-600" : "text-neutral-30")}
+                    {pointIconMap[action.icon]?.(20, action.earned ? "text-green-600" : "text-neutral-40")}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className={`font-semibold text-[1.4rem] leading-snug ${action.earned ? "text-neutral-90" : "text-neutral-40"}`}>
                       {action.action}
                     </p>
-                    <p className={`text-[1.2rem] mt-[0.2rem] font-bold ${action.earned ? "text-green-600" : "text-neutral-30"}`}>
+                    <p className={`text-[1.2rem] mt-[0.2rem] font-bold ${action.earned ? "text-green-600" : "text-neutral-40"}`}>
                       +{action.points.toLocaleString("vi-VN")} Ace Points
                     </p>
                   </div>
                   {action.earned ? (
-                    <span className="shrink-0 flex items-center gap-[0.4rem] px-[1.0rem] py-[0.5rem] bg-green-100 border border-green-200 rounded-full text-green-700 text-[1.1rem] font-bold">
+                    <span className="shrink-0 flex items-center gap-[0.4rem] px-[1.0rem] py-[0.5rem] bg-green-100 border border-green-200 rounded-full text-green-700 text-[1.2rem] font-bold">
                       <CheckCircle2 size={12} aria-hidden /> Xong
                     </span>
                   ) : (
-                    <span className="shrink-0 flex items-center gap-[0.4rem] px-[1.0rem] py-[0.5rem] bg-neutral-05 border border-neutral-10 rounded-full text-neutral-30 text-[1.1rem] font-bold">
+                    <span className="shrink-0 flex items-center gap-[0.4rem] px-[1.0rem] py-[0.5rem] bg-neutral-05 border border-[#CCD7C8] rounded-full text-neutral-40 text-[1.2rem] font-bold">
                       <Lock size={11} aria-hidden /> Khóa
                     </span>
                   )}
@@ -361,7 +362,7 @@ export default function GamificationView() {
             </div>
 
             {/* Refer CTA */}
-            <div className={`bg-gradient-to-br ${gradient} rounded-[1.2rem] p-[2.4rem] text-center`}>
+            <div className={`bg-[#103E30] rounded-[0.8rem] p-[2.4rem] text-center`}>
               <div className="flex justify-center mb-[1rem]">
                 <div className="w-[5.6rem] h-[5.6rem] bg-white/20 rounded-full flex items-center justify-center">
                   <VietravelIcon id="group-people-linear" size={28} className="text-white" />
@@ -371,7 +372,7 @@ export default function GamificationView() {
               <p className="text-white/70 text-[1.3rem] mb-[2rem]">Mỗi lượt đăng ký thành công = +300 Ace Points</p>
               <button
                 onClick={() => showToast("Đã copy link giới thiệu!", "success")}
-                className="w-full py-[1.4rem] bg-white rounded-[1rem] font-bold text-[1.5rem] shadow-[rgba(0,0,0,0.2)_0px_4px_16px] hover:bg-white/90 transition-colors"
+                className="w-full py-[1.4rem] bg-white rounded-[1rem] font-bold text-[1.5rem] shadow-none hover:bg-white/90 transition-colors"
                 style={{ color: currentTier.color }}
               >
                 Chia sẻ link giới thiệu
@@ -393,7 +394,7 @@ export default function GamificationView() {
                 const colors = badgeColors[badge.id] ?? { bg: "bg-brand-tint", ring: "ring-brand-tint", icon: "text-brand-primary" };
                 return (
                   <div key={badge.id}
-                    className={`${colors.bg} rounded-[1.4rem] ring-2 ${colors.ring} p-[2rem] text-center hover:-translate-y-1 hover:shadow-[rgba(0,0,0,0.12)_0px_8px_24px] transition-all duration-200 cursor-default`}>
+                    className={`${colors.bg} rounded-[1.4rem] ring-2 ${colors.ring} p-[2rem] text-center hover:-translate-y-1 hover:shadow-none transition-all duration-200 cursor-default`}>
                     <div className={`flex justify-center mb-[1.2rem]`}>
                       <div className="w-[6rem] h-[6rem] rounded-full bg-white flex items-center justify-center shadow-sm">
                         {badgeIconMap[badge.icon]?.(28, colors.icon)}
@@ -401,7 +402,7 @@ export default function GamificationView() {
                     </div>
                     <p className="font-bold text-neutral-90 text-[1.5rem] mb-[0.4rem]">{badge.name}</p>
                     <p className="text-neutral-50 text-[1.2rem] mb-[1.0rem]">{badge.description}</p>
-                    <span className="inline-block px-[1.2rem] py-[0.4rem] bg-white/70 rounded-full text-neutral-40 text-[1.1rem] font-medium">
+                    <span className="inline-block px-[1.2rem] py-[0.4rem] bg-white/70 rounded-full text-neutral-40 text-[1.2rem] font-medium">
                       {badge.earnedAt}
                     </span>
                   </div>
@@ -417,7 +418,7 @@ export default function GamificationView() {
                 return (
                   <button
                     key={b.id}
-                    className="w-full bg-neutral-03 rounded-[1.2rem] border border-neutral-10 p-[1.6rem] flex items-center gap-[1.4rem] text-left hover:bg-neutral-05 transition-colors focus:outline-none"
+                    className="w-full bg-[#F4F6F1] rounded-[0.8rem] border border-[#CCD7C8] p-[1.6rem] flex items-center gap-[1.4rem] text-left hover:bg-neutral-05 transition-colors focus:outline-none"
                     onClick={() => showToast(b.hint, "info")}
                     aria-label={`${b.name} — ${b.hint}`}
                   >
@@ -426,7 +427,7 @@ export default function GamificationView() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-[0.6rem] mb-[0.4rem]">
-                        <Lock size={12} className="text-neutral-30 shrink-0" aria-hidden />
+                        <Lock size={12} className="text-neutral-40 shrink-0" aria-hidden />
                         <p className="font-bold text-neutral-50 text-[1.4rem]">{b.name}</p>
                       </div>
                       <p className="text-neutral-40 text-[1.2rem] mb-[0.8rem]">{b.description}</p>
@@ -456,10 +457,10 @@ export default function GamificationView() {
               return (
                 <div key={tier.name}
                   className={`rounded-[1.4rem] border overflow-hidden transition-all duration-200 ${
-                    isCurrent ? "border-transparent shadow-[rgba(0,0,0,0.15)_0px_4px_20px]" : isLocked ? "border-neutral-10 opacity-60" : "border-neutral-10"
+                    isCurrent ? "border-transparent shadow-none" : isLocked ? "border-[#CCD7C8] opacity-60" : "border-[#CCD7C8]"
                   }`}>
                   {/* Tier header */}
-                  <div className={`bg-gradient-to-r ${tierGrad} px-[2rem] py-[1.4rem] flex items-center justify-between`}>
+                  <div className={`bg-[#103E30] px-[2rem] py-[1.4rem] flex items-center justify-between`}>
                     <div className="flex items-center gap-[1.2rem]">
                       <TierIcon name={tier.name} size={24} className="text-white" />
                       <div>
@@ -486,7 +487,7 @@ export default function GamificationView() {
                           <div className={`shrink-0 w-[2rem] h-[2rem] rounded-full flex items-center justify-center ${
                             isCurrent ? "bg-brand-tint" : isLocked ? "bg-neutral-05" : "bg-neutral-05"
                           }`}>
-                            <Trophy size={10} className={isCurrent ? "text-brand-primary" : "text-neutral-30"} aria-hidden />
+                            <Trophy size={10} className={isCurrent ? "text-brand-primary" : "text-neutral-40"} aria-hidden />
                           </div>
                           <span className={isLocked ? "text-neutral-40" : "text-neutral-60"}>{perk}</span>
                         </li>
@@ -503,14 +504,14 @@ export default function GamificationView() {
         {activeTab === "fei" && (
           <section aria-label="FEI Score">
             {/* Hero score card */}
-            <div className="bg-neutral-01 rounded-[1.4rem] border border-neutral-10 shadow-[rgba(0,0,0,0.08)_0px_4px_16px] p-[2.4rem] mb-[2.4rem]">
+            <div className="bg-neutral-01 rounded-[1.4rem] border border-[#CCD7C8] shadow-none p-[2.4rem] mb-[2.4rem]">
               <div className="flex items-center gap-[2.4rem]">
                 {/* Arc */}
                 <div className="relative shrink-0">
                   <ArcProgress score={feiScoreData.totalFEI} size={120} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <p className="text-[2.4rem] font-extrabold text-neutral-90 leading-none">{feiScoreData.totalFEI}</p>
-                    <p className="text-neutral-40 text-[1.0rem]">/100</p>
+                    <p className="text-neutral-40 text-[1.2rem]">/100</p>
                   </div>
                 </div>
                 <div className="flex-1">
@@ -535,14 +536,14 @@ export default function GamificationView() {
                 const color = FEI_COLOR(idx.score);
                 const bgClass = idx.score >= 90 ? "bg-green-50 border-green-100" : idx.score >= 85 ? "bg-blue-50 border-blue-100" : "bg-amber-50 border-amber-100";
                 return (
-                  <div key={idx.code} className={`rounded-[1.2rem] border ${bgClass} p-[1.6rem]`}>
+                  <div key={idx.code} className={`rounded-[0.8rem] border ${bgClass} p-[1.6rem]`}>
                     <div className="flex items-start justify-between mb-[1rem]">
                       <div className="flex-1 min-w-0 pr-[1.2rem]">
                         <div className="flex items-center gap-[0.8rem] mb-[0.2rem]">
                           <span className="font-extrabold text-neutral-90 text-[1.4rem]">{idx.code}</span>
                           <span className="text-neutral-50 text-[1.3rem]">{idx.name}</span>
                         </div>
-                        <p className="text-neutral-40 text-[1.1rem]">{idx.description}</p>
+                        <p className="text-neutral-40 text-[1.2rem]">{idx.description}</p>
                       </div>
                       <span className="font-extrabold text-[2.2rem] shrink-0" style={{ color }}>{idx.score}</span>
                     </div>
@@ -564,7 +565,7 @@ export default function GamificationView() {
         style={{ bottom: "53px", background: "linear-gradient(to top, rgba(255,255,255,1) 60%, rgba(255,255,255,0))" }}
       >
         <Link href="/share-card">
-          <button className={`w-full py-[1.6rem] bg-gradient-to-r ${gradient} text-white font-extrabold text-[1.6rem] rounded-[1.2rem] shadow-[rgba(0,0,0,0.25)_0px_4px_20px] hover:opacity-90 transition-opacity flex items-center justify-center gap-[0.8rem]`}>
+          <button className={`w-full py-[1.6rem] bg-[#103E30] text-white font-extrabold text-[1.6rem] rounded-[0.8rem] shadow-none hover:opacity-90 transition-opacity flex items-center justify-center gap-[0.8rem]`}>
             <Trophy size={18} aria-hidden />
             Xem thẻ thành tích · Voucher 10%
           </button>

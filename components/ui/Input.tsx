@@ -32,10 +32,10 @@ export default function Input({
     <div className="w-full">
       <label
         htmlFor={inputId}
-        className={`block text-[1.2rem] mb-[0.4rem] transition-colors duration-150 ${
+        className={`block text-[1.4rem] mb-[0.8rem] transition-colors duration-150 ${
           isActive
             ? "text-brand-light font-bold"
-            : "text-neutral-30 font-medium"
+            : "text-neutral-50 font-medium"
         }`}
       >
         {label}
@@ -58,7 +58,7 @@ export default function Input({
           setFocused(false);
           props.onBlur?.(e);
         }}
-        className={`w-full px-[1.6rem] py-[1.2rem] rounded-[0.8rem] bg-neutral-03 border-0 text-[1.6rem] text-neutral-90 placeholder-neutral-30 focus:outline-none focus:ring-2 min-h-[44px] transition-shadow duration-150 ${
+        className={`w-full px-[1.6rem] py-[1.2rem] rounded-[0.4rem] bg-neutral-01 border border-[#758875] text-[1.6rem] text-neutral-90 placeholder-neutral-30 focus:outline-none focus:ring-2 min-h-[48px] transition-shadow duration-150 ${
           error
             ? "ring-2 ring-error"
             : focused

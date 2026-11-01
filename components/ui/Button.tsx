@@ -28,7 +28,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center gap-2 font-semibold rounded-[4rem] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] min-w-[44px] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none";
+      "inline-flex items-center justify-center gap-2 font-bold rounded-[2.4rem] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] min-w-[44px] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none";
 
     const variants: Record<string, string> = {
       // Primary Blue — CTA chính
@@ -39,7 +39,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         "bg-brand-light text-neutral-01 hover:opacity-90 focus:ring-brand-light",
       // Secondary Red (CTA thứ 2, giá)
       secondary:
-        "bg-brand-secondary text-neutral-01 hover:opacity-90 focus:ring-brand-secondary",
+        "border border-brand-primary text-brand-primary bg-transparent hover:bg-brand-tint focus:ring-brand-primary",
       // Outline Danger
       "outline-danger":
         "border border-brand-secondary text-brand-secondary bg-transparent hover:bg-error-light focus:ring-brand-secondary",

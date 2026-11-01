@@ -1,0 +1,3 @@
+export const privateServices=["Nhóm riêng","Buổi HLV riêng","Xe riêng","Điều chỉnh lịch"] as const;
+export type PremiumRequest={desiredDate:string;flexibility:string;priority:string;services:string[]};
+export function validPremiumRequest(v:unknown):v is PremiumRequest{if(!v||typeof v!=="object")return false;const p=v as PremiumRequest;return typeof p.desiredDate==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(p.desiredDate)&&!Number.isNaN(Date.parse(p.desiredDate))&&["Đúng ngày","Linh hoạt ±3 ngày","Linh hoạt ±7 ngày"].includes(p.flexibility)&&["Nghỉ dưỡng","Tennis","Ẩm thực"].includes(p.priority)&&Array.isArray(p.services)&&p.services.length<=4&&new Set(p.services).size===p.services.length&&p.services.every(s=>(privateServices as readonly string[]).includes(s));}

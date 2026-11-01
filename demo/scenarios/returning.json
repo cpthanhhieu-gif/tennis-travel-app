@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "kind": "scenario-definition",
+  "scope": "demo-local",
+  "automaticActions": [],
+  "rules": [
+    "Chỉ nạp bối cảnh ban đầu; không tự gửi yêu cầu, chấp thuận, thanh toán, khai đồng thuận hoặc phản hồi.",
+    "Dữ liệu riêng của kịch bản không được xuất hiện trong kịch bản khác.",
+    "Giá, lịch, điều kiện và hạng tham chiếu danh mục chung khi triển khai seed; không sao chép công thức.",
+    "Mọi giao dịch và phản hồi vận hành trong demo đều là mô phỏng."
+  ],
+  "id": "returning",
+  "name": "Sau tour — thành tích và quay lại",
+  "problem": "Khách mất kết nối sau chuyến và chưa thấy giá trị tích lũy.",
+  "goal": "Tìm thành tích, gửi phản hồi, chia sẻ và hiểu điểm/quyền lợi để quay lại.",
+  "entryPath": "/pre-tour",
+  "entryIntent": "Một chuyến Leisure đã hoàn thành, mở Tổng kết từ Hành trình.",
+  "initialData": {
+    "account": {
+      "alias": "Khách Sau Tour Demo",
+      "ntrp": {
+        "level": 3.5,
+        "source": "self_assessment"
+      }
+    },
+    "packageId": "sbu1",
+    "participants": {
+      "players": 1,
+      "companions": 0
+    },
+    "orders": [
+      {
+        "reference": "returning-primary",
+        "phase": "completed",
+        "payment": "fully_paid",
+        "feiSubmitted": false,
+        "shareCompleted": false
+      }
+    ],
+    "bookingDraft": null,
+    "points": "Tính từ ledger tour theo quy tắc chung; không đặt số dư độc lập.",
+    "ledger": [
+      {
+        "kind": "tour",
+        "orderReference": "returning-primary",
+        "amount": "Tính theo tổng đã thanh toán và quy tắc hiện hành."
+      }
+    ],
+    "achievementCard": "Tham chiếu chuyến hoàn thành; không tự tạo huy chương hay kết quả thi đấu chưa có."
+  },
+  "steps": [
+    "Mở chuyến hoàn thành và tổng kết.",
+    "Tự gửi FEI/khảo sát.",
+    "Mở thẻ thành tích và thực hiện chia sẻ.",
+    "Xem điểm tăng và lịch sử tương ứng trong Ace Club.",
+    "Xem quyền lợi, mở khám phá chuyến tiếp theo."
+  ],
+  "completionSignals": [
+    "FEI được ghi nhận một lần cho chuyến.",
+    "Điểm chỉ tăng khi hoạt động đủ điều kiện; thao tác lặp không cộng trùng.",
+    "Thẻ thành tích đúng người và chuyến.",
+    "Khách tìm được quyền lợi và đường quay lại khám phá."
+  ],
+  "mustRemainForUser": [
+    "Gửi FEI/khảo sát",
+    "Chia sẻ thẻ",
+    "Xem quyền lợi",
+    "Chọn khám phá chuyến tiếp"
+  ],
+  "operatorEvents": []
+}

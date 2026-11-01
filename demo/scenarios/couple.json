@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "kind": "scenario-definition",
+  "scope": "demo-local",
+  "automaticActions": [],
+  "rules": [
+    "Chỉ nạp bối cảnh ban đầu; không tự gửi yêu cầu, chấp thuận, thanh toán, khai đồng thuận hoặc phản hồi.",
+    "Dữ liệu riêng của kịch bản không được xuất hiện trong kịch bản khác.",
+    "Giá, lịch, điều kiện và hạng tham chiếu danh mục chung khi triển khai seed; không sao chép công thức.",
+    "Mọi giao dịch và phản hồi vận hành trong demo đều là mô phỏng."
+  ],
+  "id": "couple",
+  "name": "Cặp đôi — trải nghiệm cho cả hai",
+  "problem": "Người mua lo người đi cùng không chơi tennis thiếu hoạt động, khó hiểu tổng chi phí.",
+  "goal": "Hiểu quyền lợi mỗi người, tổng giá và luồng xác nhận Premium.",
+  "entryPath": "/tours/sbu3",
+  "entryIntent": "Chi tiết Premium; cấu hình hai người được chuẩn bị cho bước Booking, chưa gửi yêu cầu.",
+  "initialData": {
+    "account": {
+      "alias": "Khách Cặp Đôi Demo",
+      "ntrp": {
+        "level": 3.5,
+        "source": "self_assessment"
+      }
+    },
+    "packageId": "sbu3",
+    "participants": {
+      "players": 1,
+      "companions": 1
+    },
+    "orders": [],
+    "bookingDraft": {
+      "packageId": "sbu3",
+      "players": 1,
+      "companions": 1,
+      "departureCode": null,
+      "submitted": false
+    },
+    "points": 0,
+    "ledger": []
+  },
+  "steps": [
+    "Xem Premium và hoạt động người đi cùng.",
+    "Mở Booking, kiểm tra một người chơi và một người đi cùng; chọn ngày.",
+    "Dùng lại hoặc đánh giá lại NTRP, nhập liên hệ và gửi yêu cầu.",
+    "Theo dõi phương án, tự chấp thuận và đặt cọc mô phỏng.",
+    "Mở chuẩn bị theo từng người."
+  ],
+  "completionSignals": [
+    "Yêu cầu Premium có đúng hai người với hai vai khác nhau.",
+    "Tổng giá phân biệt người chơi và người đi cùng.",
+    "Không yêu cầu NTRP tennis cho người đi cùng.",
+    "Sau sự kiện gửi phương án, khách tìm được thao tác chấp thuận và chuẩn bị."
+  ],
+  "mustRemainForUser": [
+    "Chọn ngày",
+    "Gửi yêu cầu",
+    "Chấp thuận phương án",
+    "Thanh toán mô phỏng",
+    "Tự khai và đồng thuận theo từng người"
+  ],
+  "operatorEvents": [
+    {
+      "id": "send_offer",
+      "label": "Gửi phương án Premium",
+      "precondition": "Khách đã gửi yêu cầu; chưa tự chấp thuận."
+    }
+  ]
+}

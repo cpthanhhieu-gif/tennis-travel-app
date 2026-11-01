@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "kind": "scenario-definition",
+  "scope": "demo-local",
+  "automaticActions": [],
+  "rules": [
+    "Chỉ nạp bối cảnh ban đầu; không tự gửi yêu cầu, chấp thuận, thanh toán, khai đồng thuận hoặc phản hồi.",
+    "Dữ liệu riêng của kịch bản không được xuất hiện trong kịch bản khác.",
+    "Giá, lịch, điều kiện và hạng tham chiếu danh mục chung khi triển khai seed; không sao chép công thức.",
+    "Mọi giao dịch và phản hồi vận hành trong demo đều là mô phỏng."
+  ],
+  "id": "club",
+  "name": "CLB — theo dõi đoàn 16 người",
+  "problem": "Đại diện khó theo dõi báo giá, mức độ chuẩn bị của đoàn và thay đổi lịch.",
+  "goal": "Theo dõi một yêu cầu đoàn xuyên suốt tới chuẩn bị và lịch cập nhật.",
+  "entryPath": "/pre-tour",
+  "entryIntent": "Một yêu cầu Tournament chờ báo giá; không tạo nhiều booking minh họa.",
+  "initialData": {
+    "account": {
+      "alias": "Đại diện CLB Demo",
+      "ntrp": null
+    },
+    "packageId": "sbu2",
+    "participants": {
+      "players": 16,
+      "companions": 0,
+      "accounts": 1,
+      "participantRecords": 16
+    },
+    "orders": [
+      {
+        "reference": "club-primary",
+        "phase": "quote_requested",
+        "offer": null,
+        "paid": 0,
+        "startedAt": null,
+        "completedAt": null
+      }
+    ],
+    "bookingDraft": null,
+    "points": 0,
+    "ledger": []
+  },
+  "steps": [
+    "Mở yêu cầu và đọc trạng thái phản hồi.",
+    "Sau khi vận hành gửi báo giá: kiểm tra, tự chấp thuận và đặt cọc mô phỏng.",
+    "Xem tiến độ chuẩn bị của 16 thành viên.",
+    "Sau khi vận hành cập nhật lịch: mở lịch theo ngày và xem thông báo."
+  ],
+  "completionSignals": [
+    "Chỉ một yêu cầu/booking đoàn, đúng 16 người.",
+    "Đại diện tìm được báo giá và bước tiếp theo.",
+    "Phân biệt thành viên đã hoàn tất và còn thiếu chuẩn bị.",
+    "Nhận biết được giờ/địa điểm trước và sau thay đổi."
+  ],
+  "mustRemainForUser": [
+    "Chấp thuận báo giá",
+    "Thanh toán mô phỏng",
+    "Mở thông tin chuẩn bị",
+    "Xem thay đổi lịch"
+  ],
+  "operatorEvents": [
+    {
+      "id": "send_quote",
+      "label": "Gửi báo giá đoàn",
+      "precondition": "Yêu cầu đoàn đã tồn tại."
+    },
+    {
+      "id": "load_preparation_examples",
+      "label": "Nạp trạng thái chuẩn bị mẫu của thành viên",
+      "precondition": "Booking đã xác nhận theo quy tắc được chốt; đánh dấu đây là dữ liệu mô phỏng, không phải đại diện khai thay."
+    },
+    {
+      "id": "change_schedule",
+      "label": "Cập nhật giờ/địa điểm một hoạt động",
+      "precondition": "Đã có lịch chuyến; lưu cả giá trị trước và sau."
+    }
+  ]
+}

@@ -64,7 +64,7 @@ function BotText({ text }: { text: string }) {
 /* ─── Typing dots ─────────────────────────────────────────────── */
 function TypingDots() {
   return (
-    <div className="flex items-center gap-[0.4rem] px-[1.2rem] py-[1rem] bg-neutral-05 rounded-[1.2rem] rounded-tl-[0.3rem] w-fit">
+    <div className="flex items-center gap-[0.4rem] px-[1.2rem] py-[1rem] bg-neutral-05 rounded-[0.8rem] rounded-tl-[0.3rem] w-fit">
       {[0, 1, 2].map((i) => (
         <span key={i} className="w-[0.6rem] h-[0.6rem] bg-neutral-30 rounded-full animate-bounce"
           style={{ animationDelay: `${i * 0.15}s`, animationDuration: "0.8s" }} />
@@ -209,9 +209,9 @@ export default function ChatbotWidget() {
       >
         <span className="absolute rounded-full bg-brand-primary/20 animate-ping"
           style={{ inset: "-0.4rem", animationDuration: "2s" }} />
-        <span className="relative w-[5.2rem] h-[5.2rem] rounded-full bg-brand-primary flex items-center justify-center shadow-[rgba(0,80,200,0.45)_0px_6px_24px]">
+        <span className="relative w-[5.2rem] h-[5.2rem] rounded-full bg-brand-primary flex items-center justify-center shadow-none">
           <Bot size={22} className="text-white" />
-          <span className="absolute -top-[0.3rem] -right-[0.3rem] w-[2rem] h-[2rem] rounded-full bg-green-500 border-2 border-white flex items-center justify-center text-white text-[0.85rem] font-extrabold">
+          <span className="absolute -top-[0.3rem] -right-[0.3rem] w-[2rem] h-[2rem] rounded-full bg-green-500 border-2 border-white flex items-center justify-center text-white text-[1.2rem] font-extrabold">
             AI
           </span>
         </span>
@@ -227,7 +227,7 @@ export default function ChatbotWidget() {
           />
           <div
             role="dialog" aria-modal="true" aria-label="Chat tư vấn AI — Ace"
-            className="flex flex-col bg-white rounded-t-[2.4rem] shadow-[rgba(0,0,0,0.3)_0px_-8px_40px] transition-transform duration-300 ease-out"
+            className="flex flex-col bg-white rounded-t-[1.2rem] shadow-none transition-transform duration-300 ease-out"
             style={{
               position: "fixed", left: 0, right: 0, bottom: 0,
               zIndex: 60, height: "74%",
@@ -259,7 +259,7 @@ export default function ChatbotWidget() {
                   <RefreshCw size={13} />Làm mới
                 </button>
                 <button onClick={handleClose}
-                  className="w-[3.4rem] h-[3.4rem] rounded-full bg-neutral-05 hover:bg-neutral-10 flex items-center justify-center transition-colors"
+                  className="w-[4.4rem] h-[4.4rem] rounded-full bg-neutral-05 hover:bg-neutral-10 flex items-center justify-center transition-colors"
                   aria-label="Đóng chat">
                   <ChevronDown size={18} className="text-neutral-50" />
                 </button>
@@ -282,7 +282,7 @@ export default function ChatbotWidget() {
                     {QUICK_PROMPTS.map(({ label, flowKey }) => (
                       <button key={flowKey}
                         onClick={() => handleQuickPrompt(flowKey, label)}
-                        className="w-full text-left px-[1.4rem] py-[1.2rem] rounded-[1.2rem] bg-neutral-03 border border-neutral-10 text-[1.3rem] font-medium text-neutral-70 hover:bg-brand-tint hover:border-brand-primary hover:text-brand-primary transition-all duration-200">
+                        className="w-full text-left px-[1.4rem] py-[1.2rem] rounded-[0.8rem] bg-[#F4F6F1] border border-[#CCD7C8] text-[1.3rem] font-medium text-neutral-70 hover:bg-brand-tint hover:border-brand-primary hover:text-brand-primary transition-all duration-200">
                         {label}
                       </button>
                     ))}
@@ -319,21 +319,21 @@ export default function ChatbotWidget() {
 
             {/* Input */}
             <div className="shrink-0 px-[1.6rem] pt-[1rem] pb-[2.4rem] border-t border-neutral-05">
-              <div className="flex items-center gap-[1rem] bg-neutral-03 rounded-[4rem] px-[1.6rem] py-[0.8rem]">
+              <div className="flex items-center gap-[1rem] bg-[#F4F6F1] rounded-[0.4rem] px-[1.6rem] py-[0.8rem]">
                 <input ref={inputRef} type="text" value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
                   placeholder="Nhập câu hỏi của bạn..."
-                  className="flex-1 bg-transparent text-[1.3rem] text-neutral-90 placeholder:text-neutral-30 outline-none"
+                  className="flex-1 min-w-0 bg-transparent text-[1.6rem] text-neutral-90 placeholder:text-neutral-40 outline-none"
                   aria-label="Nhập câu hỏi" />
                 <button onClick={handleSend} disabled={!inputVal.trim()} aria-label="Gửi"
-                  className={`w-[3.6rem] h-[3.6rem] rounded-full flex items-center justify-center transition-all duration-200 ${
+                  className={`w-[4.4rem] h-[4.4rem] rounded-full flex items-center justify-center transition-all duration-200 ${
                     inputVal.trim() ? "bg-brand-primary hover:bg-brand-primary-dark" : "bg-neutral-10"
                   }`}>
-                  <Send size={15} className={inputVal.trim() ? "text-white" : "text-neutral-30"} />
+                  <Send size={15} className={inputVal.trim() ? "text-white" : "text-neutral-40"} />
                 </button>
               </div>
-              <p className="text-neutral-30 text-[1.1rem] text-center mt-[0.8rem]">
+              <p className="text-neutral-40 text-[1.2rem] text-center mt-[0.8rem]">
                 Powered by Vietravel AI · Phản hồi trong vài giây
               </p>
             </div>

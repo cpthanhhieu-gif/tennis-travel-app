@@ -1,3 +1,5 @@
+export const packageCapacity = (id: string) => id === "sbu3" ? 16 : 20;
+
 export const mockUser = {
   id: "user_001",
   name: "Nguyễn Minh Khoa",
@@ -58,10 +60,10 @@ export const tourPackages: TourPackage[] = [
     priceRange: { min: 12900000, max: 12900000 },
     targetSegment: "CLB Semi-Pro (25–45 tuổi, nhóm 8–20 người)",
     highlights: [
-      "Tổ chức giải đấu nội bộ có tính điểm ELO",
-      "Live score + bảng xếp hạng realtime",
+      "4 buổi sân: vòng bảng và playoff",
+      "City tour ngắn và giao lưu CLB",
       "Ảnh chuyên nghiệp trận đấu",
-      "Tích hợp MyLeague.vn",
+      "MyLeague và điểm xếp hạng: chờ xác nhận đối tác",
     ],
     destinations: ["danang"],
     margin: "18%",
@@ -77,11 +79,11 @@ export const tourPackages: TourPackage[] = [
     priceRange: { min: 29900000, max: 29900000 },
     targetSegment: "Doanh nhân HNWIs (30–55 tuổi)",
     highlights: [
-      "HLV quốc tế 1-1",
-      "Private dining với Chef nổi tiếng",
-      "Resort 5 sao đối tác độc quyền",
+      "3 buổi sân cùng HLV theo chương trình",
+      "5 bữa trải nghiệm ẩm thực FEI",
+      "Resort 5 sao dự kiến, xác nhận theo chuyến",
       "Spa phục hồi chuyên sâu",
-      "Concierge 24/7",
+      "Hỗ trợ của Tour Manager theo chuyến",
     ],
     destinations: ["phuquoc"],
     margin: "25%",
@@ -262,7 +264,7 @@ export interface Tier {
 export const tiers: Tier[] = [
   { name: "Member", pointsMin: 0, pointsMax: 5999, perks: ["Tích điểm mọi hành trình", "Ưu đãi thành viên", "Nhận thông tin tour sớm"], color: "#2563eb", current: true },
   { name: "Gold", pointsMin: 6000, pointsMax: 14999, perks: ["Ưu tiên đặt chỗ", "Đặc quyền nâng hạng", "Ưu đãi tái đặt tour"], color: "#d97706" },
-  { name: "Diamond", pointsMin: 15000, pointsMax: 999999, perks: ["Concierge 24/7", "Thiết kế tour riêng", "Sự kiện giới hạn"], color: "#7c3aed" },
+  { name: "Diamond", pointsMin: 15000, pointsMax: 999999, perks: ["Hỗ trợ của Tour Manager theo chuyến", "Thiết kế tour riêng", "Sự kiện giới hạn"], color: "#7c3aed" },
 ];
 
 export const pointActions = [
@@ -338,7 +340,7 @@ export const destinations: Destination[] = [
     resort: "Resort đối tác Vietravel tại Đà Nẵng",
     duration: "3N2D",
     image: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?w=800&q=80",
-    highlights: ["Giải đấu nội bộ", "Live score", "Kết nối cộng đồng tennis"],
+    highlights: ["4 buổi sân", "Vòng bảng và playoff", "City tour ngắn"],
     departureSchedules: [
       { date: "2027-05-07", dateLabel: "07/05/2027", dayOfWeek: "Thứ Sáu", price: 12900000, code: "VTR-SIG-TNS-02-DN3-070527" },
       { date: "2027-05-21", dateLabel: "21/05/2027", dayOfWeek: "Thứ Sáu", price: 12900000, code: "VTR-SIG-TNS-02-DN3-210527" },
@@ -352,7 +354,7 @@ export const destinations: Destination[] = [
     resort: "Resort 5 sao đối tác Vietravel tại Phú Quốc",
     duration: "4N3D",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
-    highlights: ["HLV quốc tế 1-1", "Spa phục hồi", "Private dining"],
+    highlights: ["3 buổi sân cùng HLV theo chương trình", "Spa phục hồi", "Private dining"],
     departureSchedules: [
       { date: "2027-05-20", dateLabel: "20/05/2027", dayOfWeek: "Thứ Năm", price: 29900000, code: "VTR-SIG-TNS-03-PQ4-200527" },
       { date: "2027-06-03", dateLabel: "03/06/2027", dayOfWeek: "Thứ Năm", price: 29900000, code: "VTR-SIG-TNS-03-PQ4-030627" },
@@ -406,7 +408,7 @@ export const tours: Tour[] = [
     resort: "Resort đối tác Vietravel tại Đà Nẵng",
     duration: "3N2D",
     image: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80",
-    highlights: ["Giải đấu nội bộ ELO", "Live score realtime", "Ảnh chuyên nghiệp", "Resort 5★"],
+    highlights: ["4 buổi sân", "Vòng bảng và playoff", "City tour ngắn", "Lịch sân xác nhận theo chuyến"],
     ntrpRange: "3.0 – 4.5",
     ntrpLabel: "CLB – Nâng cao",
     badge: "Hot",
@@ -422,9 +424,9 @@ export const tours: Tour[] = [
     resort: "Resort 5 sao đối tác Vietravel tại Phú Quốc",
     duration: "4N3D",
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
-    highlights: ["HLV quốc tế 1-1", "Private dining Chef", "Spa phục hồi chuyên sâu", "Concierge 24/7"],
-    ntrpRange: "4.0 – 5.0+",
-    ntrpLabel: "Nâng cao – Chuyên nghiệp",
+    highlights: ["3 buổi sân cùng HLV theo chương trình", "Ace Cup theo chương trình", "5 bữa FEI", "Spa phục hồi"],
+    ntrpRange: "Theo đánh giá và nhóm tập được xác nhận",
+    ntrpLabel: "Tennis & nghỉ dưỡng · Ghép nhóm theo trình độ",
     badge: "Còn ít chỗ",
     departureSchedules: destinations[2].departureSchedules,
   },

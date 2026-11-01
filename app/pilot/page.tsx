@@ -1,0 +1,1 @@
+import PageWrapper from "@/components/layout/PageWrapper";import PilotReport from "@/components/features/PilotReport";export default function Page(){return <PageWrapper><PilotReport/></PageWrapper>;}

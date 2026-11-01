@@ -1,4 +1,5 @@
 import { BookingProvider } from "@/lib/BookingContext";
+import BookingAccess from "@/components/features/BookingAccess";
 import BookingFlow from "@/components/features/BookingFlow";
 import PageWrapper from "@/components/layout/PageWrapper";
 
@@ -8,7 +9,7 @@ export default function BookingPage() {
   return (
     <PageWrapper>
       <BookingProvider>
-        <BookingFlow />
+        <BookingAccess><BookingFlow /></BookingAccess>
       </BookingProvider>
     </PageWrapper>
   );

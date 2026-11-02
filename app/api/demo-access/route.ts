@@ -9,7 +9,8 @@ export async function POST(req:NextRequest){
  return apiStorage(req,async()=>{const b=await req.json();const secure=req.nextUrl.protocol==="https:";const options={httpOnly:true,secure,sameSite:"strict" as const,path:"/",maxAge:86400};
  if(b.action==="join"){
  if(typeof b.room!=="string"||!/^[-a-f0-9]{36}$/.test(b.room)||!isScenarioId(b.scenario)||!await roomExists(b.room))return NextResponse.json({error:"Link phiên demo không hợp lệ"},{status:400});
- const r=NextResponse.json({ok:true});r.cookies.set("tt-room",b.room,options);r.cookies.set("tt-scenario",b.scenario,{...options,httpOnly:false});r.cookies.set("tt-demo-revision",randomUUID(),{...options,httpOnly:false});r.cookies.set("tt-session","",{...options,maxAge:0});r.cookies.set("tt-admin","",{...options,maxAge:0});return r;
+ const keepAdmin=b.room===currentRoom()&&isAdmin(req);
+ const r=NextResponse.json({ok:true});r.cookies.set("tt-room",b.room,options);r.cookies.set("tt-scenario",b.scenario,{...options,httpOnly:false});r.cookies.set("tt-demo-revision",randomUUID(),{...options,httpOnly:false});r.cookies.set("tt-session","",{...options,maxAge:0});if(!keepAdmin)r.cookies.set("tt-admin","",{...options,maxAge:0});return r;
  }
  if(b.action==="logout"){const r=NextResponse.json({ok:true});r.cookies.set("tt-admin","",{...options,maxAge:0});return r;}
  if(!cloudMode())return NextResponse.json({ok:true});

@@ -19,7 +19,7 @@ import {validActivityTime,type ActivityUpdate,type TripNotice,type ActivityStatu
 import {trainingGroups,type GroupChange} from "@/lib/training-groups";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-type Order = PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;ntrpLevel?:number;ntrpLabel?:string;
+type Order = {journeyShare?:{token:string}} & PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;ntrpLevel?:number;ntrpLabel?:string;
   operations?:OperationDetails;offerVersions?:OfferVersion[];groupRequest?:GroupRequest; groupQuote?:GroupQuote; groupPlanToken?:string; groupAdviceRequested?:boolean; premiumRequest?:PremiumRequest; offerRevision?:{reason:string;at:string}; departureCode:string; numPeople:number;numCompanions?:number;playerRate?:number;companionRate?:number; total:number; deposit:number; paid:number; status:string; payment:string; points:number;activityChecks?:Record<string,boolean>;startedAt?:string;completedAt?:string;feiRating?:number;balancePayment?:string;offer?:{id:string;createdAt:string;acceptedAt?:string;total:number;deposit:number;departureCode:string}};
 type Store = {sessions: Record<string,number>; orders:Order[];ledger:PointEntry[];profile?:{name:string;phone:string;email:string};ntrpProfile?:{level:number;label:string;assessedAt:string}};
 
@@ -277,6 +277,13 @@ async function postLocal(req:NextRequest){
   if(typeof b.itemId!=="string"||typeof b.checked!=="boolean"||!validChecklistItem(o,b.itemId))return NextResponse.json({error:"Hoạt động không thuộc chuyến này"},{status:400});
   if(o.completedAt||o.paid<o.deposit||(!b.itemId.startsWith("prepare:")&&!o.startedAt))return NextResponse.json({error:"Chưa thể cập nhật checklist ở trạng thái này"},{status:409});
   o.activityChecks??={};o.activityChecks[b.itemId]=b.checked;await save(s,scope);return NextResponse.json(view(s));
+ }
+ if(b.action==="shareJourney"||b.action==="revokeJourney"){
+  const o=s.orders.find(o=>o.id===b.id);if(!o)return NextResponse.json({error:"Không tìm thấy chuyến"},{status:404});
+  if(!o.startedAt||o.numPeople<2)return NextResponse.json({error:"Chia sẻ mở khi chuyến có ít nhất 2 người đã bắt đầu"},{status:409});
+  if(b.action==="revokeJourney"){o.journeyShare=undefined;}
+  else{if(o.completedAt)return NextResponse.json({error:"Chuyến đã kết thúc"},{status:409});o.journeyShare??={token:randomUUID()};await writeDocument(`global/journeys/${o.journeyShare.token}`,{room:currentRoom(),scope:scope??null,id:o.id});}
+  await save(s,scope);return NextResponse.json(view(s));
  }
  if(b.action==="reportDeposit"){
   const o=s.orders.find(o=>o.id===b.id);

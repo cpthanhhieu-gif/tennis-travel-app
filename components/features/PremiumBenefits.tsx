@@ -2,6 +2,7 @@
 import {useState} from "react";
 import {ImageIcon, ArrowUpRight} from "lucide-react";
 import Modal from "@/components/ui/Modal";
+import VisualStoryDeck from "./VisualStoryDeck";
 type Benefit={title:string;summary:string;detail:string;image:string};
 const included:Benefit[]=[
 {title:"Court Hours · 3 buổi sân",summary:"Chơi theo nhịp của bạn",image:"Sân tennis & người chơi",detail:"Ba buổi sân trong Court Hours; khung hiện tại dự kiến tổng 6,5 giờ. Sân, khung giờ và phương án khi thời tiết thay đổi được xác nhận trong phương án chuyến đi."},
@@ -38,7 +39,11 @@ export default function PremiumBenefits(){
  <span className="premium-benefit-copy"><small>{group===0?"Trong cấu hình gói":group===1?"Tuỳ chọn · báo giá riêng":"Theo hồ sơ & phương án"}</small><strong>{item.title}</strong><span>{item.summary}</span><span className="premium-benefit-more">Xem chi tiết <ArrowUpRight size={16}/></span></span>
  </button>)}</div>
  <p className="ds-caption">{group===0?"Đã liệt kê đủ 9 thành phần bắt buộc. Đối tác, lịch dịch vụ và điều kiện bảo hiểm còn chờ xác nhận theo chuyến.":group===1?"Giá tham khảo từ hồ sơ; chưa tự cộng vào booking.":"Mức độ hỗ trợ khác nhau theo từng nhu cầu; xem chi tiết trước khi gửi yêu cầu."}</p>
- <details className="premium-other-inclusions"><summary>Lưu trú, di chuyển & hỗ trợ đi kèm</summary><p>Cấu hình hiện tại còn có bay khứ hồi SGN–Phú Quốc, xe theo lịch, 3 đêm resort 5 sao chung phòng, các bữa theo chương trình, cooking class, yoga/stretching và Tour Manager. Nhà cung cấp và điều kiện cụ thể xác nhận theo chuyến.</p></details>
+ <details className="premium-other-inclusions"><summary>Lưu trú, di chuyển & hỗ trợ đi kèm</summary><VisualStoryDeck label="Dịch vụ đồng hành" items={[
+{title:"Nghỉ tại resort",image:"Resort & phòng nghỉ",summary:"3 đêm resort 5 sao · chung phòng",detail:"Loại phòng và resort cụ thể được xác nhận trong phương án theo chuyến."},
+{title:"Di chuyển liền mạch",image:"Hành trình bay & xe đón",summary:"Bay SGN–Phú Quốc khứ hồi, xe theo lịch",detail:"Hãng, giờ bay, hành lý và lịch xe cần được xác nhận theo ngày khởi hành."},
+{title:"Có người đồng hành",image:"Tour Manager đón khách",summary:"Tour Manager & hoạt động theo chương trình",detail:"Các bữa theo lịch, cooking class, yoga/stretching và Tour Manager theo chương trình. Nhà cung cấp, lịch và phạm vi hỗ trợ được xác nhận trong phương án."}
+]}/></details>
  <Modal isOpen={!!selected} onClose={()=>setSelected(null)} title={selected?.title??"Quyền lợi"}>{selected&&<><p className="ds-eyebrow">THÔNG TIN QUYỀN LỢI</p><p>{selected.detail}</p><p className="ds-caption">Nguồn: hồ sơ sản phẩm v2.12, trang 26. Khung ảnh đang chờ bạn bổ sung ảnh thật.</p></>}</Modal>
  </section>
 }

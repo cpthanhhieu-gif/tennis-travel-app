@@ -48,6 +48,8 @@ async function postLocal(req:NextRequest){
   scope=b.scenario==="legacy"?undefined:b.scenario;
   if(b.action==="demoReset"){if(!isScenarioId(scope))return NextResponse.json({error:"Không đặt lại dữ liệu hiện tại"},{status:400});await resetScenario(scope);}
  }
+ if(b.action==="demoSelect"||b.action==="demoReset")await writeDocument("demo-context",{scenario:scope??null,revision:randomUUID()});
+ else {const shared=await readDocument<{scenario:string|null;revision:string}>("demo-context");if(shared&&((shared.scenario??undefined)!==scope||(b.action!=="login"&&req.cookies.get("tt-context")?.value!==shared.revision)))return NextResponse.json({error:"Bối cảnh đã đổi trên máy điều khiển. Chờ đồng bộ rồi thử lại."},{status:409});}
  const s=await load(scope);const token=req.cookies.get("tt-session")?.value;
  if(b.action==="login"||b.action==="demoSelect"||b.action==="demoReset"){const t=randomUUID();s.sessions[hash(t)]=Date.now()+86400000;await save(s,scope);const r=NextResponse.json(view(s));if(b.action!=="login"){r.cookies.set("tt-scenario",scope??"",{sameSite:"strict",path:"/",maxAge:scope?86400*30:0});if(b.action==="demoReset"&&scope)r.cookies.set(`tt-revision-${scope}`,randomUUID(),{sameSite:"strict",path:"/",maxAge:86400*30});}r.cookies.set("tt-session",t,{httpOnly:true,sameSite:"strict",secure:req.nextUrl.protocol==="https:",path:"/",maxAge:86400});return r;}
  if(!token||!(s.sessions[hash(token)]>Date.now()))return NextResponse.json({error:"Vui lòng đăng nhập tại Cá nhân"},{status:401});
@@ -297,6 +299,7 @@ async function postLocal(req:NextRequest){
    if(b.action==="start"){
     if(b.source!=="test-controls")return NextResponse.json({error:"Thao tác chỉ có trong điều khiển thử nghiệm"},{status:403});
     if(o.completedAt||o.paid<o.deposit)return NextResponse.json({error:"Chuyến chưa đủ điều kiện bắt đầu hoặc đã hoàn thành"},{status:409});
+    if(!o.operations?.confirmed&&!trainingGroups(o).some(g=>g.key===o.trainingGroup?.key))return NextResponse.json({error:"Xác nhận nhóm, sân và HLV trước khi bắt đầu chuyến."},{status:409});
     o.startedAt ??= new Date().toISOString();o.status="Đang đi";
    }else if(b.action==="complete"){
     if(b.source!=="test-controls")return NextResponse.json({error:"Thao tác chỉ có trong điều khiển thử nghiệm"},{status:403});

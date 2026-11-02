@@ -1,4 +1,5 @@
 "use client";
+import PostTripExperience from "./PostTripExperience";
 import JourneyServices from "./JourneyServices";
 import JourneyShare from "./JourneyShare";
 import OperationsDetails from "./OperationsDetails";
@@ -42,7 +43,7 @@ export default function JourneyDashboard(){
 {!o.completedAt&&!requestBlocked(o)&&(t?.packageId==="sbu1"||o.offer?.acceptedAt)&&o.payment!=="success"&&<fieldset disabled={busy} className="flex flex-wrap gap-[1.2rem]"><legend className="mb-[1.2rem]">Đặt cọc</legend><button className="ds-cta" disabled={o.payment==="awaiting_confirmation"} onClick={()=>act({action:"reportDeposit",id:o.id})}>{o.payment==="awaiting_confirmation"?"Đang chờ xác nhận cọc":"Tôi đã chuyển cọc"}</button></fieldset>}{!o.completedAt&&!requestBlocked(o)&&(t?.packageId==="sbu1"||o.offer?.acceptedAt)&&o.paid>=o.deposit&&o.paid<o.total&&<fieldset disabled={busy} className="flex flex-wrap gap-[1.2rem]"><legend>Thanh toán còn lại: {formatVND(o.total-o.paid)}</legend><button className="ds-cta" onClick={()=>act({action:"pay",id:o.id,phase:"balance",result:"success"})}>Thanh toán phần còn lại</button>{o.balancePayment&&<p role="status">{o.balancePayment==="failed"?"Thanh toán còn lại thất bại. Có thể thử lại.":"Đã hủy thanh toán còn lại."}</p>}</fieldset>}
 </>},
 {id:"preparation",label:"Chuẩn bị",content:<>{t?.packageId==="sbu3"&&<JourneyServices order={o} busy={busy} act={act}/>} {!o.completedAt&&<PreparationPanel order={o} busy={busy} act={act}/>}</>},
-{id:"feedback",label:"Đánh giá",content:<>{(o.startedAt||o.completedAt)&&<PilotSurvey order={o} busy={busy} act={act}/>} {o.completedAt&&<Link className="ds-link" href={`/share-card?booking=${o.id}`}>Mở thẻ thành tích</Link>}
+{id:"feedback",label:"Sau chuyến",content:<>{o.completedAt&&<PostTripExperience key={o.id} order={o} busy={busy} act={act}/>}{(o.startedAt||o.completedAt)&&<PilotSurvey order={o} busy={busy} act={act}/>} {o.completedAt&&<Link className="ds-link" href={`/share-card?booking=${o.id}`}>Mở thẻ thành tích</Link>}
 {!o.startedAt&&!o.completedAt&&<p>Đánh giá sẽ mở theo tiến độ chuyến đi.</p>}</>}
 ]}/></Modal>}</section>})}</div>{pageCount>1&&<nav className="journey-pagination" aria-label="Trang hành trình"><span>{currentPage*6+1}–{Math.min((currentPage+1)*6,filtered.length)} / {filtered.length} chuyến</span><button aria-label="Trang trước" disabled={currentPage===0} onClick={()=>setPage(currentPage-1)}><ChevronLeft size={20}/></button><span>Trang {currentPage+1} / {pageCount}</span><button aria-label="Trang sau" disabled={currentPage+1>=pageCount} onClick={()=>setPage(currentPage+1)}><ChevronRight size={20}/></button></nav>}</>}</div>;
 }

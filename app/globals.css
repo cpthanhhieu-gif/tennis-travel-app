@@ -612,3 +612,14 @@ body{background:#f4f6f1;color:#103e30;font-family:Arial,'Helvetica Neue',sans-se
 .service-plan-editor summary{min-height:44px;cursor:pointer}
 .service-plan-editor textarea{min-height:88px}
 .ui-dialog-body p{white-space:pre-line}
+/* Electronic Passport and private post-trip memories. */
+.passport-metrics{display:flex;gap:32px;margin:24px 0;padding:20px 0;border-block:1px solid #d8e1db}
+.passport-metrics strong,.passport-metrics span{display:block}.passport-metrics strong{font-size:28px;color:#173e2e}.passport-metrics span{font-size:13px}
+.passport-grid{display:grid;grid-template-columns:1fr;gap:20px;margin:20px 0}
+.passport-entry{padding:0;border:1px solid #d8e1db;border-radius:18px;overflow:hidden;background:#fff;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.passport-entry .premium-image-slot{aspect-ratio:16/10}.passport-entry-copy{display:flex;flex-direction:column;gap:10px;padding:20px}.passport-entry-copy>strong{font-size:24px}.passport-entry-copy>small{font-size:12px;line-height:1.6}
+.passport-seal{border:1px dashed #6a826c;border-radius:8px;padding:8px 10px;width:fit-content;font-size:10px;letter-spacing:1px;color:#34593f}
+.passport-stamp-summary{border:1px solid #d8e1db;border-radius:16px;overflow:hidden;margin:20px 0}.passport-stamp-summary>div{padding:20px}.passport-stamp-summary>.premium-image-slot{aspect-ratio:16/9}
+.post-trip-notebook{margin:24px 0;padding:20px;border-radius:16px;background:#f1f5ee}.post-trip-notebook legend{font-weight:700}.post-trip-notebook :is(textarea,select){width:100%;min-height:44px;border:1px solid #c5d1c5;border-radius:10px;padding:12px;background:#fff;color:#203e2e;font:inherit;box-sizing:border-box}.post-trip-notebook label{display:block;margin:14px 0 8px}.post-trip-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}
+.passport-page button:focus-visible{outline:3px solid #0754c8;outline-offset:3px}
+@media(min-width:768px){.passport-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.passport-stamp-summary{display:grid;grid-template-columns:1fr 1fr}.passport-stamp-summary>.premium-image-slot{aspect-ratio:auto;min-height:220px}}

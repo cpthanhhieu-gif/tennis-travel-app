@@ -1,3 +1,4 @@
+import {type PassportFields,reliableCompletion,validPassport} from "@/lib/passport";
 import {type ServiceFields,validServicePlan,safeDocumentUrl} from "@/lib/service-plan";
 import {readDocument,writeDocument,apiStorage,cloudMode,currentRoom,roomExists} from "@/lib/cloud-store";
 import {isAdmin} from "@/lib/demo-auth";
@@ -20,7 +21,7 @@ import {validActivityTime,type ActivityUpdate,type TripNotice,type ActivityStatu
 import {trainingGroups,type GroupChange} from "@/lib/training-groups";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-type Order = {journeyShare?:{token:string}} & ServiceFields & PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;ntrpLevel?:number;ntrpLabel?:string;
+type Order = {journeyShare?:{token:string}} & PassportFields & ServiceFields & PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;ntrpLevel?:number;ntrpLabel?:string;
   operations?:OperationDetails;offerVersions?:OfferVersion[];groupRequest?:GroupRequest; groupQuote?:GroupQuote; groupPlanToken?:string; groupAdviceRequested?:boolean; premiumRequest?:PremiumRequest; offerRevision?:{reason:string;at:string}; departureCode:string; numPeople:number;numCompanions?:number;playerRate?:number;companionRate?:number; total:number; deposit:number; paid:number; status:string; payment:string; points:number;activityChecks?:Record<string,boolean>;startedAt?:string;completedAt?:string;feiRating?:number;balancePayment?:string;offer?:{servicePlanId?:string;id:string;createdAt:string;acceptedAt?:string;total:number;deposit:number;departureCode:string}};
 type Store = {sessions: Record<string,number>; orders:Order[];ledger:PointEntry[];profile?:{name:string;phone:string;email:string};ntrpProfile?:{level:number;label:string;assessedAt:string}};
 
@@ -41,7 +42,7 @@ async function postLocal(req:NextRequest){
  if(req.headers.get("origin")!==req.nextUrl.origin)return NextResponse.json({error:"Yêu cầu không hợp lệ"},{status:403});
  const run=async()=>{try{const b=await req.json();
  if(cloudMode()&&(!/^[a-f0-9-]{36}$/.test(currentRoom())||!await roomExists(currentRoom())))return NextResponse.json({error:"Mở link phiên demo do người trình diễn cung cấp."},{status:403});
- const privileged=["publishServicePlan","issueInsurance","handoverKit","demoSelect","demoReset","demoOperate","seedRequestExamples","checkIn","saveOperations","sendOfferVersion","approveGroupQuote","publishGroupPlan","replyPremiumRevision","offer","updateActivity","assignTrainingGroup","resolveGroupChange","pay","start","complete"];
+ const privileged=["verifyPassport","publishServicePlan","issueInsurance","handoverKit","demoSelect","demoReset","demoOperate","seedRequestExamples","checkIn","saveOperations","sendOfferVersion","approveGroupQuote","publishGroupPlan","replyPremiumRevision","offer","updateActivity","assignTrainingGroup","resolveGroupChange","pay","start","complete"];
  if((privileged.includes(b.action)||b.source==="test-controls"||b.source==="operations")&&!isAdmin(req))return NextResponse.json({error:"Cần đăng nhập quản trị Demo để thực hiện thao tác này."},{status:403});
  let scope=req.cookies.get("tt-scenario")?.value;
  if(b.action==="demoSelect"||b.action==="demoReset"){
@@ -164,6 +165,23 @@ async function postLocal(req:NextRequest){
  if(t.packageId==="sbu3"&&b.booking.premiumRequest!==undefined&&!validPremiumRequest(b.booking.premiumRequest))return NextResponse.json({error:"Kiểm tra ngày mong muốn và nhu cầu Premium"},{status:400});
  let o=s.orders.find(o=>o.key===b.key);if(o&&(o.tourId!==t.id||o.departureCode!==d.code||o.numPeople!==n||JSON.stringify(o.groupRequest)!==JSON.stringify(t.packageId==="sbu2"?b.booking.groupRequest:undefined)||JSON.stringify(o.premiumRequest)!==JSON.stringify(t.packageId==="sbu3"?b.booking.premiumRequest:undefined)||(o.groupAdviceRequested??false)!==(b.booking.groupAdviceRequested===true)||(o.referral?.token??"")!==ref||(o.numCompanions??0)!==companions||o.name!==name.trim()||(o.phone??"")!==(b.booking.phone??"")||(o.email??"")!==(b.booking.email??"")||(o.ntrpLevel??0)!==(t.packageId==="sbu2"?0:(level??0))))return NextResponse.json({error:"Thông tin đã thay đổi. Vui lòng quay lại bước trước rồi xác nhận lại."},{status:409});if(!o){const total=coupleTotal(t.packageId,d.price,n,companions);o={id:randomUUID(),key:b.key,tourId:t.id,name:name.trim(),phone:typeof b.booking.phone==="string"?b.booking.phone.slice(0,30):undefined,email:typeof b.booking.email==="string"?b.booking.email.slice(0,254):undefined,ntrpLevel:t.packageId!=="sbu2"&&level?level:undefined,ntrpLabel:t.packageId!=="sbu2"&&level?getNtrpLevel(level).label:undefined,groupRequest:t.packageId==="sbu2"?b.booking.groupRequest:undefined,premiumRequest:t.packageId==="sbu3"?b.booking.premiumRequest:undefined,groupAdviceRequested:b.booking.groupAdviceRequested===true,departureCode:d.code,numPeople:n,numCompanions:companions,referral,playerRate:d.price,companionRate:companionRate(t.packageId),total,deposit:Math.round(total*(t.packageId==="sbu2"?.5:.3)),paid:0,status:t.packageId==="sbu2"?"Chờ báo giá":t.packageId==="sbu3"?"Chờ xác nhận trong 24 giờ":"Đăng ký chưa hoàn tất · Chờ đặt cọc",payment:"pending",points:0};addRequestEvent(o,"created",t.packageId==="sbu1"?"Đã tạo booking, chờ đặt cọc":"Đã gửi yêu cầu");s.orders.unshift(o);await save(s,scope);}return NextResponse.json({...view(s),order:o});}
 
+
+ if(b.action==="verifyPassport"||b.action==="savePostTrip"){
+ const o=s.orders.find(o=>o.id===b.id);if(!o)return NextResponse.json({error:"Không tìm thấy chuyến đi"},{status:404});
+ if(!reliableCompletion(o))return NextResponse.json({error:"Cần xác nhận bắt đầu, hoàn thành và thanh toán đủ trước khi mở Passport"},{status:409});
+ if(b.action==="verifyPassport"){
+ if(b.reviewed!==true)return NextResponse.json({error:"Điều phối cần kiểm tra dữ liệu hoàn thành trước khi xác nhận"},{status:400});
+ const t=tours.find(t=>t.id===o.tourId),d=t?.departureSchedules.find(d=>d.code===o.departureCode);
+ if(!t||!d)return NextResponse.json({error:"Không đối chiếu được lịch khởi hành"},{status:409});
+ if(o.passportStamp&&!validPassport(o))return NextResponse.json({error:"Dấu Passport không khớp hồ sơ; cần đối soát, không ghi đè"},{status:409});
+ if(!o.passportStamp){o.passportStamp={id:randomUUID(),orderId:o.id,tourId:o.tourId,departureCode:o.departureCode,tourName:t.name,destination:t.destinationName,departureDate:d.date,completedAt:o.completedAt!,verifiedAt:new Date().toISOString(),source:"operator-review"};addRequestEvent(o,"passport","Điều phối đã kiểm tra và cấp dấu Passport cho hành trình hoàn thành");}
+ }else{
+ if(!validPassport(o))return NextResponse.json({error:"Chuyến chưa có dấu Passport được xác nhận"},{status:409});
+ if(typeof b.note!=="string"||b.note.length>500||typeof b.nextPackage!=="string"||!["","sbu1","sbu2","sbu3"].includes(b.nextPackage))return NextResponse.json({error:"Ghi chú tối đa 500 ký tự và chọn gói hợp lệ"},{status:400});
+ o.postTrip={note:b.note.trim(),nextPackage:b.nextPackage,updatedAt:new Date().toISOString()};
+ }
+ await save(s,scope);return NextResponse.json(view(s));
+ }
  if(["publishServicePlan","issueInsurance","handoverKit","receiveKit"].includes(b.action)){
  const o=s.orders.find(o=>o.id===b.id);
  if(!o||tours.find(t=>t.id===o.tourId)?.packageId!=="sbu3")return NextResponse.json({error:"Không tìm thấy chuyến Premium"},{status:404});
@@ -359,7 +377,13 @@ async function postLocal(req:NextRequest){
     if(b.source!=="test-controls")return NextResponse.json({error:"Thao tác chỉ có trong điều khiển thử nghiệm"},{status:403});
     if(!o.startedAt&&!o.completedAt)return NextResponse.json({error:"Chuyến chưa bắt đầu"},{status:409});
     if(o.paid<o.total)return NextResponse.json({error:"Cần thanh toán đủ trước khi hoàn thành hành trình"},{status:409});
-    o.completedAt ??= new Date().toISOString();o.status="Đã hoàn thành";awardOnce(s.ledger,o,"tour");awardOnce(s.ledger,o,"fei");
+    o.completedAt ??= new Date().toISOString();o.status="Đã hoàn thành";
+    if(!reliableCompletion(o))return NextResponse.json({error:"Dữ liệu bắt đầu, kết thúc hoặc thanh toán chưa hợp lệ"},{status:409});
+    const passportTour=tours.find(t=>t.id===o.tourId),passportDate=passportTour?.departureSchedules.find(d=>d.code===o.departureCode);
+    if(!passportTour||!passportDate)return NextResponse.json({error:"Không đối chiếu được lịch khởi hành để cấp Passport"},{status:409});
+    if(!o.passportStamp)o.passportStamp={id:randomUUID(),orderId:o.id,tourId:o.tourId,departureCode:o.departureCode,tourName:passportTour.name,destination:passportTour.destinationName,departureDate:passportDate.date,completedAt:o.completedAt!,verifiedAt:new Date().toISOString(),source:"operator-complete"};
+    addRequestEvent(o,"passport","Đã cấp dấu Passport sau xác nhận hoàn thành và thanh toán đủ");
+    awardOnce(s.ledger,o,"tour");awardOnce(s.ledger,o,"fei");
    }else{
     if(!o.completedAt)return NextResponse.json({error:"Hành trình chưa hoàn thành"},{status:409});
     if(b.action==="fei"){

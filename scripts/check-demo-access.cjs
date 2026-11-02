@@ -6,12 +6,12 @@ function compile(file){if(cache.has(file))return cache.get(file).exports;const m
 (async()=>{process.env.DEMO_ADMIN_PASSWORD='only-test-password-for-demo';const {NextRequest}=require('next/server');const api=compile(path.join(root,'app/api/local/route.ts'));const auth=compile(path.join(root,'lib/demo-auth.ts'));let cookie='';const post=b=>api.POST(new NextRequest('http://localhost/api/local',{method:'POST',headers:{origin:'http://localhost',cookie,'content-type':'application/json'},body:JSON.stringify(b)}));
 const login=await post({action:'login'});assert.equal(login.status,200);cookie='tt-session='+login.cookies.get('tt-session').value;
 const before=JSON.stringify([...documents]);
-for(const action of ['publishServicePlan','issueInsurance','handoverKit','demoSelect','demoReset','demoOperate','seedRequestExamples','checkIn','saveOperations','sendOfferVersion','approveGroupQuote','publishGroupPlan','replyPremiumRevision','offer','updateActivity','assignTrainingGroup','resolveGroupChange','pay','start','complete'])assert.equal((await post({action,source:'test-controls',scenario:'personal'})).status,403,action);
+for(const action of ['verifyPassport','publishServicePlan','issueInsurance','handoverKit','demoSelect','demoReset','demoOperate','seedRequestExamples','checkIn','saveOperations','sendOfferVersion','approveGroupQuote','publishGroupPlan','replyPremiumRevision','offer','updateActivity','assignTrainingGroup','resolveGroupChange','pay','start','complete'])assert.equal((await post({action,source:'test-controls',scenario:'personal'})).status,403,action);
 assert.equal(JSON.stringify([...documents]),before,'forbidden actions must not change data');
 assert.equal((await post({action:'profile',name:'Guest Demo',phone:'',email:''})).status,200);
 assert.equal((await post({action:'profile',source:'operations',name:'forged'})).status,403);
 cookie+='; tt-admin='+auth.adminToken(room,Date.now()+60000);
 assert.equal((await post({action:'demoSelect',scenario:'personal'})).status,200);
 const {GET}=compile(path.join(root,'app/api/demo/route.ts'));assert.equal((await GET(new NextRequest('http://localhost/api/demo'))).status,401);assert.equal((await GET(new NextRequest('http://localhost/api/demo',{headers:{cookie}}))).status,200);
-console.log('PASS demo access: guest login/profile, 20 protected actions, forged source, no forbidden writes, admin scenario selection, protected demo listing');
+console.log('PASS demo access: guest login/profile, 21 protected actions, forged source, no forbidden writes, admin scenario selection, protected demo listing');
 })().catch(e=>{console.error(e);process.exitCode=1;});

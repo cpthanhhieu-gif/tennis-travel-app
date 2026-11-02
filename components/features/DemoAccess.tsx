@@ -1,13 +1,14 @@
 "use client";
-import {useEffect,useState} from "react";
+import {useEffect,useState,useRef} from "react";
 import QRCode from "qrcode";
 import DemoManager from "./DemoManager";
 export default function DemoAccess(){
+ const reading=useRef(false);
  const [qr,setQr]=useState(""),[activeScenario,setActiveScenario]=useState<string|null>(null),[copied,setCopied]=useState(false);
  const [access,setAccess]=useState<{admin:boolean;room:string;cloud:boolean}|null>(null),[error,setError]=useState(""),[busy,setBusy]=useState(false),[password,setPassword]=useState(""),[scenario,setScenario]=useState("personal");
- async function load(){try{const r=await fetch("/api/demo-access");if(!r.ok)throw Error("Chưa kết nối được dữ liệu online. Kiểm tra DATABASE_URL trên Vercel.");setAccess(await r.json());const sync=await fetch("/api/demo-sync",{cache:"no-store"});if(sync.ok){const d=await sync.json();if(d.scenario){setScenario(d.scenario);setActiveScenario(d.scenario);}}}catch(e){setError((e as Error).message);}}
- useEffect(()=>{void load();const check=()=>{if(document.visibilityState==="visible")void load();};const timer=setInterval(check,5000);window.addEventListener("focus",check);return()=>{clearInterval(timer);window.removeEventListener("focus",check);};},[]);
- useEffect(()=>{let cancelled=false;if(access?.cloud){const url=`${window.location.origin}/demo/join?room=${access.room}&scenario=${scenario}`;void QRCode.toDataURL(url,{width:220,margin:2}).then(value=>{if(!cancelled)setQr(value);}).catch(()=>setError("Không tạo được QR. Dùng link bên dưới."));}return()=>{cancelled=true;};},[access,scenario]);
+ async function load(){if(reading.current)return;reading.current=true;try{const r=await fetch("/api/demo-access");if(!r.ok)throw Error("Chưa kết nối được dữ liệu online. Kiểm tra DATABASE_URL trên Vercel.");setAccess(await r.json());const sync=await fetch("/api/demo-sync",{cache:"no-store"});if(sync.ok){const d=await sync.json();if(d.scenario){setScenario(d.scenario);setActiveScenario(d.scenario);}}}catch(e){setError((e as Error).message);}finally{reading.current=false;}}
+ useEffect(()=>{const initial=setTimeout(()=>void load(),0);const check=()=>{if(document.visibilityState==="visible")void load();};const timer=setInterval(check,15000);window.addEventListener("focus",check);return()=>{clearTimeout(initial);clearInterval(timer);window.removeEventListener("focus",check);};},[]);
+ useEffect(()=>{let cancelled=false;if(access?.cloud){const url=`${window.location.origin}/demo/join?room=${access.room}&scenario=${scenario}`;void QRCode.toDataURL(url,{width:220,margin:2}).then(value=>{if(!cancelled)setQr(value);}).catch(()=>setError("Không tạo được QR. Dùng link bên dưới."));}return()=>{cancelled=true;};},[access?.cloud,access?.room,scenario]);
  async function controlScenario(id:string){setBusy(true);setError("");try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"demoSelect",scenario:id})});if(!r.ok)throw Error("Không chuyển được kịch bản");setScenario(id);window.location.reload();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
 
  async function act(action:string){setBusy(true);setError("");try{const r=await fetch("/api/demo-access",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,password})});const d=await r.json();if(!r.ok)throw Error(d.error);setPassword("");await load();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}

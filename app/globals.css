@@ -526,3 +526,17 @@ body{background:#f4f6f1;color:#103e30;font-family:Arial,'Helvetica Neue',sans-se
 @media(max-width:767px){.app-tour-detail .ds-detail-grid>.ds-summary{display:none}.app-tour-detail .ui-tabset>.ui-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;overflow:visible;padding:8px;min-width:0}.app-tour-detail .ui-tabset>.ui-tabs>button{padding:10px 4px;font-size:12px;min-width:0;white-space:normal;line-height:1.4}.app-tour-detail .ds-detail-grid>div{min-width:0}}
 
 .booking-field-error{display:block;color:#b42318;font-size:14px;line-height:1.5;margin:6px 0}.premium-request-fields [aria-invalid="true"]{border-color:#b42318;outline-color:#b42318;scroll-margin-block:160px}
+
+/* Feedback for demo controller actions, including inherited fieldset disabling. */
+.journey-controls :is(button, a.ds-link, a.ds-cta){transition:background-color .15s,color .15s,border-color .15s,box-shadow .15s;cursor:pointer}
+@media(hover:hover){.journey-controls .ds-link:not(:disabled):hover{background:#e8f0ff;border-color:#0646a6;color:#0646a6}}
+.journey-controls :is(button,a):focus-visible{outline:3px solid #103e30;outline-offset:3px}
+.journey-controls button:not(:disabled):active{box-shadow:inset 0 0 0 2px #103e30;background:#d6e5ff;color:#0646a6}
+.journey-controls button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.journey-controls button[aria-pressed="true"]{background:#103e30;border-color:#103e30;color:#fff;opacity:1}
+.journey-controls button[aria-busy="true"]{background:#e8f0ff;color:#0646a6;opacity:1;cursor:progress}
+.journey-controls .payment-control-row{margin:12px 0 20px}
+.journey-controls .payment-control-row button{margin-bottom:8px}
+.journey-controls details>summary:hover{color:#0754c8}
+.journey-controls details>summary:focus-visible{outline:3px solid #103e30;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.journey-controls :is(button,a){transition:none}}

@@ -1,7 +1,7 @@
 "use client";
 import ResponsiveDetail from "@/components/ui/ResponsiveDetail";
-import PremiumValueDetails from "./PremiumValueDetails";
-import {CalendarDays,Utensils,Users,ListChecks,ShieldCheck} from "lucide-react";
+import PremiumBenefits from "./PremiumBenefits";
+import {CalendarDays,Utensils,Users,ShieldCheck} from "lucide-react";
 import InfoPanel from "@/components/ui/InfoPanel";
 import { tours } from "@/lib/mock-data";
 import { tripItinerary } from "@/lib/trip-itinerary";
@@ -9,7 +9,7 @@ import { tripItinerary } from "@/lib/trip-itinerary";
 export default function PremiumTourDetails() {
   const tour = tours.find(t => t.packageId === "sbu3")!;
   const days = tripItinerary({ tourId: tour.id, departureCode: tour.departureSchedules[0].code });
-  return <div className="premium-details"><PremiumValueDetails/>
+  return <div className="premium-details"><PremiumBenefits/>
     <ResponsiveDetail title="Chương trình Premium 4N3D" description="Giờ sân, Ace Cup, ẩm thực & phục hồi"><section className="ds-section" aria-labelledby="premium-program">
       <p className="ds-eyebrow">4 NGÀY 3 ĐÊM / PHÚ QUỐC</p>
       <h2 id="premium-program">Một nhịp chơi, nghỉ và thưởng vị.</h2>
@@ -51,24 +51,6 @@ export default function PremiumTourDetails() {
         <li><strong>Ngày 4:</strong> yoga/stretching nhẹ và cùng đoàn kết thúc chuyến.</li>
       </ul>
       <p>Giá tham khảo trong hồ sơ: <strong>22,9 triệu đồng/người đi cùng</strong>, chung phòng. Chọn số người chơi và người đi cùng ở bước đặt tour để xem tổng dự kiến. Lịch hoạt động, phòng ở và phụ thu được xác nhận trong phương án chuyến đi.</p>
-    </section></InfoPanel>
-    <InfoPanel icon={<ListChecks size={22}/>} title="Giá gồm gì?" description="Quyền lợi bao gồm và các khoản tính riêng">    <section className="ds-section" aria-labelledby="premium-inclusions">
-      <h2 id="premium-inclusions">Giá gồm gì, khoản nào tính riêng?</h2>
-      <p>Quyền lợi dưới đây là cấu hình dự kiến của gói người chơi, cần đối chiếu với phương án và báo giá của chuyến bạn chọn.</p>
-      <div className="premium-columns"><div><h3>Dự kiến bao gồm</h3><ul className="premium-list">
-        <li>Chặng bay SGN–Phú Quốc khứ hồi và xe theo chương trình; hãng, giờ bay và điều kiện hành lý xác nhận theo chuyến.</li>
-        <li>3 đêm resort 5 sao, phòng Deluxe/garden view, ở ghép đôi/twin; resort cụ thể chờ xác nhận.</li>
-        <li>Đánh giá NTRP, ba buổi sân theo nhóm, Ace Cup theo chương trình, recovery kit và Tennis Passport.</li>
-        <li>Năm bữa FEI và các bữa theo lịch, cooking class, spa recovery 60 phút, yoga/stretching.</li>
-        <li>Tour Manager hỗ trợ theo chương trình.</li>
-      </ul></div><div><h3>Không gồm trong giá cơ bản</h3><ul className="premium-list">
-        <li>Buổi 1-1 với đại sứ: dự kiến 1,5 triệu đồng/giờ, tùy lịch xác nhận.</li>
-        <li>Spa thêm: dự kiến 900.000đ; ảnh chuyên nghiệp cả giải: dự kiến 500.000đ/khách.</li>
-        <li>VinWonders, snorkeling và các hoạt động tham quan tùy chọn: báo giá riêng.</li>
-        <li>Nâng hạng phòng, phòng đơn, phụ thu xuất phát Hà Nội/cao điểm và hành lý thể thao phát sinh: xác nhận trong báo giá.</li>
-        <li>Chi tiêu cá nhân và dịch vụ ngoài phương án đã chấp thuận.</li>
-      </ul></div></div>
-      <p className="ds-caption">Giá tùy chọn là mức tham khảo từ hồ sơ v2.12, chưa phải báo giá còn hiệu lực. Không tự cộng vào tổng booking.</p>
     </section></InfoPanel>
     <InfoPanel icon={<ShieldCheck size={22}/>} title="Xác nhận dịch vụ" description="Đối tác, phương án và điều kiện trước khi cọc">    <section className="ds-section" aria-labelledby="premium-confirmation">
       <h2 id="premium-confirmation">Dịch vụ được xác nhận như thế nào?</h2>

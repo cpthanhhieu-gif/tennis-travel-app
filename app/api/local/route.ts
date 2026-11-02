@@ -35,7 +35,7 @@ async function load(scope?:string):Promise<Store>{
 async function save(s:Store,scope?:string){await writeDocument(scenarioKey(scope),s);for(const o of s.orders){if(o.publication){const t=tours.find(t=>t.id===o.tourId);await writeDocument(`global/cards/${o.publication.token}`,{alias:o.publication.alias,packageId:t?.packageId,tourName:t?.name,completedAt:o.completedAt,expiresAt:o.publication.expiresAt});}}}
 const hash=(s:string)=>createHash("sha256").update(s).digest("hex");
 function view(s:Store){return {account:s.profile??{name:"Tennis Member"},orders:s.orders,points:s.ledger.reduce((n,e)=>n+e.amount,0),ledger:s.ledger,profile:s.profile??null,ntrpProfile:s.ntrpProfile??null};}
-async function getLocal(req:NextRequest){await queue;const scope=req.cookies.get("tt-scenario")?.value;const s=await load(scope);const token=req.cookies.get("tt-session")?.value;return NextResponse.json(token&&s.sessions[hash(token)]>Date.now()?view(s):{account:null,orders:[],points:0},{headers:{"Cache-Control":"no-store"}});}
+async function getLocal(req:NextRequest){await queue;const scope=req.cookies.get("tt-scenario")?.value;const s=await load(scope);const token=req.cookies.get("tt-session")?.value;return NextResponse.json(isAdmin(req)||token&&s.sessions[hash(token)]>Date.now()?view(s):{account:null,orders:[],points:0},{headers:{"Cache-Control":"no-store"}});}
 async function postLocal(req:NextRequest){
  if(req.headers.get("origin")!==req.nextUrl.origin)return NextResponse.json({error:"Yêu cầu không hợp lệ"},{status:403});
  const run=async()=>{try{const b=await req.json();
@@ -52,7 +52,7 @@ async function postLocal(req:NextRequest){
  else {const shared=await readDocument<{scenario:string|null;revision:string}>("demo-context");if(shared&&((shared.scenario??undefined)!==scope||(b.action!=="login"&&req.cookies.get("tt-context")?.value!==shared.revision)))return NextResponse.json({error:"Bối cảnh đã đổi trên máy điều khiển. Chờ đồng bộ rồi thử lại."},{status:409});}
  const s=await load(scope);const token=req.cookies.get("tt-session")?.value;
  if(b.action==="login"||b.action==="demoSelect"||b.action==="demoReset"){const t=randomUUID();s.sessions[hash(t)]=Date.now()+86400000;await save(s,scope);const r=NextResponse.json(view(s));if(b.action!=="login"){r.cookies.set("tt-scenario",scope??"",{sameSite:"strict",path:"/",maxAge:scope?86400*30:0});if(b.action==="demoReset"&&scope)r.cookies.set(`tt-revision-${scope}`,randomUUID(),{sameSite:"strict",path:"/",maxAge:86400*30});}r.cookies.set("tt-session",t,{httpOnly:true,sameSite:"strict",secure:req.nextUrl.protocol==="https:",path:"/",maxAge:86400});return r;}
- if(!token||!(s.sessions[hash(token)]>Date.now()))return NextResponse.json({error:"Vui lòng đăng nhập tại Cá nhân"},{status:401});
+ if(!isAdmin(req)&&(!token||!(s.sessions[hash(token)]>Date.now())))return NextResponse.json({error:"Vui lòng đăng nhập tại Cá nhân"},{status:401});
  if(b.action==="demoOperate"){
   if(!isScenarioId(scope)||b.scenario!==scope)return NextResponse.json({error:"Chọn đúng kịch bản đang hoạt động trước khi mô phỏng."},{status:409});
   const o=s.orders.find(o=>o.id===b.id);if(!o)return NextResponse.json({error:"Chưa có booking trong kịch bản này."},{status:404});
@@ -71,7 +71,7 @@ async function postLocal(req:NextRequest){
    Object.assign(b,{action:"updateActivity",source:"test-controls",activityId:a.id,status:"changed",time:a.time,location:"Sân dự phòng · địa điểm demo",reason:"Mô phỏng: điều phối xác nhận chuyển sân theo phương án dự phòng."});
   }else return NextResponse.json({error:"Sự kiện không hợp lệ."},{status:400});
  }
- if(b.action==="logout"){delete s.sessions[hash(token)];await save(s,scope);const r=NextResponse.json({account:null,orders:[],points:0});r.cookies.set("tt-session","",{path:"/",maxAge:0});return r;}
+ if(b.action==="logout"){if(token)delete s.sessions[hash(token)];await save(s,scope);const r=NextResponse.json({account:null,orders:[],points:0});r.cookies.set("tt-session","",{path:"/",maxAge:0});return r;}
  if(b.action==="ntrp"){
   if(!b.answers||!ntrpQuiz.every(q=>q.options.some(o=>o.value===b.answers[q.id])))return NextResponse.json({error:"Cần trả lời đúng định dạng cả 5 câu NTRP"},{status:400});
   const average=ntrpQuiz.reduce((sum,q)=>sum+b.answers[q.id],0)/ntrpQuiz.length;
@@ -277,6 +277,16 @@ async function postLocal(req:NextRequest){
   if(typeof b.itemId!=="string"||typeof b.checked!=="boolean"||!validChecklistItem(o,b.itemId))return NextResponse.json({error:"Hoạt động không thuộc chuyến này"},{status:400});
   if(o.completedAt||o.paid<o.deposit||(!b.itemId.startsWith("prepare:")&&!o.startedAt))return NextResponse.json({error:"Chưa thể cập nhật checklist ở trạng thái này"},{status:409});
   o.activityChecks??={};o.activityChecks[b.itemId]=b.checked;await save(s,scope);return NextResponse.json(view(s));
+ }
+ if(b.action==="reportDeposit"){
+  const o=s.orders.find(o=>o.id===b.id);
+  if(!o)return NextResponse.json({error:"Không tìm thấy booking"},{status:404});
+  if(o.completedAt||requestBlocked(o))return NextResponse.json({error:"Booking chưa cho phép báo chuyển cọc"},{status:409});
+  if(tours.find(t=>t.id===o.tourId)?.packageId!=="sbu1"&&!o.offer?.acceptedAt)return NextResponse.json({error:"Cần chấp thuận phương án trước khi chuyển cọc"},{status:409});
+  if(o.paid>=o.deposit||o.payment==="awaiting_confirmation")return NextResponse.json(view(s));
+  o.payment="awaiting_confirmation";o.status="Chờ xác nhận cọc";
+  addRequestEvent(o,"depositReported","Khách báo đã chuyển cọc; chờ điều phối xác nhận nhận tiền");
+  await save(s,scope);return NextResponse.json(view(s));
  }
  if(["pay","start","complete","fei","share"].includes(b.action)){
   const o=s.orders.find(o=>o.id===b.id);

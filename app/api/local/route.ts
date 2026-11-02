@@ -161,7 +161,7 @@ async function postLocal(req:NextRequest){
  referral={sourceOrderId:source.id,token:ref,at:new Date().toISOString()};}
  if(t.packageId==="sbu2"&&b.booking.groupRequest!==undefined&&!validGroupRequest(b.booking.groupRequest))return NextResponse.json({error:"Kiểm tra quy mô, 2–3 ngày đi và nhu cầu đoàn"},{status:400});
  if(t.packageId==="sbu3"&&b.booking.premiumRequest!==undefined&&!validPremiumRequest(b.booking.premiumRequest))return NextResponse.json({error:"Kiểm tra ngày mong muốn và nhu cầu Premium"},{status:400});
- let o=s.orders.find(o=>o.key===b.key);if(o&&(o.tourId!==t.id||o.departureCode!==d.code||o.numPeople!==n||JSON.stringify(o.groupRequest)!==JSON.stringify(t.packageId==="sbu2"?b.booking.groupRequest:undefined)||JSON.stringify(o.premiumRequest)!==JSON.stringify(t.packageId==="sbu3"?b.booking.premiumRequest:undefined)||(o.groupAdviceRequested??false)!==(b.booking.groupAdviceRequested===true)||(o.referral?.token??"")!==ref||(o.numCompanions??0)!==companions||o.name!==name.trim()||(o.phone??"")!==(b.booking.phone??"")||(o.email??"")!==(b.booking.email??"")||(o.ntrpLevel??0)!==(t.packageId==="sbu2"?0:(level??0))))return NextResponse.json({error:"Thông tin đã thay đổi. Vui lòng quay lại bước trước rồi xác nhận lại."},{status:409});if(!o){const total=coupleTotal(t.packageId,d.price,n,companions);o={id:randomUUID(),key:b.key,tourId:t.id,name:name.trim(),phone:typeof b.booking.phone==="string"?b.booking.phone.slice(0,30):undefined,email:typeof b.booking.email==="string"?b.booking.email.slice(0,254):undefined,ntrpLevel:t.packageId!=="sbu2"&&level?level:undefined,ntrpLabel:t.packageId!=="sbu2"&&level?getNtrpLevel(level).label:undefined,groupRequest:t.packageId==="sbu2"?b.booking.groupRequest:undefined,premiumRequest:t.packageId==="sbu3"?b.booking.premiumRequest:undefined,groupAdviceRequested:b.booking.groupAdviceRequested===true,departureCode:d.code,numPeople:n,numCompanions:companions,referral,playerRate:d.price,companionRate:companionRate(t.packageId),total,deposit:Math.round(total*(t.packageId==="sbu2"?.5:.3)),paid:0,status:t.packageId==="sbu2"?"Chờ báo giá":t.packageId==="sbu3"?"Chờ xác nhận trong 24 giờ":"Chờ đặt cọc",payment:"pending",points:0};addRequestEvent(o,"created",t.packageId==="sbu1"?"Đã tạo booking, chờ đặt cọc":"Đã gửi yêu cầu");s.orders.unshift(o);await save(s,scope);}return NextResponse.json({...view(s),order:o});}
+ let o=s.orders.find(o=>o.key===b.key);if(o&&(o.tourId!==t.id||o.departureCode!==d.code||o.numPeople!==n||JSON.stringify(o.groupRequest)!==JSON.stringify(t.packageId==="sbu2"?b.booking.groupRequest:undefined)||JSON.stringify(o.premiumRequest)!==JSON.stringify(t.packageId==="sbu3"?b.booking.premiumRequest:undefined)||(o.groupAdviceRequested??false)!==(b.booking.groupAdviceRequested===true)||(o.referral?.token??"")!==ref||(o.numCompanions??0)!==companions||o.name!==name.trim()||(o.phone??"")!==(b.booking.phone??"")||(o.email??"")!==(b.booking.email??"")||(o.ntrpLevel??0)!==(t.packageId==="sbu2"?0:(level??0))))return NextResponse.json({error:"Thông tin đã thay đổi. Vui lòng quay lại bước trước rồi xác nhận lại."},{status:409});if(!o){const total=coupleTotal(t.packageId,d.price,n,companions);o={id:randomUUID(),key:b.key,tourId:t.id,name:name.trim(),phone:typeof b.booking.phone==="string"?b.booking.phone.slice(0,30):undefined,email:typeof b.booking.email==="string"?b.booking.email.slice(0,254):undefined,ntrpLevel:t.packageId!=="sbu2"&&level?level:undefined,ntrpLabel:t.packageId!=="sbu2"&&level?getNtrpLevel(level).label:undefined,groupRequest:t.packageId==="sbu2"?b.booking.groupRequest:undefined,premiumRequest:t.packageId==="sbu3"?b.booking.premiumRequest:undefined,groupAdviceRequested:b.booking.groupAdviceRequested===true,departureCode:d.code,numPeople:n,numCompanions:companions,referral,playerRate:d.price,companionRate:companionRate(t.packageId),total,deposit:Math.round(total*(t.packageId==="sbu2"?.5:.3)),paid:0,status:t.packageId==="sbu2"?"Chờ báo giá":t.packageId==="sbu3"?"Chờ xác nhận trong 24 giờ":"Đăng ký chưa hoàn tất · Chờ đặt cọc",payment:"pending",points:0};addRequestEvent(o,"created",t.packageId==="sbu1"?"Đã tạo booking, chờ đặt cọc":"Đã gửi yêu cầu");s.orders.unshift(o);await save(s,scope);}return NextResponse.json({...view(s),order:o});}
  if(b.action==="saveOperations"||b.action==="sendOfferVersion"){
  if(b.source!=="operations")return NextResponse.json({error:"Mở công cụ vận hành cục bộ để cập nhật"},{status:403});
  const o=s.orders.find(o=>o.id===b.id);if(!o)return NextResponse.json({error:"Không tìm thấy yêu cầu"},{status:404});
@@ -214,7 +214,7 @@ async function postLocal(req:NextRequest){
   }else{
    if(o.offerRevision)return NextResponse.json({error:"Đang chờ phản hồi điều chỉnh; chưa thể chấp thuận"},{status:409});
    if(!o.offer||b.offerId!==o.offer.id)return NextResponse.json({error:"Vui lòng xem lại phương án hiện tại trước khi chấp thuận"},{status:409});
-   if(!o.offer.acceptedAt){o.offer.acceptedAt=new Date().toISOString();o.status="Chờ đặt cọc";addRequestEvent(o,"accepted","Đã chấp thuận phương án/báo giá");}
+   if(!o.offer.acceptedAt){o.offer.acceptedAt=new Date().toISOString();o.status="Đăng ký chưa hoàn tất · Chờ đặt cọc";addRequestEvent(o,"accepted","Đã chấp thuận phương án/báo giá");}
   }
   await save(s,scope);return NextResponse.json(view(s));
  }
@@ -284,7 +284,7 @@ async function postLocal(req:NextRequest){
   if(o.completedAt||requestBlocked(o))return NextResponse.json({error:"Booking chưa cho phép báo chuyển cọc"},{status:409});
   if(tours.find(t=>t.id===o.tourId)?.packageId!=="sbu1"&&!o.offer?.acceptedAt)return NextResponse.json({error:"Cần chấp thuận phương án trước khi chuyển cọc"},{status:409});
   if(o.paid>=o.deposit||o.payment==="awaiting_confirmation")return NextResponse.json(view(s));
-  o.payment="awaiting_confirmation";o.status="Chờ xác nhận cọc";
+  o.payment="awaiting_confirmation";o.status="Chờ xác nhận cọc · Đăng ký chưa hoàn tất";
   addRequestEvent(o,"depositReported","Khách báo đã chuyển cọc; chờ điều phối xác nhận nhận tiền");
   await save(s,scope);return NextResponse.json(view(s));
  }
@@ -301,7 +301,7 @@ async function postLocal(req:NextRequest){
     if(o.paid<o.deposit)return NextResponse.json({error:"Vui lòng hoàn tất đặt cọc trước"},{status:409});
     if(o.paid<o.total){o.balancePayment=b.result;if(b.result==="success")o.paid=o.total;}
    }else if(o.payment!=="success"){
-    o.payment=b.result;if(b.result==="success"){o.paid=o.deposit;o.status="Đã xác nhận";}
+    o.payment=b.result;if(b.result==="success"){o.paid=o.deposit;o.status="Đã xác nhận đặt chuyến";}else{o.status="Đăng ký chưa hoàn tất · Cần thanh toán lại cọc";}
    }
    if(previousPayment!==JSON.stringify([o.paid,o.payment,o.balancePayment]))addRequestEvent(o,`pay:${b.phase??"deposit"}:${b.result}`,`${b.phase==="balance"?"Thanh toán còn lại":"Đặt cọc"}: ${b.result==="success"?"thành công":b.result==="failed"?"thất bại":"đã hủy"}`);
    awardOnce(s.ledger,o,"tour");

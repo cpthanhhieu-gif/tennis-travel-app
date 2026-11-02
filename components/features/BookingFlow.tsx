@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Check, CalendarDays, Users, Clock3, ArrowRight } from "lucide-react";
+import { ChevronLeft, Check, CalendarDays, Users, ArrowRight } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { useBooking } from "@/lib/BookingContext";
@@ -10,7 +10,7 @@ import BookingStep1 from "./BookingStep1";
 import BookingStep2 from "./BookingStep2";
 import BookingStep3 from "./BookingStep3";
 import BookingStep4 from "./BookingStep4";
-import {coupleTotal,companionRate} from "@/lib/couple-pricing";
+import {coupleTotal} from "@/lib/couple-pricing";
 import { tours } from "@/lib/mock-data";
 
 
@@ -21,7 +21,7 @@ export default function BookingFlow() {
   const { booking,step,setStep,clearDraft } = useBooking();
   useEffect(()=>{window.scrollTo({top:0,behavior:"instant"});},[step]);
   const isGroup = booking.packageId === "sbu2";
-  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : ["Chọn gói tour", "Đánh giá NTRP", "Thông tin", "Xác nhận"];
+  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : ["Chọn gói tour", "Đánh giá NTRP", "Thông tin", "Xác nhận & đặt cọc"];
   const visibleStep = isGroup && step > 1 ? step - 1 : step;
   const previousStep = isGroup && step === 3 ? 1 : step - 1;
   const router = useRouter();
@@ -152,14 +152,14 @@ export default function BookingFlow() {
       <Modal
         isOpen={showSuccess}
         onClose={handleViewPreTour}
-        title={booking.packageId === "sbu1" ? "Đã tiếp nhận đặt chỗ" : "Đã tiếp nhận yêu cầu"}
+        title="Đặt chuyến thành công"
         bottomSheet
       >
         <div className="booking-received">
-          <div className="booking-received-status"><span className="booking-received-icon"><Check size={24} aria-hidden="true"/></span><div><strong>Gửi thông tin thành công</strong><p>Cảm ơn {booking.name}. Yêu cầu của bạn đã được lưu.</p></div></div>
+          <div className="booking-received-status"><span className="booking-received-icon"><Check size={24} aria-hidden="true"/></span><div><strong>Đã xác nhận đặt chuyến</strong><p>Cảm ơn {booking.name}. Khoản cọc đã được xác nhận. Đăng ký đã hoàn tất.</p></div></div>
           <section className="booking-received-trip" aria-label="Thông tin chuyến đi"><span className="ds-eyebrow">CHUYẾN BẠN ĐÃ CHỌN</span><h3>{selectedTour.name}</h3><p><CalendarDays size={18} aria-hidden="true"/>{selectedSchedule.dateLabel} · {selectedTour.duration}</p><p><Users size={18} aria-hidden="true"/>{booking.numPeople-booking.numCompanions} người chơi · {booking.numCompanions} người đi cùng</p></section>
-          <section className="booking-received-next" aria-label="Bước tiếp theo"><Clock3 size={20} aria-hidden="true"/><div><h3>{booking.packageId==="sbu3"?"Chờ phương án chuyến đi":booking.packageId==="sbu2"?"Chờ báo giá đoàn":"Kiểm tra đặt chỗ & khoản cọc"}</h3><p>{booking.packageId==="sbu3"?"Thời gian phản hồi dự kiến: tối đa 24 giờ. Xem phương án và dịch vụ cần xác nhận trước khi chấp thuận, đặt cọc.":booking.packageId==="sbu2"?"Thời gian phản hồi dự kiến: 1 ngày làm việc. Kiểm tra báo giá theo quy mô đoàn trước khi chấp thuận.":"Mở Hành trình để kiểm tra trạng thái đặt chỗ, khoản cọc 30% và hướng dẫn tiếp theo."}</p></div></section>
-          <p className="booking-received-note">Tiếp nhận yêu cầu chưa đồng nghĩa chuyến đi đã được xác nhận hoặc thanh toán.</p>
+          <p>Chuyến đi đã chuyển sang Sắp đi. Mở Hành trình để xem nhóm tập và chuẩn bị.</p>
+          <p className="booking-received-note">Đã nhận cọc và xác nhận chỗ. Vui lòng thanh toán phần còn lại trước ngày khởi hành 15 ngày.</p>
           <Button variant="primary" onClick={handleViewPreTour} className="w-full" size="lg">Theo dõi trong Hành trình <ArrowRight size={18} aria-hidden="true"/></Button>
         </div>
       </Modal>

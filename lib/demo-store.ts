@@ -5,7 +5,7 @@ import {tours,getNtrpLevel} from "./mock-data";
 import {coupleTotal,companionRate} from "./couple-pricing";
 export function storeDirectory(scope?:string){return isScenarioId(scope)?path.join(process.cwd(),".local-data","scenarios",scope):path.join(process.cwd(),".local-data");}
 export function seedScenario(id:ScenarioId){
- const profile={name:({personal:"Khách Cá nhân Demo",couple:"Khách Cặp Đôi Demo",club:"Đại diện CLB Demo",returning:"Khách Sau Tour Demo"})[id],phone:"",email:""};
+ const profile={name:({personal:"Khách Cá nhân Demo",couple:"Khách Cặp Đôi Demo",club:"Đại diện CLB Demo",returning:"Khách Sau Tour Demo"})[id],phone:"0900000001",email:`${id}@example.com`};
  const level=id==="couple"?3.5:id==="returning"?3.5:null;
  const t=tours.find(t=>t.packageId===(id==="club"?"sbu2":"sbu1"))!;const d=t.departureSchedules[0];
  const count=id==="club"?16:1,total=coupleTotal(t.packageId,d.price,count,0);
@@ -14,5 +14,10 @@ export function seedScenario(id:ScenarioId){
  return {sessions:{},profile,orders:id==="club"||id==="returning"?[order]:[],ledger:id==="returning"?[{key:`${order.id}:tour`,orderId:order.id,kind:"tour",amount:order.points,createdAt:completedAt}]:[],...(level?{ntrpProfile:{level,label:getNtrpLevel(level).label,assessedAt:completedAt}}:{}),demo:{scenario:id,seedVersion:1,createdAt:completedAt,bookingPreset:id==="couple"?{packageId:"sbu3",numPeople:2,numCompanions:1}:null}};
 }
 export const scenarioKey=(scope?:string)=>isScenarioId(scope)?`scenarios/${scope}/store`:"store";
-export async function ensureScenario(id:ScenarioId){if(!await readDocument(scenarioKey(id)))await writeDocument(scenarioKey(id),seedScenario(id));}
+export async function ensureScenario(id:ScenarioId){
+ const key=scenarioKey(id);const existing=await readDocument<ReturnType<typeof seedScenario>>(key);
+ if(!existing){await writeDocument(key,seedScenario(id));return;}
+ // Upgrade older demo profiles without resetting bookings or replacing saved contacts.
+ if(existing.profile&&(!existing.profile.phone||!existing.profile.email)){const defaults=seedScenario(id).profile;existing.profile={...existing.profile,phone:existing.profile.phone||defaults.phone,email:existing.profile.email||defaults.email};await writeDocument(key,existing);}
+}
 export async function resetScenario(id:ScenarioId){const previous=await readDocument<{orders:{publication?:{token:string};groupPlanToken?:string}[]}>(scenarioKey(id));for(const o of previous?.orders??[]){if(o.publication)await writeDocument(`global/cards/${o.publication.token}`,null);if(o.groupPlanToken)await writeDocument(`global/group-plans/${o.groupPlanToken}`,null);}await writeDocument(scenarioKey(id),seedScenario(id));}

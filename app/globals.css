@@ -604,3 +604,11 @@ body{background:#f4f6f1;color:#103e30;font-family:Arial,'Helvetica Neue',sans-se
 .premium-couple-days dd{margin:5px 0 0;line-height:1.5}
 .premium-couple-inclusions .premium-benefit-card{max-width:280px}
 @media(min-width:768px){.premium-couple-days>section{flex-basis:45%}}
+.service-fulfillment{border-top:1px solid #d8e1db;padding:18px 0;margin-top:16px}
+.service-fulfillment label,.service-plan-editor label{display:block;margin:12px 0}
+.service-fulfillment select{width:100%;min-height:44px;padding:10px;border:1px solid #ccd7c8;border-radius:10px;background:#fff}
+.service-plan-editor{padding:20px 0;border-bottom:1px solid #d8e1db}
+.service-plan-editor details{padding:12px 0;border-bottom:1px solid #d8e1db}
+.service-plan-editor summary{min-height:44px;cursor:pointer}
+.service-plan-editor textarea{min-height:88px}
+.ui-dialog-body p{white-space:pre-line}

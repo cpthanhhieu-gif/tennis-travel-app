@@ -1,3 +1,4 @@
+import {type ServiceFields,validServicePlan,safeDocumentUrl} from "@/lib/service-plan";
 import {readDocument,writeDocument,apiStorage,cloudMode,currentRoom,roomExists} from "@/lib/cloud-store";
 import {isAdmin} from "@/lib/demo-auth";
 import {type OperationDetails,type OfferVersion,validOperations} from "@/lib/operations";
@@ -19,8 +20,8 @@ import {validActivityTime,type ActivityUpdate,type TripNotice,type ActivityStatu
 import {trainingGroups,type GroupChange} from "@/lib/training-groups";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-type Order = {journeyShare?:{token:string}} & PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;ntrpLevel?:number;ntrpLabel?:string;
-  operations?:OperationDetails;offerVersions?:OfferVersion[];groupRequest?:GroupRequest; groupQuote?:GroupQuote; groupPlanToken?:string; groupAdviceRequested?:boolean; premiumRequest?:PremiumRequest; offerRevision?:{reason:string;at:string}; departureCode:string; numPeople:number;numCompanions?:number;playerRate?:number;companionRate?:number; total:number; deposit:number; paid:number; status:string; payment:string; points:number;activityChecks?:Record<string,boolean>;startedAt?:string;completedAt?:string;feiRating?:number;balancePayment?:string;offer?:{id:string;createdAt:string;acceptedAt?:string;total:number;deposit:number;departureCode:string}};
+type Order = {journeyShare?:{token:string}} & ServiceFields & PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;ntrpLevel?:number;ntrpLabel?:string;
+  operations?:OperationDetails;offerVersions?:OfferVersion[];groupRequest?:GroupRequest; groupQuote?:GroupQuote; groupPlanToken?:string; groupAdviceRequested?:boolean; premiumRequest?:PremiumRequest; offerRevision?:{reason:string;at:string}; departureCode:string; numPeople:number;numCompanions?:number;playerRate?:number;companionRate?:number; total:number; deposit:number; paid:number; status:string; payment:string; points:number;activityChecks?:Record<string,boolean>;startedAt?:string;completedAt?:string;feiRating?:number;balancePayment?:string;offer?:{servicePlanId?:string;id:string;createdAt:string;acceptedAt?:string;total:number;deposit:number;departureCode:string}};
 type Store = {sessions: Record<string,number>; orders:Order[];ledger:PointEntry[];profile?:{name:string;phone:string;email:string};ntrpProfile?:{level:number;label:string;assessedAt:string}};
 
 let queue:Promise<unknown>=Promise.resolve();
@@ -40,7 +41,7 @@ async function postLocal(req:NextRequest){
  if(req.headers.get("origin")!==req.nextUrl.origin)return NextResponse.json({error:"Yêu cầu không hợp lệ"},{status:403});
  const run=async()=>{try{const b=await req.json();
  if(cloudMode()&&(!/^[a-f0-9-]{36}$/.test(currentRoom())||!await roomExists(currentRoom())))return NextResponse.json({error:"Mở link phiên demo do người trình diễn cung cấp."},{status:403});
- const privileged=["demoSelect","demoReset","demoOperate","seedRequestExamples","checkIn","saveOperations","sendOfferVersion","approveGroupQuote","publishGroupPlan","replyPremiumRevision","offer","updateActivity","assignTrainingGroup","resolveGroupChange","pay","start","complete"];
+ const privileged=["publishServicePlan","issueInsurance","handoverKit","demoSelect","demoReset","demoOperate","seedRequestExamples","checkIn","saveOperations","sendOfferVersion","approveGroupQuote","publishGroupPlan","replyPremiumRevision","offer","updateActivity","assignTrainingGroup","resolveGroupChange","pay","start","complete"];
  if((privileged.includes(b.action)||b.source==="test-controls"||b.source==="operations")&&!isAdmin(req))return NextResponse.json({error:"Cần đăng nhập quản trị Demo để thực hiện thao tác này."},{status:403});
  let scope=req.cookies.get("tt-scenario")?.value;
  if(b.action==="demoSelect"||b.action==="demoReset"){
@@ -162,6 +163,39 @@ async function postLocal(req:NextRequest){
  if(t.packageId==="sbu2"&&b.booking.groupRequest!==undefined&&!validGroupRequest(b.booking.groupRequest))return NextResponse.json({error:"Kiểm tra quy mô, 2–3 ngày đi và nhu cầu đoàn"},{status:400});
  if(t.packageId==="sbu3"&&b.booking.premiumRequest!==undefined&&!validPremiumRequest(b.booking.premiumRequest))return NextResponse.json({error:"Kiểm tra ngày mong muốn và nhu cầu Premium"},{status:400});
  let o=s.orders.find(o=>o.key===b.key);if(o&&(o.tourId!==t.id||o.departureCode!==d.code||o.numPeople!==n||JSON.stringify(o.groupRequest)!==JSON.stringify(t.packageId==="sbu2"?b.booking.groupRequest:undefined)||JSON.stringify(o.premiumRequest)!==JSON.stringify(t.packageId==="sbu3"?b.booking.premiumRequest:undefined)||(o.groupAdviceRequested??false)!==(b.booking.groupAdviceRequested===true)||(o.referral?.token??"")!==ref||(o.numCompanions??0)!==companions||o.name!==name.trim()||(o.phone??"")!==(b.booking.phone??"")||(o.email??"")!==(b.booking.email??"")||(o.ntrpLevel??0)!==(t.packageId==="sbu2"?0:(level??0))))return NextResponse.json({error:"Thông tin đã thay đổi. Vui lòng quay lại bước trước rồi xác nhận lại."},{status:409});if(!o){const total=coupleTotal(t.packageId,d.price,n,companions);o={id:randomUUID(),key:b.key,tourId:t.id,name:name.trim(),phone:typeof b.booking.phone==="string"?b.booking.phone.slice(0,30):undefined,email:typeof b.booking.email==="string"?b.booking.email.slice(0,254):undefined,ntrpLevel:t.packageId!=="sbu2"&&level?level:undefined,ntrpLabel:t.packageId!=="sbu2"&&level?getNtrpLevel(level).label:undefined,groupRequest:t.packageId==="sbu2"?b.booking.groupRequest:undefined,premiumRequest:t.packageId==="sbu3"?b.booking.premiumRequest:undefined,groupAdviceRequested:b.booking.groupAdviceRequested===true,departureCode:d.code,numPeople:n,numCompanions:companions,referral,playerRate:d.price,companionRate:companionRate(t.packageId),total,deposit:Math.round(total*(t.packageId==="sbu2"?.5:.3)),paid:0,status:t.packageId==="sbu2"?"Chờ báo giá":t.packageId==="sbu3"?"Chờ xác nhận trong 24 giờ":"Đăng ký chưa hoàn tất · Chờ đặt cọc",payment:"pending",points:0};addRequestEvent(o,"created",t.packageId==="sbu1"?"Đã tạo booking, chờ đặt cọc":"Đã gửi yêu cầu");s.orders.unshift(o);await save(s,scope);}return NextResponse.json({...view(s),order:o});}
+
+ if(["publishServicePlan","issueInsurance","handoverKit","receiveKit"].includes(b.action)){
+ const o=s.orders.find(o=>o.id===b.id);
+ if(!o||tours.find(t=>t.id===o.tourId)?.packageId!=="sbu3")return NextResponse.json({error:"Không tìm thấy chuyến Premium"},{status:404});
+ if(o.completedAt&&b.action!=="receiveKit")return NextResponse.json({error:"Chuyến đã kết thúc"},{status:409});
+ if(b.action==="publishServicePlan"){
+ if(o.paid>0||o.offer?.acceptedAt)return NextResponse.json({error:"Phương án đã chấp thuận hoặc thanh toán; không ghi đè nội dung đã thống nhất"},{status:409});
+ if(b.basePlanId!==(o.servicePlan?.id??null))return NextResponse.json({error:"Nội dung đã thay đổi. Tải lại trước khi gửi"},{status:409});
+ if(!validServicePlan(b.plan))return NextResponse.json({error:"Điền lịch, xác nhận đủ 9 quyền lợi, điều kiện bảo hiểm và cách nhận kit"},{status:400});
+ const p=b.plan;o.servicePlan={id:randomUUID(),publishedAt:new Date().toISOString(),schedule:p.schedule.trim(),rights:p.rights.map((r:{key:string;detail:string})=>({key:r.key,detail:r.detail.trim(),confirmed:true})),insurance:{provider:p.insurance.provider.trim(),coverage:p.insurance.coverage.trim(),limits:p.insurance.limits.trim(),exclusions:p.insurance.exclusions.trim(),contact:p.insurance.contact.trim()},kitContents:p.kitContents.trim(),kitPickup:p.kitPickup.trim()};
+ o.offer=undefined;o.offerRevision=undefined;o.status="Chờ gửi phương án";addRequestEvent(o,"created","Đã xác nhận lịch, 9 quyền lợi, điều kiện bảo hiểm và nhận kit; cần gửi phương án mới");
+ }else{
+ if(!o.servicePlan||!o.offer?.acceptedAt||o.offer.servicePlanId!==o.servicePlan.id)return NextResponse.json({error:"Cần khách chấp thuận phương án có quyền lợi đã xác nhận"},{status:409});
+ if(b.action==="issueInsurance"){
+ if(o.insuranceIssue)return NextResponse.json({error:"Đã ghi nhận cấp bảo hiểm; không ghi đè chứng từ"},{status:409});
+ if(typeof b.reference!=="string"||!b.reference.trim()||b.reference.length>200||!safeDocumentUrl(b.documentUrl))return NextResponse.json({error:"Nhập số chứng nhận và đường dẫn HTTPS hợp lệ"},{status:400});
+ o.insuranceIssue={reference:b.reference.trim(),documentUrl:b.documentUrl,issuedAt:new Date().toISOString(),planId:o.servicePlan.id};addRequestEvent(o,"created","Điều phối đã ghi nhận chứng từ bảo hiểm cho booking");
+ }else{
+ const person=participants(o).find(p=>p.id===b.participant&&p.player);if(!person)return NextResponse.json({error:"Chọn đúng người chơi nhận kit"},{status:400});
+ o.kitHandovers??=[];const entry=o.kitHandovers.find(k=>k.participant===person.id);
+ if(b.action==="handoverKit"){
+ if(o.paid<o.deposit)return NextResponse.json({error:"Cần đủ cọc trước khi bàn giao kit"},{status:409});
+ if(typeof b.recipient!=="string"||!b.recipient.trim()||b.recipient.length>100)return NextResponse.json({error:"Nhập tên người thực tế nhận kit"},{status:400});
+ if(!entry){o.kitHandovers.push({participant:person.id,recipient:b.recipient.trim(),deliveredAt:new Date().toISOString(),planId:o.servicePlan.id});addRequestEvent(o,"created",`Đã bàn giao kit cho ${person.label}`);}
+ }else{
+ if(!entry)return NextResponse.json({error:"Chưa có bàn giao từ điều phối"},{status:409});
+ if(b.self!==true)return NextResponse.json({error:"Chỉ xác nhận cho chính người nhận"},{status:400});
+ if(!entry.receivedAt){entry.receivedAt=new Date().toISOString();addRequestEvent(o,"created",`${person.label} đã xác nhận nhận kit`);}
+ }
+ }
+ }
+ await save(s,scope);return NextResponse.json(view(s));
+ }
  if(b.action==="saveOperations"||b.action==="sendOfferVersion"){
  if(b.source!=="operations")return NextResponse.json({error:"Mở công cụ vận hành cục bộ để cập nhật"},{status:403});
  const o=s.orders.find(o=>o.id===b.id);if(!o)return NextResponse.json({error:"Không tìm thấy yêu cầu"},{status:404});
@@ -175,7 +209,8 @@ async function postLocal(req:NextRequest){
  if(!Number.isSafeInteger(b.total)||b.total<=0||b.total>10000000000||![b.program,b.included,b.extras,b.pending,b.changeNote].every(v=>typeof v==="string"&&v.trim().length>0&&v.length<=2000))return NextResponse.json({error:"Điền đầy đủ nội dung, lý do thay đổi và tổng giá hợp lệ"},{status:400});
  const pkg=tours.find(t=>t.id===o.tourId)?.packageId;if(pkg==="sbu1")return NextResponse.json({error:"Leisure không dùng luồng báo giá"},{status:409});
  if(pkg==="sbu2"&&(!o.groupQuote||b.total!==o.groupQuote.fixed+o.groupQuote.perPerson*o.numPeople))return NextResponse.json({error:"Giá đoàn phải khớp bảng chi phí đã duyệt"},{status:409});
- o.offerVersions??=[];const v:OfferVersion={id:randomUUID(),version:o.offerVersions.length+1,createdAt:new Date().toISOString(),total:b.total,deposit:Math.round(b.total*(pkg==="sbu2"?.5:.3)),departureCode:o.departureCode,program:b.program.trim(),included:b.included.trim(),extras:b.extras.trim(),pending:b.pending.trim(),changeNote:b.changeNote.trim()};o.offerVersions.push(v);o.offer={id:v.id,createdAt:v.createdAt,total:v.total,deposit:v.deposit,departureCode:v.departureCode};o.total=v.total;o.deposit=v.deposit;o.offerRevision=undefined;o.status="Phương án sẵn sàng";addRequestEvent(o,"offered",`Đã gửi phương án phiên bản ${v.version}`);
+ if(pkg==="sbu3"&&!o.servicePlan)return NextResponse.json({error:"Xác nhận lịch, quyền lợi, bảo hiểm và kit trước khi gửi phương án"},{status:409});
+ o.offerVersions??=[];const v:OfferVersion={id:randomUUID(),version:o.offerVersions.length+1,servicePlan:o.servicePlan,createdAt:new Date().toISOString(),total:b.total,deposit:Math.round(b.total*(pkg==="sbu2"?.5:.3)),departureCode:o.departureCode,program:b.program.trim(),included:b.included.trim(),extras:b.extras.trim(),pending:b.pending.trim(),changeNote:b.changeNote.trim()};o.offerVersions.push(v);o.offer={servicePlanId:o.servicePlan?.id,id:v.id,createdAt:v.createdAt,total:v.total,deposit:v.deposit,departureCode:v.departureCode};o.total=v.total;o.deposit=v.deposit;o.offerRevision=undefined;o.status="Phương án sẵn sàng";addRequestEvent(o,"offered",`Đã gửi phương án phiên bản ${v.version}`);
  }
  await save(s,scope);return NextResponse.json(view(s));
  }
@@ -196,7 +231,7 @@ async function postLocal(req:NextRequest){
  if(b.action==="replyPremiumRevision"){
  if(b.source!=="test-controls")return NextResponse.json({error:"Chỉ dùng trong điều khiển thử nghiệm"},{status:403});
  const o=s.orders.find(o=>o.id===b.id);if(!o||!o.offerRevision||o.offer?.acceptedAt||o.paid>0)return NextResponse.json({error:"Không có điều chỉnh đang chờ"},{status:409});
- o.offerRevision=undefined;o.offer={id:randomUUID(),createdAt:new Date().toISOString(),total:o.total,deposit:o.deposit,departureCode:o.departureCode};o.status="Phương án sẵn sàng";addRequestEvent(o,"offered","Mô phỏng phản hồi: giữ lịch và giá cơ bản; dịch vụ riêng chưa xác nhận");await save(s,scope);return NextResponse.json(view(s));
+ o.offerRevision=undefined;o.offer={servicePlanId:o.servicePlan?.id,id:randomUUID(),createdAt:new Date().toISOString(),total:o.total,deposit:o.deposit,departureCode:o.departureCode};o.status="Phương án sẵn sàng";addRequestEvent(o,"offered","Mô phỏng phản hồi: giữ lịch và giá cơ bản; dịch vụ riêng chưa xác nhận");await save(s,scope);return NextResponse.json(view(s));
  }
  if(b.action==="revisePremiumOffer"){
  const o=s.orders.find(o=>o.id===b.id);if(!o)return NextResponse.json({error:"Không tìm thấy chuyến"},{status:404});
@@ -210,10 +245,12 @@ async function postLocal(req:NextRequest){
   const t=tours.find(t=>t.id===o.tourId);if(!t||t.packageId==="sbu1")return NextResponse.json({error:"Gói này không cần phương án riêng"},{status:409});
   if(b.action==="offer"){
    if(t.packageId==="sbu2"&&!o.groupQuote)return NextResponse.json({error:"Chờ nhân viên duyệt chi phí đoàn trước khi lập báo giá"},{status:409});
-   if(!o.offer){o.offer={id:randomUUID(),createdAt:new Date().toISOString(),total:o.total,deposit:o.deposit,departureCode:o.departureCode};o.status=t.packageId==="sbu2"?"Báo giá sẵn sàng":"Phương án sẵn sàng";addRequestEvent(o,"offered",o.status);}
+   if(t.packageId==="sbu3"&&!o.servicePlan)return NextResponse.json({error:"Mở Điều phối chuyến đi (/operations), xác nhận lịch, quyền lợi, bảo hiểm và kit trước khi gửi phương án"},{status:409});
+   if(!o.offer){o.offer={servicePlanId:o.servicePlan?.id,id:randomUUID(),createdAt:new Date().toISOString(),total:o.total,deposit:o.deposit,departureCode:o.departureCode};o.status=t.packageId==="sbu2"?"Báo giá sẵn sàng":"Phương án sẵn sàng";addRequestEvent(o,"offered",o.status);}
   }else{
    if(o.offerRevision)return NextResponse.json({error:"Đang chờ phản hồi điều chỉnh; chưa thể chấp thuận"},{status:409});
    if(!o.offer||b.offerId!==o.offer.id)return NextResponse.json({error:"Vui lòng xem lại phương án hiện tại trước khi chấp thuận"},{status:409});
+   if(t.packageId==="sbu3"&&(!o.servicePlan||o.offer.servicePlanId!==o.servicePlan.id||b.planId!==o.servicePlan.id))return NextResponse.json({error:"Xem và xác nhận lịch, quyền lợi, bảo hiểm và kit của phương án mới nhất"},{status:409});
    if(!o.offer.acceptedAt){o.offer.acceptedAt=new Date().toISOString();o.status="Đăng ký chưa hoàn tất · Chờ đặt cọc";addRequestEvent(o,"accepted","Đã chấp thuận phương án/báo giá");}
   }
   await save(s,scope);return NextResponse.json(view(s));

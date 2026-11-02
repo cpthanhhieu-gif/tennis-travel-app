@@ -1,0 +1,13 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
+const result={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/request-flow.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,{exports:result,Intl,Date});
+const base={paid:0,deposit:15840000,total:52800000,payment:'pending',numPeople:2,history:[{key:'created',at:'2026-11-02T08:00:00Z'}]};
+const next=o=>result.nextRequestAction({...base,...o},'sbu3');
+assert.equal(next({}).title,'Đang chờ xác nhận chuyến đi');assert.ok(next({}).body.includes('3/11/2026'));assert.equal(next({}).tab,undefined);
+assert.equal(next({offer:{}}).tab,'payment');assert.equal(next({offer:{}}).title,'Xem phương án cho 2 người');
+assert.equal(next({offer:{acceptedAt:'now'}}).label,'Tiếp tục thanh toán cọc');
+assert.equal(next({payment:'awaiting_confirmation'}).title,'Chờ xác nhận nhận cọc');
+assert.equal(next({issue:{type:'needsInfo',reason:'Cần giờ đến'}}).body,'Cần giờ đến');
+assert.equal(next({offer:{},offerRevision:{reason:'Đổi phòng'}}).title,'Đang chờ điều chỉnh phương án');
+assert.equal(result.nextRequestAction(base,'sbu2').title,'Đang chờ báo giá đoàn');
+assert.ok(!next({paid:base.deposit,payment:'success'}).title.includes('cọc'));
+console.log('PASS: waiting, deadline, offer navigation, deposit, confirmation, missing info, revision, group and paid states');

@@ -1,6 +1,6 @@
 export type RequestEvent={key:string;label:string;at:string};
 export type RequestIssue={type:"needsInfo"|"unavailable";reason:string;response?:string;respondedAt?:string};
-type RequestState={paid:number;deposit:number;total:number;payment:string;balancePayment?:string;startedAt?:string;completedAt?:string;feiRating?:number;offer?:{acceptedAt?:string};issue?:RequestIssue};
+type RequestState={paid:number;deposit:number;total:number;payment:string;balancePayment?:string;startedAt?:string;completedAt?:string;feiRating?:number;offer?:{acceptedAt?:string};issue?:RequestIssue;history?:RequestEvent[];numPeople?:number;offerRevision?:{reason:string}};
 export function requestBlocked(o:{issue?:RequestIssue}){return !!o.issue&&(o.issue.type==="unavailable"||!o.issue.response);}
 export function addRequestEvent(o:{history?:RequestEvent[]},key:string,label:string){o.history??=[];if(!o.history.some(e=>e.key===key))o.history.push({key,label,at:new Date().toISOString()});}
 export function balanceReminder(o:{paid:number;total:number;startedAt?:string;completedAt?:string}, departureDate?:string, now=new Date()){
@@ -14,16 +14,19 @@ export function balanceReminder(o:{paid:number;total:number;startedAt?:string;co
  const deadline=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Ho_Chi_Minh",year:"numeric",month:"2-digit",day:"2-digit"}).format(due);
  return today>deadline?`Đã quá hạn thanh toán ${date}. Vui lòng liên hệ tư vấn viên.`:`Hạn thanh toán phần còn lại: ${date} (D-15).`;
 }
-export function nextRequestAction(o:RequestState,packageId?:string,departureDate?:string){
+export function nextRequestAction(o:RequestState,packageId?:string,departureDate?:string):{title:string;body:string;tab?:string;label?:string}{
  if(o.issue?.type==="unavailable")return {title:"Chọn lịch hoặc gói khác",body:o.issue.reason};
  if(requestBlocked(o))return {title:"Bổ sung thông tin yêu cầu",body:o.issue!.reason};
  if(o.completedAt)return {title:"Xem đánh giá và thẻ thành tích",body:"Hành trình đã hoàn thành. Bạn có thể xem lại thông tin bên dưới."};
  if(o.startedAt)return {title:o.paid<o.total?"Hoàn tất thanh toán còn lại":"Mở Tour Live",body:"Xem lịch và các hoạt động của chuyến đang đi."};
  if(o.paid>=o.deposit)return {title:o.paid<o.total?balanceReminder(o,departureDate):"Xem lịch trình và chuẩn bị",body:o.balancePayment==="failed"?"Thanh toán còn lại thất bại. Thử lại bên dưới; khoản cọc đã ghi nhận được giữ nguyên.":o.balancePayment==="cancelled"?"Đã hủy thanh toán còn lại. Có thể tiếp tục khi sẵn sàng.":"Chuyến đã được xác nhận. Checklist chuẩn bị được giữ theo booking."};
- if(o.payment==="awaiting_confirmation")return {title:"Chờ xác nhận cọc",body:"Đã ghi nhận bạn báo chuyển cọc. Điều phối sẽ xác nhận sau khi kiểm tra nhận tiền."};
- if(packageId==="sbu1"||o.offer?.acceptedAt||o.payment!=="pending")return {title:"Hoàn tất đặt cọc",body:o.payment==="failed"?"Lần thanh toán trước thất bại. Có thể thử lại, booking vẫn được giữ.":o.payment==="cancelled"?"Bạn đã hủy thanh toán. Tiếp tục đặt cọc khi sẵn sàng.":"Kiểm tra số tiền cọc trước khi tiếp tục."};
- if(o.offer)return {title:"Xem và chấp thuận phương án/báo giá",body:"Kiểm tra lịch, số khách, tổng giá và tiền cọc bên dưới."};
- return {title:"Xem bước xử lý bên dưới",body:o.issue?.response?"Đã nhận thông tin bổ sung. Tiếp tục xem phương án theo lịch và giá đã chọn.":packageId==="sbu2"?"Yêu cầu báo giá đoàn được phản hồi trong 1 ngày làm việc.":"Yêu cầu Premium được xác nhận trong tối đa 24 giờ."};
+ if(o.payment==="awaiting_confirmation")return {title:"Chờ xác nhận nhận cọc",body:"Bạn đã báo chuyển cọc. Điều hành đang đối chiếu tiền; đăng ký chỉ hoàn tất sau khi xác nhận đã nhận cọc. Bạn chưa cần thao tác thêm."};
+ if(packageId==="sbu1"||o.offer?.acceptedAt||o.payment!=="pending")return {title:"Thanh toán cọc để hoàn tất đăng ký",tab:"payment",label:"Tiếp tục thanh toán cọc",body:o.payment==="failed"?"Lần thanh toán trước thất bại. Có thể thử lại, booking vẫn được giữ.":o.payment==="cancelled"?"Bạn đã hủy thanh toán. Tiếp tục đặt cọc khi sẵn sàng.":"Kiểm tra số tiền cọc trước khi tiếp tục."};
+ if(o.offerRevision)return {title:"Đang chờ điều chỉnh phương án",body:"Vietravel đang xử lý đề nghị điều chỉnh của bạn. Bạn chưa cần thanh toán hoặc chấp thuận phương án cũ."};
+ if(o.offer)return {title:packageId==="sbu2"?"Xem báo giá đoàn":`Xem phương án cho ${o.numPeople??2} người`,body:"Kiểm tra lịch cho người chơi và người đi cùng, phòng chung, dịch vụ, phụ thu, tổng giá và tiền cọc trước khi chấp thuận.",tab:"payment",label:packageId==="sbu2"?"Xem và chấp thuận báo giá":"Xem và chấp thuận phương án"};
+ const created=o.history?.find(e=>e.key==="created")?.at;
+ const due=created&&Number.isFinite(Date.parse(created))&&packageId==="sbu3"?new Date(Date.parse(created)+86400000).toLocaleString("vi-VN",{timeZone:"Asia/Ho_Chi_Minh"}):null;
+ return {title:o.issue?.response?"Đã nhận bổ sung · Đang chờ phản hồi":packageId==="sbu2"?"Đang chờ báo giá đoàn":"Đang chờ xác nhận chuyến đi",body:(packageId==="sbu2"?"Vietravel đang kiểm tra nhu cầu và chi phí đoàn. Phản hồi trong 1 ngày làm việc.":"Vietravel đang kiểm tra sân, HLV/đại sứ và phòng cho chuyến đi. Phản hồi trong tối đa 24 giờ.")+(due?` Hạn phản hồi: ${due} (giờ Việt Nam).`:"")+" Bạn chưa cần thanh toán lúc này. Phương án sẽ xuất hiện tại đây khi điều hành gửi."};
 }
 export const requestExamples=[
  {packageId:"sbu3",type:"needsInfo" as const,name:"Premium · gia đình",people:3,reason:"Cần giờ đến dự kiến và lựa chọn phòng đôi/twin để sắp xếp đón đoàn theo gói."},

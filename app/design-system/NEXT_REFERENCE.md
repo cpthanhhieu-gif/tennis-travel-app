@@ -21,4 +21,6 @@ Nguồn: 19 ảnh JPG người dùng cung cấp ngày 03/11/2026. Đây là bộ
 
 ## Bảo toàn Classic
 
+Next không sử dụng xanh lá: màu nền Classic `#E7EFDC` được ánh xạ qua `--ds-subtle` sang xanh dương nhạt `#D9F1FF`. Success, badge hoàn thành, biểu đồ và các utility green hiện có cũng dùng thang xanh dương trong Next; giữ nguyên nhãn và dấu check để phân biệt ý nghĩa. Quy tắc này áp dụng cho màu UI, không đổi màu ảnh chụp du lịch.
+
 Không sửa `classic.css`, không đổi `DEFAULT_DESIGN_THEME` khỏi `classic`. Thử Next bằng cookie ở `/design-preview`; chọn Classic để khôi phục. Chưa thay toàn bộ cấu trúc bố cục, ảnh, icon hoặc mọi cỡ chữ riêng lẻ của màn cũ. Những thay đổi cấu trúc sau này phải được scope hoặc có nhánh Classic riêng.

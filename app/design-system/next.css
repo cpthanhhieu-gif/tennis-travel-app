@@ -5,7 +5,16 @@
   --ds-ink:#191919; --ds-muted:#62676f; --ds-canvas:#f4f7ff; --ds-surface:#fff;
   --ds-subtle:#d9f1ff; --ds-border:#e0e3e8; --ds-input-border:#a2a8b1;
   --ds-accent:#d9f1ff; --ds-accent-hover:#c5e8ff;
-  --ds-success:#197342; --ds-success-soft:#e9f7ef;
+  /* Success keeps its label/check icon, but follows the blue-only palette. */
+  --ds-success:#1046c8; --ds-success-soft:#e9f0ff;
+  --ds-palette-e3f1e8:#e9f0ff; --ds-palette-155e38:#0a389f;
+  --ds-palette-10b981:#1046c8; --ds-palette-16a34a:#1046c8;
+  --ds-palette-f0fdf4:#f4f7ff;
+  /* Existing Tailwind green utilities resolve to blue in Next only. */
+  --color-green-50:#f4f7ff; --color-green-100:#e9f0ff;
+  --color-green-200:#c5daff; --color-green-500:#1046c8;
+  --color-green-600:#1046c8; --color-green-700:#0a389f;
+  --color-green-800:#082c7d;
   --ds-warning:#855300; --ds-warning-soft:#fff5dc;
   --ds-danger:#b91c1c; --ds-danger-soft:#fff0ee;
   --ds-font:"Segoe UI",Arial,sans-serif;

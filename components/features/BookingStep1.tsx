@@ -48,7 +48,7 @@ export default function BookingStep1({ onNext }: Props) {
   const [scheduleCode, setScheduleCode] = useState(booking.departureCode || firstSchedule.code);
 
   useEffect(() => {
-    if(restoredDraft)return;
+    if(restoredDraft&&!["departure","players"].some(key=>new URLSearchParams(window.location.search).has(key)))return;
     const params = new URLSearchParams(window.location.search);
     const packageId = params.get("package");
     const destinationId = params.get("destination");
@@ -59,6 +59,8 @@ export default function BookingStep1({ onNext }: Props) {
     if (!linkedTour || (!packageId && !destinationId)) return;
     const linkedSchedule = linkedTour.departureSchedules.find(s => s.code === params.get("departure")) ?? linkedTour.departureSchedules[0];
     if(packageId==="sbu3"&&params.get("couple")==="1"){setPeople(2);setCompanions(1);}
+    const requestedPlayers=Number(params.get("players")),requestedCompanions=Number(params.get("companions"));
+    if(params.has("players")&&Number.isInteger(requestedPlayers)&&requestedPlayers>=1&&Number.isInteger(requestedCompanions)&&requestedCompanions>=0&&requestedPlayers+requestedCompanions<=packageCapacity(linkedTour.packageId)){setPeople(requestedPlayers+requestedCompanions);setCompanions(requestedCompanions);}
     setPkgFilter(packageId ?? "all");
     setDestFilter(destinationId ?? "all");
     updateBooking({tourId:linkedTour.id,packageId:linkedTour.packageId,destination:linkedTour.destinationId,departureCode:linkedSchedule.code,departureDate:linkedSchedule.date,numCompanions:companions,totalPrice:coupleTotal(linkedTour.packageId,linkedSchedule.price,people,companions)});
@@ -73,6 +75,8 @@ export default function BookingStep1({ onNext }: Props) {
 
   const handleSelectTour = (tour: Tour) => {
     updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions)});
+    const limit=packageCapacity(tour.packageId);
+    if(people>limit){const nextCompanions=Math.min(companions,limit-1);setCompanions(nextCompanions);setPeople(limit);}
     setSelectedTourId(tour.id);
     setScheduleCode(tour.departureSchedules[0].code);
     setChangeTour(false);
@@ -126,11 +130,11 @@ export default function BookingStep1({ onNext }: Props) {
       </fieldset>
       {selectedTour.packageId==="sbu2"&&<><GroupRequestFields showErrors={groupError}/></>}
       {selectedTour.packageId!=="sbu2"&&<section className="mb-[3.2rem]" aria-labelledby="couple-heading">
-        <h3 id="couple-heading" className="text-[2rem] font-bold">Ai cùng tham gia?</h3>
+        <h3 id="couple-heading" className="text-[2rem] font-bold">Ai cùng tham gia?</h3><p>Bạn có thể đăng ký cho nhiều người. Nhập số người chơi tennis và người đi cùng thực tế; tổng khách bao gồm cả hai nhóm.</p>
         <div className="ds-summary-row"><label htmlFor="num-players">Người chơi tennis</label><input id="num-players" type="number" min={1} max={maxPeople-companions} value={people-companions} className="border p-[1.2rem] w-[9rem] text-[1.6rem]" onChange={event=>setPeople(Math.max(1,Math.min(maxPeople-companions,parseInt(event.target.value)||1))+companions)}/></div>
         <p className="text-[1.4rem]">Giá người chơi: {selectedSchedule.price.toLocaleString("vi-VN")}đ/người.</p>
         <div className="ds-summary-row"><label htmlFor="num-companions">Người đi cùng không chơi</label><input id="num-companions" type="number" min={0} max={Math.max(0,maxPeople-(people-companions))} value={companions} className="border p-[1.2rem] w-[9rem] text-[1.6rem]" onChange={event=>{const players=people-companions;const next=Math.max(0,Math.min(Math.max(0,maxPeople-players),parseInt(event.target.value)||0));setCompanions(next);setPeople(players+next);}}/></div>
-        <p className="text-[1.4rem]">Couple Mode: {companionRate(selectedTour.packageId).toLocaleString("vi-VN")}đ/người, chung phòng. Không bao gồm sân và HLV; không cần NTRP cho người đi cùng.</p>
+        <p className="text-[1.4rem]">Giá người đi cùng: {companionRate(selectedTour.packageId).toLocaleString("vi-VN")}đ/người, chung phòng. Không bao gồm sân và HLV; không cần NTRP cho người đi cùng.</p>
         <details className="booking-companion-details"><summary>Hoạt động & điều kiện người đi cùng</summary><p className="text-[1.4rem]">{selectedTour.packageId==="sbu3"?"Nghỉ dưỡng, spa, ẩm thực và tham quan theo phương án; có thể cùng cooking class, gala và cổ vũ Ace Cup.":"Nghỉ dưỡng, ẩm thực và tham quan theo phương án. Spa và hoạt động cụ thể cần xác nhận theo chuyến."} Hoạt động tùy chọn và phụ thu phòng được báo giá riêng.</p></details>
         <p className="mt-[1.6rem]">Tổng: {people} khách · {people-companions} người chơi + {companions} người đi cùng (tối đa {maxPeople}). Cần ít nhất một người chơi.</p>
       </section>}

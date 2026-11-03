@@ -362,6 +362,18 @@ export const destinations: Destination[] = [
   },
 ];
 
+// Additional demonstration departures retain each package's departure weekday and duration.
+for (const destination of destinations) {
+  const first = destination.departureSchedules[0];
+  for (let offset = 2; offset < 6; offset++) {
+    const date = new Date(`${first.date}T00:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + offset * 14);
+    const iso = date.toISOString().slice(0,10);
+    const [year,month,day] = iso.split("-");
+    destination.departureSchedules.push({date:iso,dateLabel:`${day}/${month}/${year}`,dayOfWeek:first.dayOfWeek,price:first.price,code:`${destination.tourCode}-${day}${month}${year.slice(2)}`});
+  }
+}
+
 export type TourBadge = "Phổ biến" | "Còn ít chỗ" | "Mới" | "Hot";
 
 export interface Tour {

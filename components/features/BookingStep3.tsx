@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import {validBookingParticipants,type BookingParticipant} from "@/lib/booking-participants";
 import PremiumRequestFields from "./PremiumRequestFields";
 import {validPremiumRequest} from "@/lib/premium-request";
 import Button from "@/components/ui/Button";
@@ -48,6 +49,10 @@ export default function BookingStep3({ onNext }: Props) {
       ? "" : "Vui lòng nhập email đúng định dạng.",
   };
 
+  const participants:BookingParticipant[]=Array.from({length:booking.numPeople},(_,i)=>({name:booking.participants?.[i]?.name??"",roomPreference:booking.participants?.[i]?.roomPreference??"",role:i<booking.numPeople-booking.numCompanions?"player":"companion"}));
+  if(booking.contactParticipates&&participants[0])participants[0]={...participants[0],name:name.trim()};
+  const participantsValid=validBookingParticipants(participants,booking.numPeople,booking.numCompanions);
+  const changeParticipant=(index:number,patch:Partial<BookingParticipant>)=>updateBooking({participants:participants.map((p,i)=>i===index?{...p,...patch}:p)});
   const handleNext = () => {
     setSubmitted(true);
     const invalidField = (["name", "phone", "email"] as const).find(key => errors[key]);
@@ -55,18 +60,19 @@ export default function BookingStep3({ onNext }: Props) {
       document.getElementById(invalidField)?.focus();
       return;
     }
+    if(booking.packageId!=="sbu2"&&!participantsValid){document.getElementById("participant-errors")?.focus();return;}
     if(booking.packageId==="sbu3") {const request=booking.premiumRequest??{desiredDate:booking.departureDate,flexibility:"Đúng ngày",priority:"Nghỉ dưỡng",services:[]};if(!validPremiumRequest(request)){requestAnimationFrame(()=>document.getElementById("premium-date-error")?.focus());return;}updateBooking({premiumRequest:request});}
-    updateBooking({ name: name.trim(), phone: cleanPhone, email: email.trim(), notes });
+    updateBooking({ name: name.trim(), phone: cleanPhone, email: email.trim(), notes, participants });
     onNext();
   };
 
   return (
     <form className="booking-contact" noValidate onSubmit={(event) => { event.preventDefault(); handleNext(); }}>
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.8rem]">
-        {booking.packageId === "sbu2" ? "Liên hệ đại diện đoàn" : "Thông tin cá nhân"}
+        {booking.packageId === "sbu2" ? "Liên hệ đại diện đoàn" : "Người đăng ký / liên hệ"}
       </h2>
       <p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">
-        {booking.packageId === "sbu2" ? "Cung cấp liên hệ đại diện để nhận báo giá; hồ sơ từng thành viên được bổ sung sau." : "Thông tin để chúng tôi liên hệ xác nhận tour của bạn"}
+        {booking.packageId === "sbu2" ? "Cung cấp liên hệ đại diện để nhận báo giá; hồ sơ từng thành viên được bổ sung sau." : "Người liên hệ có thể đặt giúp và không tham gia chuyến đi. Số khách chỉ tính theo danh sách người tham gia."}
       </p>
 
       {autoFilled&&<p role="status">Đã tự điền thông tin từ hồ sơ. Bạn kiểm tra lại và bổ sung các mục còn thiếu trước khi tiếp tục.</p>}
@@ -124,6 +130,7 @@ export default function BookingStep3({ onNext }: Props) {
         </div>
       </div>
 
+      {booking.packageId!=="sbu2"&&<section className="ds-section"><h2>Người tham gia ({booking.numPeople} khách)</h2><label className="group-advice-choice"><input type="checkbox" checked={booking.contactParticipates??false} onChange={e=>updateBooking({contactParticipates:e.target.checked})}/>Tôi cũng tham gia chuyến đi (dùng thông tin người liên hệ cho khách đầu tiên)</label><p>Vai trò tương ứng số người chơi và người đi cùng đã chọn. Muốn đổi cơ cấu, quay lại bước chọn gói. Nhu cầu phòng được tư vấn riêng, không tự chia phòng theo số cặp.</p>{participants.map((person,i)=><fieldset key={i} className="ds-section"><legend>Khách {i+1} · {person.role==="player"?"Người chơi tennis":"Người đi cùng không chơi"}</legend><Input id={`participant-${i}`} label="Họ và tên người tham gia" required maxLength={100} value={person.name} disabled={i===0&&booking.contactParticipates} onChange={e=>changeParticipant(i,{name:e.target.value})}/><Input label="Nhu cầu phòng / muốn ở cùng ai (tùy chọn)" maxLength={200} value={person.roomPreference} onChange={e=>changeParticipant(i,{roomPreference:e.target.value})}/></fieldset>)}{submitted&&!participantsValid&&<p id="participant-errors" tabIndex={-1} role="alert">Điền họ tên cho đủ {booking.numPeople} người tham gia. Người liên hệ không đi không được tính vào số khách.</p>}</section>}
       {booking.packageId==="sbu3"&&<><PremiumRequestFields/>{submitted&&booking.premiumRequest&&!validPremiumRequest(booking.premiumRequest)&&<p id="premium-date-error" tabIndex={-1} role="alert">Kiểm tra ngày mong muốn và lựa chọn Premium.</p>}</>}
       <div className="booking-step-action"><p>Kiểm tra thông tin và giá trước khi gửi.</p><Button
         variant="primary"

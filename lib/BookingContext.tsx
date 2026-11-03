@@ -8,7 +8,10 @@ import {browserStorageKey} from "./demo-scope";
 import {coupleTotal} from "./couple-pricing";
 import { getNtrpLevel, tours } from "@/lib/mock-data";
 
+import type {BookingParticipant} from "./booking-participants";
 export interface BookingState {
+  participants?:BookingParticipant[];
+  contactParticipates?:boolean;
   submissionKey?: string;
   referralToken?: string;
   tourId: string;          // ví dụ "dn-sbu1"
@@ -98,7 +101,9 @@ export function BookingProvider({ children }: { children: ReactNode }) {
         if(Number.isInteger(saved.step)&&saved.step>=1&&saved.step<=4)setStep(t.packageId==="sbu2"&&saved.step===2?3:saved.step);
         setRestoredDraft(true);
       }
-    }}catch{/* A malformed or unavailable draft does not block booking. */}setHydrated(true);
+    }const explicitDeparture=params.get("departure");
+    if(explicitDeparture){const t=tours.find(t=>t.packageId===params.get("package"));const d=t?.departureSchedules.find(d=>d.code===explicitDeparture);if(t&&d){setBooking(prev=>({...prev,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,totalPrice:coupleTotal(t.packageId,d.price,prev.numPeople,prev.numCompanions)}));setStep(1);}}
+    }catch{/* A malformed or unavailable draft does not block booking. */}setHydrated(true);
   },[]);
   useEffect(()=>{if(!hydrated)return;try{const {notes,...safeBooking}=booking;sessionStorage.setItem(draftKey.current,JSON.stringify({version:1,booking:safeBooking,quiz:ntrpQuizState,step}));}catch{/* Booking remains usable if storage is unavailable. */}},[booking,ntrpQuizState,step,hydrated]);
   const updateBooking=useCallback((updates:Partial<BookingState>)=>{

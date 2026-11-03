@@ -39,7 +39,7 @@ export default function BookingStep4({ onConfirm }: Props) {
     { label: "Ngày khởi hành", value: `${selectedSchedule.dayOfWeek}, ${selectedSchedule.dateLabel}` },
     { label: "Số người", value: booking.packageId==="sbu2"&&booking.groupRequest?`${booking.groupRequest.min}–${booking.groupRequest.max} khách dự kiến · ${booking.groupRequest.companions} người đi cùng dự kiến`:`${booking.numPeople-booking.numCompanions} người chơi + ${booking.numCompanions} người đi cùng` },
     ...(booking.groupAdviceRequested ? [{label:"Nhóm chơi",value:"Có nhu cầu tư vấn nhóm phù hợp"}] : []),
-    ...(booking.packageId === "sbu2" ? [] : [{ label: "NTRP", value: booking.ntrpLabel ? `${booking.ntrpLevel} — ${booking.ntrpLabel}` : "Chưa đánh giá" }]),
+    ...(booking.packageId === "sbu2" ? [] : [{ label: "NTRP", value: booking.ntrpLabel ? `${booking.ntrpLevel} — ${booking.ntrpLabel}` : "Bổ sung sau; HLV xác nhận trước khi phân nhóm" }]),
     ...(booking.packageId==="sbu2"?[{label:"Danh sách thành viên",value:"Bổ sung sau khi thống nhất phương án; chưa cần khai đủ khi gửi yêu cầu báo giá."}]:[]),
     ...(booking.packageId!=="sbu2"&&booking.participants?.length?[{label:"Người tham gia",value:booking.participants.map((p,i)=>`${i+1}. ${p.name} (${p.role==="player"?"Chơi tennis":"Đi cùng"})${p.roomPreference?` · Phòng: ${p.roomPreference}`:""}`).join("; ")}]:[]),
     { label: "Người đăng ký / liên hệ", value: booking.name || "Chưa nhập" },

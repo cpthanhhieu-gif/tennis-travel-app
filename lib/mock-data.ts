@@ -236,20 +236,20 @@ export const ntrpQuiz = [
   },
 ];
 
-export const ntrpLevels: Record<string, { label: string; description: string; recommendedSBU: string }> = {
-  "1.0-1.5": { label: "Beginner", description: "Đang học kỹ thuật cơ bản", recommendedSBU: "sbu1" },
-  "2.0-2.5": { label: "Novice", description: "Chơi được nhưng cần cải thiện", recommendedSBU: "sbu1" },
-  "3.0-3.5": { label: "Intermediate", description: "Chơi đều, bắt đầu thi đấu được", recommendedSBU: "sbu2" },
-  "4.0-4.5": { label: "Advanced", description: "Thi đấu club, kỹ thuật tốt", recommendedSBU: "sbu3" },
-  "5.0+": { label: "Expert", description: "Gần chuyên nghiệp", recommendedSBU: "sbu3" },
+export const ntrpLevels: Record<string, { label: string; description: string }> = {
+  "1.0-1.5": { label: "Beginner", description: "Đang học kỹ thuật cơ bản" },
+  "2.0-2.5": { label: "Novice", description: "Chơi được nhưng cần cải thiện" },
+  "3.0-3.5": { label: "Intermediate", description: "Chơi đều, bắt đầu thi đấu được" },
+  "4.0-4.5": { label: "Advanced", description: "Thi đấu club, kỹ thuật tốt" },
+  "5.0+": { label: "Expert", description: "Gần chuyên nghiệp" },
 };
 
-export function getNtrpLevel(avg: number): { level: number; label: string; description: string; recommendedSBU: string } {
-  if (avg <= 1.5) return { level: 1.5, label: "Beginner", description: "Đang học kỹ thuật cơ bản", recommendedSBU: "sbu1" };
-  if (avg <= 2.5) return { level: 2.5, label: "Novice", description: "Chơi được nhưng cần cải thiện", recommendedSBU: "sbu1" };
-  if (avg <= 3.5) return { level: 3.5, label: "Intermediate", description: "Chơi đều, bắt đầu thi đấu được", recommendedSBU: "sbu2" };
-  if (avg <= 4.5) return { level: 4.5, label: "Advanced", description: "Thi đấu club, kỹ thuật tốt", recommendedSBU: "sbu3" };
-  return { level: 5.0, label: "Expert", description: "Gần chuyên nghiệp", recommendedSBU: "sbu3" };
+export function getNtrpLevel(avg: number): { level: number; label: string; description: string } {
+  if (avg <= 1.5) return { level: 1.5, label: "Beginner", description: "Đang học kỹ thuật cơ bản" };
+  if (avg <= 2.5) return { level: 2.5, label: "Novice", description: "Chơi được nhưng cần cải thiện" };
+  if (avg <= 3.5) return { level: 3.5, label: "Intermediate", description: "Chơi đều, bắt đầu thi đấu được" };
+  if (avg <= 4.5) return { level: 4.5, label: "Advanced", description: "Thi đấu club, kỹ thuật tốt" };
+  return { level: 5.0, label: "Expert", description: "Gần chuyên nghiệp" };
 }
 
 export interface Tier {

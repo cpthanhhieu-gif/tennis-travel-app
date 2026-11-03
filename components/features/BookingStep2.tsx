@@ -1,86 +1,48 @@
 "use client";
-import DemoScenarioGuide from "./DemoScenarioGuide";
-import {demoParty,browserScenario} from "@/lib/demo-experience";
-import {coupleTotal} from "@/lib/couple-pricing";
 import {requestErrorMessage} from "@/lib/request-error";
 
 import { useEffect, useState as useLocalState } from "react";
 import Button from "@/components/ui/Button";
-import { Target, CheckCircle2, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useBooking } from "@/lib/BookingContext";
-import { packageCapacity, ntrpQuiz, getNtrpLevel, tourPackages, tours } from "@/lib/mock-data";
+import { ntrpQuiz, getNtrpLevel, tourPackages } from "@/lib/mock-data";
 
 interface Props { onNext: () => void }
 
 export default function BookingStep2({ onNext }: Props) {
-  const { booking, setStep, updateBooking, ntrpQuizState, updateNtrpQuizState } = useBooking();
-  const { answers, showResult, ntrpResult, originalPackageId, packageDecision } = ntrpQuizState;
+  const { booking, updateBooking, ntrpQuizState, updateNtrpQuizState } = useBooking();
+  const { answers, showResult, ntrpResult } = ntrpQuizState;
 
   const [currentQ, setCurrentQ] = useLocalState(0); // index 0–4
   const advancing=false;
 
   const [saved,setSaved]=useLocalState<{level:number;label:string;assessedAt:string}|null>(null);
   const [saving,setSaving]=useLocalState(false),[saveError,setSaveError]=useLocalState("");
-  const [switchTour,setSwitchTour]=useLocalState<string|null>(null),[switchCode,setSwitchCode]=useLocalState("");
+  const [selfConfirmed,setSelfConfirmed]=useLocalState(false);
   useEffect(()=>{fetch("/api/local").then(r=>r.ok?r.json():null).then(d=>setSaved(d?.ntrpProfile??null)).catch(()=>{});},[]);
   const applyResult=(result:ReturnType<typeof getNtrpLevel>)=>{updateNtrpQuizState({ntrpResult:result,showResult:true,packageDecision:null,originalPackageId:booking.packageId});updateBooking({ntrpLevel:result.level,ntrpLabel:result.label});};
   const allAnswered = ntrpQuiz.every((q) => answers[q.id] !== undefined);
 
   const handleCalculate = async () => {
-    if(saving||!allAnswered)return;setSaving(true);setSaveError("");
+    if(saving||!allAnswered||!selfConfirmed)return;setSaving(true);setSaveError("");
     try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"ntrp",answers})});const d=await r.json();if(!r.ok)throw Error(d.error);setSaved(d.ntrpProfile);applyResult(getNtrpLevel(d.ntrpProfile.level));}catch(e){setSaveError(requestErrorMessage(e));}finally{setSaving(false);}
   };
 
-  const handleKeepPackage = () => {
-    updateNtrpQuizState({ packageDecision: false });
-  };
-
-  const handleSwitchPackage = (recommendedId: string, recommendedPkgData: typeof tourPackages[0]) => {
-    const recommendedTour = tours.find((tour) => tour.packageId === recommendedId) ?? tours[0];
-    setSwitchTour(recommendedTour.id);setSwitchCode("");
-  };
-
+  const deferAssessment=()=>{updateBooking({ntrpLevel:0,ntrpLabel:""});updateNtrpQuizState({ntrpResult:null,showResult:false});onNext();};
   if (showResult && ntrpResult) {
-    const recommendedPkg = tourPackages.find((p) => p.id === ntrpResult.recommendedSBU);
-    const selectedPkg = tourPackages.find((p) => p.id === originalPackageId);
-    const hasMismatch = originalPackageId !== "sbu3" && originalPackageId !== ntrpResult.recommendedSBU;
-    const canProceed = !hasMismatch || packageDecision !== null;
-
+    const selectedPkg = tourPackages.find(p=>p.id===booking.packageId);
     return (
       <div className="ntrp-result">
-        <header className="ntrp-result-heading"><span className="ds-eyebrow">HỒ SƠ TENNIS</span><h2>Kết quả NTRP của bạn</h2><p>Kết quả tự đánh giá để tham khảo cách chọn trải nghiệm và ghép nhóm.</p></header>
+        <header className="ntrp-result-heading"><span className="ds-eyebrow">HỒ SƠ TENNIS</span><h2>Kết quả NTRP của người chơi</h2><p>Kết quả tự đánh giá để HLV xác nhận trình độ và tư vấn nhóm chơi.</p></header>
         <section className="ntrp-score-panel" aria-label="Kết quả tự đánh giá">
           <div className="ntrp-score"><span>NTRP</span><strong>{ntrpResult.level.toFixed(1)}</strong></div>
           <div><h3>{ntrpResult.label}</h3><p>{ntrpResult.description}</p><small>Trình độ sẽ được xác nhận riêng theo chuyến.</small></div>
         </section>
         <p className="ntrp-profile-note">Kết quả dành cho người chơi đang khai hồ sơ. Người đi cùng không chơi tennis không cần đánh giá NTRP.</p>
-        <section className="ntrp-recommendation"><h3>Tham gia {selectedPkg?.name}</h3><p>{originalPackageId==="sbu1"?"Bạn có thể tiếp tục đăng ký Leisure. HLV sẽ xác nhận trình độ và điều phối nhóm trong buổi đầu theo phương án chuyến đi.":"Kết quả này giúp điều phối xem xét nhóm phù hợp trong gói bạn chọn. Khả năng tham gia và nhóm tập cần xác nhận theo chuyến."}</p><p>Chưa có nhóm chơi được xác nhận cho lịch đang chọn.</p><label className="group-advice-choice"><input type="checkbox" checked={booking.groupAdviceRequested===true} onChange={e=>updateBooking({groupAdviceRequested:e.target.checked})}/><span>Nhờ tư vấn nhóm chơi phù hợp<small>Nhu cầu được gửi cùng yêu cầu đặt chuyến khi bạn hoàn tất bước xác nhận.</small></span></label></section>
-        {recommendedPkg&&<section className="ntrp-recommendation" aria-labelledby="ntrp-recommendation-title">
-          <div className="ntrp-section-label"><Target size={20} aria-hidden="true"/><span>Lựa chọn tham khảo khác</span></div>
-          <h3 id="ntrp-recommendation-title">{recommendedPkg.name}</h3><p>{recommendedPkg.tagline}</p>
-          {hasMismatch&&packageDecision===null&&<>
-            <div className="ntrp-current-choice"><span>Gói bạn đang chọn</span><strong>{selectedPkg?.name}</strong></div>
-            <p className="ntrp-decision-help">Bạn có thể giữ gói hiện tại hoặc xem lịch và giá của gói gợi ý trước khi quyết định đổi.</p>
-            <div className="ntrp-decision-actions">
-              <Button variant="primary" size="md" onClick={handleKeepPackage}>Giữ gói hiện tại</Button>
-              <Button variant="secondary" size="md" aria-expanded={!!switchTour} onClick={()=>handleSwitchPackage(ntrpResult.recommendedSBU,recommendedPkg)}>Xem lịch &amp; giá gói gợi ý</Button>
-            </div>
-          </>}
-        </section>}
-        {switchTour&&packageDecision===null&&(()=>{const t=tours.find(t=>t.id===switchTour)!;const schedule=t.departureSchedules.find(d=>d.code===switchCode);return <section className="ntrp-switch-panel"><h3 className="text-[2rem] font-bold">Lịch và giá gói gợi ý</h3><DemoScenarioGuide packageId={t.packageId}/><label htmlFor="switch-schedule">Lịch khởi hành {t.name}</label><select id="switch-schedule" className="w-full border p-[1.2rem] text-[1.6rem]" value={switchCode} onChange={e=>setSwitchCode(e.target.value)}><option value="">Chọn ngày khởi hành</option>{t.departureSchedules.map(d=><option key={d.code} value={d.code}>{d.dateLabel} · {d.price.toLocaleString("vi-VN")}đ/người</option>)}</select>{schedule&&t.packageId!=="sbu2"&&<p>Gói cơ bản tham khảo: {(coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)).toLocaleString("vi-VN")}đ / {booking.numPeople} người.</p>}{booking.numPeople>packageCapacity(t.packageId)&&<p role="alert">Gói này tối đa {packageCapacity(t.packageId)} khách. Quay lại bước chọn tour để điều chỉnh số người.</p>}<Button disabled={!schedule||booking.numPeople>packageCapacity(t.packageId)} onClick={()=>{if(!schedule||booking.numPeople>packageCapacity(t.packageId))return;updateBooking({tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureDate:schedule.date,departureCode:schedule.code,totalPrice:coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)});updateNtrpQuizState({packageDecision:true});setSwitchTour(null);if(t.packageId==="sbu2"){const party=demoParty(browserScenario(),t.packageId);updateBooking({...party,participants:undefined,groupRequest:undefined,premiumRequest:undefined});setStep(1);}else onNext();}}>Áp dụng gói & lịch đã chọn</Button></section>;})()}
-        {/* Decision confirmed feedback */}
-        {hasMismatch && packageDecision !== null && (
-          <div className="flex items-center gap-[1rem] bg-success-light border border-success/30 rounded-[var(--ds-radius-card)] p-[1.6rem] mb-[2.4rem]">
-            <CheckCircle2 size={18} className="text-success shrink-0" aria-hidden="true" />
-            <p className="text-[1.4rem] text-success font-medium text-left">
-              {packageDecision
-                ? `Đã đổi sang gói ${recommendedPkg?.name}`
-                : `Giữ nguyên gói ${selectedPkg?.name}`}
-            </p>
-          </div>
-        )}
-
-        {canProceed && <Button variant="primary" size="lg" className="w-full" onClick={onNext}>Tiếp tục — Nhập thông tin</Button>}
+        <section className="ntrp-recommendation"><h3>Tham gia {selectedPkg?.name}</h3><p>{booking.packageId==="sbu1"?"Bạn có thể tiếp tục đăng ký Leisure. HLV sẽ xác nhận trình độ và điều phối nhóm trong buổi đầu theo phương án chuyến đi.":booking.packageId==="sbu2"?"HLV dùng hồ sơ từng thành viên để đề xuất nhóm và nội dung thi đấu; đại diện không dùng một kết quả cho cả đoàn.":"HLV dựa trên mục tiêu và trình độ để đề xuất clinic, nhóm tập và Ace Cup trong phương án Premium; không cần trình độ cao mới được chọn Premium."}</p><p>Chưa có nhóm chơi được xác nhận cho lịch đang chọn.</p><label className="group-advice-choice"><input type="checkbox" checked={booking.groupAdviceRequested===true} onChange={e=>updateBooking({groupAdviceRequested:e.target.checked})}/><span>Nhờ tư vấn nhóm chơi phù hợp<small>Nhu cầu được gửi cùng yêu cầu đặt chuyến khi bạn hoàn tất bước xác nhận.</small></span></label></section>
+        <p>Kết quả không tự đổi gói hoặc xác nhận sẵn nhóm chơi. Nếu muốn đổi trải nghiệm, quay lại bước chọn gói.</p>
+        <Button variant="secondary" onClick={()=>{setCurrentQ(0);updateNtrpQuizState({showResult:false,answers:{}});}}>Đánh giá lại</Button>
+        <Button variant="primary" size="lg" className="w-full" onClick={onNext}>Tiếp tục — Nhập thông tin</Button>
       </div>
     );
   }
@@ -102,10 +64,12 @@ export default function BookingStep2({ onNext }: Props) {
         Đánh giá NTRP của người chơi
       </h2>
       <p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">
-        Người chơi đang khai hồ sơ thực hiện đánh giá; người đi cùng không cần NTRP. Trình độ những người chơi khác được xác nhận riêng theo chuyến.
+        Người chơi đang khai hồ sơ thực hiện đánh giá; người đi cùng không cần NTRP. Kết quả này không áp dụng chung cho những người chơi khác. Nếu đặt giúp hoặc chưa có kết quả, chọn bổ sung sau; HLV xác nhận riêng trước khi phân nhóm.
       </p>
 
-      {saved&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">NTRP đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
+      <label className="group-advice-choice"><input type="checkbox" checked={selfConfirmed} onChange={e=>setSelfConfirmed(e.target.checked)}/>Tôi là người chơi đang khai NTRP cho chính mình, không khai thay người khác.</label>
+      <button type="button" className="ds-link" onClick={deferAssessment}>Đặt giúp / Chưa có kết quả — Bổ sung NTRP sau</button>
+      {saved&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">NTRP đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button disabled={!selfConfirmed} onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
       {saveError&&<p role="alert">{saveError}</p>}
       {/* Progress dots */}
       <div className="flex items-center gap-[0.8rem] mb-[2.8rem]">
@@ -195,7 +159,7 @@ export default function BookingStep2({ onNext }: Props) {
             size="md"
             className="flex-1"
             onClick={handleCalculate}
-            disabled={!allAnswered||saving}
+            disabled={!allAnswered||saving||!selfConfirmed}
           >
             {allAnswered
               ? "Xem kết quả NTRP"

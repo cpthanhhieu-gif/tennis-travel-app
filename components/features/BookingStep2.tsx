@@ -41,8 +41,10 @@ export default function BookingStep2({ onNext }: Props) {
         <p className="ntrp-profile-note">Kết quả dành cho người chơi đang khai hồ sơ. Người đi cùng không chơi tennis không cần đánh giá NTRP.</p>
         <section className="ntrp-recommendation"><h3>Tham gia {selectedPkg?.name}</h3><p>{booking.packageId==="sbu1"?"Bạn có thể tiếp tục đăng ký Leisure. HLV sẽ xác nhận trình độ và điều phối nhóm trong buổi đầu theo phương án chuyến đi.":booking.packageId==="sbu2"?"HLV dùng hồ sơ từng thành viên để đề xuất nhóm và nội dung thi đấu; đại diện không dùng một kết quả cho cả đoàn.":"HLV dựa trên mục tiêu và trình độ để đề xuất clinic, nhóm tập và Ace Cup trong phương án Premium; không cần trình độ cao mới được chọn Premium."}</p><p>Chưa có nhóm chơi được xác nhận cho lịch đang chọn.</p><label className="group-advice-choice"><input type="checkbox" checked={booking.groupAdviceRequested===true} onChange={e=>updateBooking({groupAdviceRequested:e.target.checked})}/><span>Nhờ tư vấn nhóm chơi phù hợp<small>Nhu cầu được gửi cùng yêu cầu đặt chuyến khi bạn hoàn tất bước xác nhận.</small></span></label></section>
         <p>Kết quả không tự đổi gói hoặc xác nhận sẵn nhóm chơi. Nếu muốn đổi trải nghiệm, quay lại bước chọn gói.</p>
-        <Button variant="secondary" onClick={()=>{setCurrentQ(0);updateNtrpQuizState({showResult:false,answers:{}});}}>Đánh giá lại</Button>
-        <Button variant="primary" size="lg" className="w-full" onClick={onNext}>Tiếp tục — Nhập thông tin</Button>
+        <div className="booking-result-actions">
+          <Button variant="primary" size="lg" onClick={onNext}>Tiếp tục — Nhập thông tin</Button>
+          <Button variant="secondary" size="lg" onClick={()=>{setCurrentQ(0);updateNtrpQuizState({showResult:false,answers:{}});}}>Đánh giá lại</Button>
+        </div>
       </div>
     );
   }

@@ -650,3 +650,13 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 /* Explicit parent destination; independent of in-module Back navigation. */
 .travel-parent{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px max(16px,calc((100% - 1184px)/2));font-size:13px;font-weight:600;color:var(--ds-primary);background:var(--ds-surface);border-bottom:1px solid var(--ds-border)}
 .travel-parent:hover{background:var(--ds-subtle)}
+
+/* Booking forms: a single participant card boundary and separated result actions. */
+.booking-contact .booking-participants{padding:16px 0 0;border:0;margin:0;min-width:0}
+.booking-participants>h2{margin:0 0 12px}
+.booking-participants>p{font-size:14px;line-height:1.6;color:var(--ds-muted);margin:12px 0}
+.booking-contact .booking-participant-card{display:grid;gap:16px;min-width:0;margin:16px 0 0;padding:16px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-card)}
+.booking-participant-card>legend{padding:0 6px;font-size:14px;font-weight:600;line-height:1.5}
+.booking-contact .booking-step-action{margin-top:20px}
+.booking-result-actions{display:grid;gap:12px;margin-top:20px}
+.booking-result-actions>button{width:100%;min-height:48px;height:auto;white-space:normal;line-height:1.5}

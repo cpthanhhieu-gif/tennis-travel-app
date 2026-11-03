@@ -1,0 +1,17 @@
+const fs=require("node:fs"),path=require("node:path"),vm=require("node:vm"),assert=require("node:assert/strict"),ts=require("typescript");
+const {renderToStaticMarkup}=require("react-dom/server");
+const file=path.join(__dirname,"../components/features/BookingPriceSummary.tsx");
+const compiled=ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+const mod={exports:{}};
+vm.runInNewContext(compiled,{exports:mod.exports,module:mod,require:id=>id==="@/lib/mock-data"?{formatVND:n=>String(n)}:require(id)});
+const Summary=mod.exports.default;
+const initial={total:206400000,deposit:103200000,paid:0};
+const render=(packageId,patch={})=>renderToStaticMarkup(Summary({packageId,order:{...initial,...patch}}));
+let html=render("sbu2");assert(html.includes("Đang chờ báo giá đoàn"));assert(!html.includes("206400000"));assert(!html.includes("103200000"));
+html=render("sbu3");assert(html.includes("206400000"));assert(html.includes("tham khảo"));assert(!html.includes("103200000"));
+const offer={total:220000000,deposit:110000000};
+html=render("sbu2",{offer});assert(html.includes("220000000"));assert(html.includes("Cọc theo đề xuất"));assert(!html.includes("206400000"));assert(!html.includes("Cọc còn cần thanh toán"));
+html=render("sbu3",{offer,offerRevision:{reason:"Đổi phòng"}});assert(html.includes("Đang chờ điều chỉnh"));assert(!html.includes("220000000"));
+html=render("sbu2",{total:offer.total,deposit:offer.deposit,paid:20000000,offer:{...offer,acceptedAt:"2026-11-03"}});assert(html.includes("Tổng giá đã chấp thuận"));assert(html.includes("90000000"));assert(html.includes("200000000"));
+html=render("sbu1");assert(html.includes("Tổng giá gói đã chọn"));assert(html.includes("Cọc còn cần thanh toán"));
+console.log("PASS: group waiting, Premium estimate, proposed offer, revision, accepted offer and direct booking.");

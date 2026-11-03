@@ -21,7 +21,7 @@ export default function BookingFlow() {
   const { booking,step,setStep,clearDraft } = useBooking();
   useEffect(()=>{window.scrollTo({top:0,behavior:"instant"});},[step]);
   const isGroup = booking.packageId === "sbu2";
-  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : ["Chọn gói tour", "Đánh giá NTRP", "Thông tin", "Xác nhận & đặt cọc"];
+  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : ["Chọn gói tour", "Đánh giá NTRP", "Thông tin", booking.packageId==="sbu3"?"Xem lại yêu cầu":"Xác nhận & đặt cọc"];
   const visibleStep = isGroup && step > 1 ? step - 1 : step;
   const previousStep = isGroup && step === 3 ? 1 : step - 1;
   const router = useRouter();
@@ -119,7 +119,7 @@ export default function BookingFlow() {
         {step === 4 && <BookingStep4 onConfirm={handleNext} />}
       </div>
 
-      {step>1&&<aside className="booking-context-strip"><div><span className="ds-eyebrow">CHUYẾN ĐANG ĐẶT</span><strong>{selectedTour.name}</strong><p>{selectedSchedule.dateLabel} · {booking.numPeople} khách</p></div><div><span>Tổng dự kiến</span><strong>{coupleTotal(booking.packageId,selectedSchedule.price,booking.numPeople,booking.numCompanions).toLocaleString("vi-VN")} ₫</strong></div></aside>}</div>
+      {step>1&&<aside className="booking-context-strip"><div><span className="ds-eyebrow">CHUYẾN ĐANG ĐẶT</span><strong>{selectedTour.name}</strong><p>{selectedSchedule.dateLabel} · {booking.numPeople} khách</p></div><div>{booking.packageId==="sbu2"?<><span>Chi phí đoàn</span><strong>Chờ báo giá theo nhu cầu</strong></>:<><span>{booking.packageId==="sbu3"?"Gói cơ bản tham khảo":"Tổng giá gói đã chọn"}</span><strong>{coupleTotal(booking.packageId,selectedSchedule.price,booking.numPeople,booking.numCompanions).toLocaleString("vi-VN")} ₫</strong>{booking.packageId==="sbu3"&&<small>Chưa gồm dịch vụ bổ sung, phụ thu phòng</small>}</>}</div></aside>}</div>
       {/* Cancel confirm — Bottom Sheet on mobile */}
       <Modal
         isOpen={showCancelDialog}

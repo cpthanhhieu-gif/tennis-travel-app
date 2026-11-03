@@ -30,14 +30,14 @@ export default function BookingStep4({ onConfirm }: Props) {
   const total = coupleTotal(booking.packageId,pricePerPerson,booking.numPeople,booking.numCompanions);
 
   const rows = [
-    ...(booking.groupRequest?[{label:"Nhu cầu đoàn",value:`${booking.groupRequest.min}–${booking.groupRequest.max} khách · ${booking.groupRequest.dates.join(" / ")} · ${booking.groupRequest.format} · ${booking.groupRequest.courts} buổi sân · ${booking.groupRequest.gala?"Có gala":"Không gala"}`}]:[]),
+    ...(booking.groupRequest?[{label:"Ngân sách dự kiến / khách",value:formatVND(booking.groupRequest.budget)},{label:"Nhu cầu đoàn",value:`${booking.groupRequest.min}–${booking.groupRequest.max} khách · ${booking.groupRequest.dates.join(" / ")} · ${booking.groupRequest.format} · ${booking.groupRequest.courts} buổi sân · ${booking.groupRequest.gala?"Có gala":"Không gala"}`}]:[]),
     ...(booking.packageId==="sbu3"&&booking.premiumRequest?[{label:"Mong muốn Premium",value:`${booking.premiumRequest.desiredDate} · ${booking.premiumRequest.flexibility} · ${booking.premiumRequest.priority}`},{label:"Dịch vụ cần báo giá",value:booking.premiumRequest.services.join(", ")||"Không yêu cầu"}]:[]),
     { label: "Tour", value: tour.name },
     { label: "Gói", value: pkg.name },
     { label: "Mã chuyến", value: booking.departureCode || tour.tourCode },
     { label: "Điểm đến", value: tour.destinationName },
     { label: "Ngày khởi hành", value: `${selectedSchedule.dayOfWeek}, ${selectedSchedule.dateLabel}` },
-    { label: "Số người", value: `${booking.numPeople-booking.numCompanions} người chơi + ${booking.numCompanions} người đi cùng` },
+    { label: "Số người", value: booking.packageId==="sbu2"&&booking.groupRequest?`${booking.groupRequest.min}–${booking.groupRequest.max} khách dự kiến · ${booking.groupRequest.companions} người đi cùng dự kiến`:`${booking.numPeople-booking.numCompanions} người chơi + ${booking.numCompanions} người đi cùng` },
     ...(booking.groupAdviceRequested ? [{label:"Nhóm chơi",value:"Có nhu cầu tư vấn nhóm phù hợp"}] : []),
     ...(booking.packageId === "sbu2" ? [] : [{ label: "NTRP", value: booking.ntrpLabel ? `${booking.ntrpLevel} — ${booking.ntrpLabel}` : "Chưa đánh giá" }]),
     ...(booking.packageId==="sbu2"?[{label:"Danh sách thành viên",value:"Bổ sung sau khi thống nhất phương án; chưa cần khai đủ khi gửi yêu cầu báo giá."}]:[]),
@@ -66,11 +66,11 @@ export default function BookingStep4({ onConfirm }: Props) {
 
       {booking.referralToken&&<section className="ds-quality"><p>Đơn này có nguồn giới thiệu từ thẻ chia sẻ. Mã không phải ưu đãi giảm giá.</p><button className="ds-link" onClick={()=>updateBooking({referralToken:""})}>Bỏ mã giới thiệu</button></section>}
       <div className="booking-review-summary">
-        {[{title:"Chuyến đi & người tham gia",step:1,items:rows.slice(0,booking.packageId==="sbu2"?6:7)},{title:"Thông tin liên hệ",step:3,items:rows.slice(booking.packageId==="sbu2"?6:7)}].map(group=><section className="booking-review-group" key={group.title}><header><h3>{group.title}</h3><button type="button" className="ui-text-button" onClick={()=>setStep(group.step)}>Chỉnh sửa</button></header><dl>{group.items.map(({label,value})=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>)}
+        {[{title:"Chuyến đi & người tham gia",step:1,items:rows.slice(0,-3)},{title:"Thông tin liên hệ",step:3,items:rows.slice(-3)}].map(group=><section className="booking-review-group" key={group.title}><header><h3>{group.title}</h3><button type="button" className="ui-text-button" onClick={()=>setStep(group.step)}>Chỉnh sửa</button></header><dl>{group.items.map(({label,value})=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>)}
         {/* Total */}
-        <div className="border-t border-neutral-10 mt-[1.6rem] pt-[1.6rem]">
+        {pkg.id==="sbu2"?<section className="ds-quality"><h3>Chờ báo giá theo nhu cầu đoàn</h3><p>Chi phí phụ thuộc quy mô được chốt, lịch và các dịch vụ yêu cầu. Chưa cần đặt cọc khi gửi yêu cầu.</p></section>:<div className="border-t border-neutral-10 mt-[1.6rem] pt-[1.6rem]">
           <div className="flex justify-between items-baseline">
-            <span className="text-neutral-50 font-semibold text-[1.6rem]">Tổng dự kiến</span>
+            <span className="text-neutral-50 font-semibold text-[1.6rem]">{pkg.id==="sbu3"?"Chi phí gói cơ bản tham khảo":"Tổng giá gói đã chọn"}</span>
             <span className="text-[2.6rem] font-extrabold text-brand-secondary">
               {formatVNDShort(total)}
             </span>
@@ -78,7 +78,8 @@ export default function BookingStep4({ onConfirm }: Props) {
           <p className="text-neutral-30 text-[1.2rem] mt-[0.4rem] text-right">
             {formatVND(pricePerPerson)} × {booking.numPeople-booking.numCompanions} người chơi + {formatVND(companionRate(booking.packageId))} × {booking.numCompanions} người đi cùng
           </p>
-        </div>
+          {pkg.id==="sbu3"&&<p>Chưa gồm dịch vụ bổ sung, phụ thu phòng; giá cuối cùng theo phương án được xác nhận. Chưa cần thanh toán khi gửi yêu cầu.</p>}
+        </div>}
       </div>
 
       {/* Guarantees */}
@@ -86,7 +87,7 @@ export default function BookingStep4({ onConfirm }: Props) {
         <ul className="space-y-[0.8rem]">
           {[
             pkg.id === "sbu2" ? "Báo giá trong 1 ngày làm việc" : pkg.id === "sbu3" ? "Xác nhận trong 24 giờ" : "Xác nhận sau khi đặt cọc",
-            "Hủy trước D-30: hoàn 100% trừ 500.000đ; D-30 đến D-15: mất cọc 30%; D-14 đến D-7: mất 70%; dưới D-7: mất 100%.",
+            pkg.id!=="sbu1"?"Khoản cọc và điều kiện thay đổi/hủy được thông báo trong báo giá hoặc phương án trước khi bạn chấp thuận.":"Hủy trước D-30: hoàn 100% trừ 500.000đ; D-30 đến D-15: mất cọc 30%; D-14 đến D-7: mất 70%; dưới D-7: mất 100%.",
             "Hỗ trợ 24/7 trong suốt hành trình",
           ].map((item) => (
             <li
@@ -110,7 +111,7 @@ export default function BookingStep4({ onConfirm }: Props) {
         loading={loading}
         disabled={needsLogin}
       >
-        {loading ? "Đang xử lý..." : pkg.id === "sbu2" ? "Gửi yêu cầu báo giá" : pkg.id === "sbu3" ? "Gửi yêu cầu xác nhận" : "Tiếp tục đặt cọc"}
+        {loading ? "Đang xử lý..." : pkg.id === "sbu2" ? "Gửi yêu cầu báo giá" : pkg.id === "sbu3" ? "Gửi yêu cầu phương án" : "Tiếp tục đặt cọc"}
       </Button></div>
     </div>
   );

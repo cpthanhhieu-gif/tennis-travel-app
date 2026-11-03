@@ -1,0 +1,6 @@
+/* New design system overrides belong here. Classic is the complete fallback.
+   Intentionally identical until the new specifications are supplied.
+   Scope ALL token and component overrides to this selector. */
+:root[data-design-theme="next"] {
+  /* Example once approved: --ds-primary: ...; */
+}

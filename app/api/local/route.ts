@@ -155,7 +155,8 @@ async function postLocal(req:NextRequest){
  if(level!==undefined&&level!==0&&![1.5,2.5,3.5,4.5,5].includes(level))return NextResponse.json({error:"Kết quả NTRP không hợp lệ"},{status:400});
  const t=tours.find(t=>t.id===b.booking?.tourId);const d=t?.departureSchedules.find(d=>d.code===b.booking?.departureCode);const n=b.booking?.numPeople;const companions=b.booking?.numCompanions??0;const name=b.booking?.name;
  if(!t||!d||!Number.isInteger(n)||n<1||n>packageCapacity(t.packageId)||!Number.isInteger(companions)||companions<0||companions>=n||typeof name!=="string"||!name.trim()||name.length>100||typeof b.key!=="string"||!b.key.trim()||b.key.length>100)return NextResponse.json({error:"Thông tin đặt chỗ không hợp lệ"},{status:400});
- if((t.packageId!=="sbu2"||b.booking.participants!==undefined)&&!validBookingParticipants(b.booking.participants,n,companions))return NextResponse.json({error:"Điền đủ danh sách người tham gia, đúng số người chơi và người đi cùng."},{status:400});
+ if(t.packageId==="sbu2"){delete b.booking.participants;delete b.booking.contactParticipates;}
+ if(t.packageId!=="sbu2"&&!validBookingParticipants(b.booking.participants,n,companions))return NextResponse.json({error:"Điền đủ danh sách người tham gia, đúng số người chơi và người đi cùng."},{status:400});
  const ref=b.booking?.referralToken??"";let referral:Order["referral"];
  const previousOrder=s.orders.find(o=>o.key===b.key);
  if(ref&&previousOrder&&previousOrder.referral&&previousOrder.referral.token===ref)referral=previousOrder.referral;

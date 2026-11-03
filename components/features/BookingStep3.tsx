@@ -49,7 +49,7 @@ export default function BookingStep3({ onNext }: Props) {
       ? "" : "Vui lòng nhập email đúng định dạng.",
   };
 
-  const participants:BookingParticipant[]=Array.from({length:booking.numPeople},(_,i)=>({name:booking.participants?.[i]?.name??"",roomPreference:booking.participants?.[i]?.roomPreference??"",role:i<booking.numPeople-booking.numCompanions?"player":"companion"}));
+  const participants:BookingParticipant[]=Array.from({length:booking.packageId==="sbu2"?0:booking.numPeople},(_,i)=>({name:booking.participants?.[i]?.name??"",roomPreference:booking.participants?.[i]?.roomPreference??"",role:i<booking.numPeople-booking.numCompanions?"player":"companion"}));
   if(booking.contactParticipates&&participants[0])participants[0]={...participants[0],name:name.trim()};
   const participantsValid=validBookingParticipants(participants,booking.numPeople,booking.numCompanions);
   const changeParticipant=(index:number,patch:Partial<BookingParticipant>)=>updateBooking({participants:participants.map((p,i)=>i===index?{...p,...patch}:p)});
@@ -62,7 +62,7 @@ export default function BookingStep3({ onNext }: Props) {
     }
     if(booking.packageId!=="sbu2"&&!participantsValid){document.getElementById("participant-errors")?.focus();return;}
     if(booking.packageId==="sbu3") {const request=booking.premiumRequest??{desiredDate:booking.departureDate,flexibility:"Đúng ngày",priority:"Nghỉ dưỡng",services:[]};if(!validPremiumRequest(request)){requestAnimationFrame(()=>document.getElementById("premium-date-error")?.focus());return;}updateBooking({premiumRequest:request});}
-    updateBooking({ name: name.trim(), phone: cleanPhone, email: email.trim(), notes, participants });
+    updateBooking({ name: name.trim(), phone: cleanPhone, email: email.trim(), notes, participants:booking.packageId==="sbu2"?undefined:participants });
     onNext();
   };
 

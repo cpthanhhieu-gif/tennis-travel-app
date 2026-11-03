@@ -225,6 +225,7 @@ async function postLocal(req:NextRequest){
  if(!validOperations(b.details)||b.details.size>o.numPeople)return NextResponse.json({error:"Kiểm tra thông tin sân, HLV và quy mô nhóm"},{status:400});
  o.operations={...b.details,updatedAt:new Date().toISOString()};if(o.groupChange?.status==="pending"){o.groupChange.status="accepted";o.groupChange.resolution="Điều phối đã cập nhật thông tin nhóm theo chuyến.";o.groupChange.resolvedAt=new Date().toISOString();}addRequestEvent(o,"created","Đã cập nhật sân, HLV và phân nhóm theo lịch");
  }else{
+ if(requestBlocked(o))return NextResponse.json({error:"Cần xử lý thông tin yêu cầu trước khi gửi phương án"},{status:409});
  if(o.paid>0||o.offer?.acceptedAt||o.groupPlanToken)return NextResponse.json({error:"Không sửa báo giá đã chấp thuận, thanh toán hoặc chia sẻ thành viên"},{status:409});
  if(b.baseOfferId!==(o.offer?.id??null))return NextResponse.json({error:"Phương án đã thay đổi; tải lại trước khi gửi"},{status:409});
  if(!Number.isSafeInteger(b.total)||b.total<=0||b.total>10000000000||![b.program,b.included,b.extras,b.pending,b.changeNote].every(v=>typeof v==="string"&&v.trim().length>0&&v.length<=2000))return NextResponse.json({error:"Điền đầy đủ nội dung, lý do thay đổi và tổng giá hợp lệ"},{status:400});
@@ -243,6 +244,7 @@ async function postLocal(req:NextRequest){
  if(o.groupPlanToken)return NextResponse.json({error:"Phương án đã gửi thành viên; cần thu hồi trước khi đổi giá"},{status:409});
  o.groupQuote={fixed:b.fixed,perPerson:b.perPerson,options:b.options,source:b.sourceNote.trim(),approvedAt:new Date().toISOString()};o.total=b.fixed+b.perPerson*o.numPeople;o.deposit=Math.round(o.total*.5);o.offer=undefined;
  }else{
+ if(!o.offer||o.completedAt)return NextResponse.json({error:"Gửi phương án cho đại diện trước khi chia sẻ thành viên"},{status:409});
  if(!o.groupQuote||!o.groupRequest||typeof b.deadline!=="string"||isNaN(Date.parse(b.deadline))||Date.parse(b.deadline)<=Date.now())return NextResponse.json({error:"Cần nhu cầu đoàn, giá đã duyệt và hạn phản hồi tương lai"},{status:400});
  if(o.groupPlanToken)return NextResponse.json(view(s));
  o.groupPlanToken=await publishGroupPlan({token:o.groupPlanToken,tourName:tours.find(t=>t.id===o.tourId)!.name,request:o.groupRequest,quote:o.groupQuote,deadline:b.deadline});
@@ -357,6 +359,7 @@ async function postLocal(req:NextRequest){
   const o=s.orders.find(o=>o.id===b.id);
   if(!o)return NextResponse.json({error:"Không tìm thấy booking"},{status:404});
   if(b.action==="pay"){
+   if(o.completedAt)return NextResponse.json({error:"Chuyến đã hoàn thành; không thay đổi thanh toán"},{status:409});
    if(requestBlocked(o))return NextResponse.json({error:"Yêu cầu chưa đủ điều kiện thanh toán"},{status:409});
    const previousPayment=JSON.stringify([o.paid,o.payment,o.balancePayment]);
    if(!["success","failed","cancelled"].includes(b.result)||![undefined,"deposit","balance"].includes(b.phase))return NextResponse.json({error:"Trạng thái không hợp lệ"},{status:400});
@@ -372,6 +375,7 @@ async function postLocal(req:NextRequest){
    awardOnce(s.ledger,o,"tour");
   }else{
    if(b.action==="start"){
+    if(requestBlocked(o))return NextResponse.json({error:"Cần xử lý thông tin yêu cầu trước khi bắt đầu chuyến"},{status:409});
     if(b.source!=="test-controls")return NextResponse.json({error:"Thao tác chỉ có trong điều khiển thử nghiệm"},{status:403});
     if(o.completedAt||o.paid<o.deposit)return NextResponse.json({error:"Chuyến chưa đủ điều kiện bắt đầu hoặc đã hoàn thành"},{status:409});
     if(!o.operations?.confirmed&&!trainingGroups(o).some(g=>g.key===o.trainingGroup?.key))return NextResponse.json({error:"Xác nhận nhóm, sân và HLV trước khi bắt đầu chuyến."},{status:409});

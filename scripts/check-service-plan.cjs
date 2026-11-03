@@ -7,7 +7,7 @@ assert.equal((await post({action:'login'},'https://other.example')).status,403);
 const login=await post({action:'login'});assert.equal(login.status,200,await login.clone().text());cookie=login.headers.get('set-cookie').split(';')[0];
 
 const request={desiredDate:'2027-05-20',flexibility:'Linh hoạt ±3 ngày',priority:'Nghỉ dưỡng',services:['Xe riêng','Buổi HLV riêng']};
-const booking={tourId:'pq-sbu3',departureCode:'VTR-SIG-TNS-03-PQ4-200527',numPeople:2,numCompanions:1,name:'Premium QA',phone:'0901234567',email:'qa@example.com',ntrpLevel:3.5,premiumRequest:request};
+const booking={tourId:'pq-sbu3',departureCode:'VTR-SIG-TNS-03-PQ4-200527',numPeople:2,numCompanions:1,name:'Premium QA',phone:'0901234567',email:'qa@example.com',ntrpLevel:3.5,premiumRequest:request,participants:[{name:'Player QA',role:'player',roomPreference:''},{name:'Companion QA',role:'companion',roomPreference:''}]};
 const {tours}=compile(path.join(root,'lib/mock-data.ts'));booking.tourId=tours.find(t=>t.packageId==='sbu3').id;
 assert.equal((await post({action:'book',key:'invalid',booking:{...booking,premiumRequest:{...request,services:['Unknown']}}})).status,400);
 let r=await post({action:'book',key:'premium',booking});assert.equal(r.status,200,await r.clone().text());let data=await r.json(),o=data.order;assert.equal(o.total,52800000);assert.deepEqual(o.premiumRequest,request);

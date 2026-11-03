@@ -44,7 +44,7 @@ const TIER_GRADIENTS: Record<string, string> = {
 };
 
 const FEI_COLOR = (score: number) =>
-  score >= 90 ? "#10b981" : score >= 85 ? "#3b82f6" : "#f59e0b";
+  score >= 90 ? "var(--ds-palette-10b981)" : score >= 85 ? "var(--ds-palette-3b82f6)" : "var(--ds-palette-f59e0b)";
 
 function ArcProgress({ score, size = 120 }: { score: number; size?: number }) {
   const r = 44;
@@ -57,7 +57,7 @@ function ArcProgress({ score, size = 120 }: { score: number; size?: number }) {
 
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" aria-hidden="true">
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#f1f5f9" strokeWidth="10"
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--ds-palette-f1f5f9)" strokeWidth="10"
         strokeDasharray={`${circumference * 0.75} ${circumference * 0.25}`}
         strokeLinecap="round"
         transform={`rotate(${rotation} ${cx} ${cy})`} />
@@ -172,7 +172,7 @@ export default function GamificationView() {
 
       {/* ── Hero Profile Banner ── */}
       <p className="ds-demo-note">ACE CLUB / DỮ LIỆU MẪU · Điểm và quyền lợi đang minh họa.</p>
-      <section aria-labelledby="profile-title" className={`bg-[#103E30] px-[2rem] pt-[3.2rem] pb-[3.2rem]`}>
+      <section aria-labelledby="profile-title" className={`bg-[var(--ds-ink)] px-[2rem] pt-[3.2rem] pb-[3.2rem]`}>
         <div className="flex items-start gap-[1.6rem] mb-[2.4rem]">
           {/* Avatar with tier ring */}
           <div className="relative shrink-0">
@@ -267,7 +267,7 @@ export default function GamificationView() {
 
       {/* ── Pill Tabs ── */}
       <div className="px-[1.6rem] pt-[1.6rem] pb-[0.8rem]">
-        <div className="flex gap-[0.8rem] bg-neutral-05 rounded-[0.8rem] p-[0.4rem]" role="tablist">
+        <div className="flex gap-[0.8rem] bg-neutral-05 rounded-[var(--ds-radius-card)] p-[0.4rem]" role="tablist">
           {TABS.map(({ key, label }) => {
             const active = activeTab === key;
             return (
@@ -290,7 +290,7 @@ export default function GamificationView() {
           <section aria-label="Chi tiết Ace Points">
 
             {/* Tour breakdown card */}
-            <div className="bg-neutral-01 rounded-[0.8rem] border border-[#CCD7C8] shadow-none p-[2rem] mb-[2rem]">
+            <div className="bg-neutral-01 rounded-[var(--ds-radius-card)] border border-[var(--ds-border)] shadow-none p-[2rem] mb-[2rem]">
               <div className="flex items-center justify-between mb-[1.6rem]">
                 <h2 className="font-bold text-neutral-90 text-[1.5rem]">📍 Hoạt động hành trình — Ace Points</h2>
                 <span className="inline-flex items-center gap-[0.4rem] px-[1.2rem] py-[0.4rem] bg-brand-tint rounded-full text-brand-primary font-extrabold text-[1.4rem]">
@@ -323,10 +323,10 @@ export default function GamificationView() {
               {pointActions.map((action) => (
                 <button
                   key={action.action}
-                  className={`w-full flex items-center gap-[1.4rem] p-[1.6rem] rounded-[0.8rem] border text-left transition-all duration-200 focus:outline-none ${
+                  className={`w-full flex items-center gap-[1.4rem] p-[1.6rem] rounded-[var(--ds-radius-card)] border text-left transition-all duration-200 focus:outline-none ${
                     action.earned
                       ? "bg-neutral-01 border-green-200 shadow-none hover:shadow-none"
-                      : "bg-[#F4F6F1] border-[#CCD7C8] hover:bg-neutral-05 cursor-pointer"
+                      : "bg-[var(--ds-canvas)] border-[var(--ds-border)] hover:bg-neutral-05 cursor-pointer"
                   }`}
                   onClick={() => {
                     if (!action.earned) {
@@ -353,7 +353,7 @@ export default function GamificationView() {
                       <CheckCircle2 size={12} aria-hidden /> Xong
                     </span>
                   ) : (
-                    <span className="shrink-0 flex items-center gap-[0.4rem] px-[1.0rem] py-[0.5rem] bg-neutral-05 border border-[#CCD7C8] rounded-full text-neutral-40 text-[1.2rem] font-bold">
+                    <span className="shrink-0 flex items-center gap-[0.4rem] px-[1.0rem] py-[0.5rem] bg-neutral-05 border border-[var(--ds-border)] rounded-full text-neutral-40 text-[1.2rem] font-bold">
                       <Lock size={11} aria-hidden /> Khóa
                     </span>
                   )}
@@ -362,7 +362,7 @@ export default function GamificationView() {
             </div>
 
             {/* Refer CTA */}
-            <div className={`bg-[#103E30] rounded-[0.8rem] p-[2.4rem] text-center`}>
+            <div className={`bg-[var(--ds-ink)] rounded-[var(--ds-radius-card)] p-[2.4rem] text-center`}>
               <div className="flex justify-center mb-[1rem]">
                 <div className="w-[5.6rem] h-[5.6rem] bg-white/20 rounded-full flex items-center justify-center">
                   <VietravelIcon id="group-people-linear" size={28} className="text-white" />
@@ -418,7 +418,7 @@ export default function GamificationView() {
                 return (
                   <button
                     key={b.id}
-                    className="w-full bg-[#F4F6F1] rounded-[0.8rem] border border-[#CCD7C8] p-[1.6rem] flex items-center gap-[1.4rem] text-left hover:bg-neutral-05 transition-colors focus:outline-none"
+                    className="w-full bg-[var(--ds-canvas)] rounded-[var(--ds-radius-card)] border border-[var(--ds-border)] p-[1.6rem] flex items-center gap-[1.4rem] text-left hover:bg-neutral-05 transition-colors focus:outline-none"
                     onClick={() => showToast(b.hint, "info")}
                     aria-label={`${b.name} — ${b.hint}`}
                   >
@@ -457,10 +457,10 @@ export default function GamificationView() {
               return (
                 <div key={tier.name}
                   className={`rounded-[1.4rem] border overflow-hidden transition-all duration-200 ${
-                    isCurrent ? "border-transparent shadow-none" : isLocked ? "border-[#CCD7C8] opacity-60" : "border-[#CCD7C8]"
+                    isCurrent ? "border-transparent shadow-none" : isLocked ? "border-[var(--ds-border)] opacity-60" : "border-[var(--ds-border)]"
                   }`}>
                   {/* Tier header */}
-                  <div className={`bg-[#103E30] px-[2rem] py-[1.4rem] flex items-center justify-between`}>
+                  <div className={`bg-[var(--ds-ink)] px-[2rem] py-[1.4rem] flex items-center justify-between`}>
                     <div className="flex items-center gap-[1.2rem]">
                       <TierIcon name={tier.name} size={24} className="text-white" />
                       <div>
@@ -504,7 +504,7 @@ export default function GamificationView() {
         {activeTab === "fei" && (
           <section aria-label="FEI Score">
             {/* Hero score card */}
-            <div className="bg-neutral-01 rounded-[1.4rem] border border-[#CCD7C8] shadow-none p-[2.4rem] mb-[2.4rem]">
+            <div className="bg-neutral-01 rounded-[1.4rem] border border-[var(--ds-border)] shadow-none p-[2.4rem] mb-[2.4rem]">
               <div className="flex items-center gap-[2.4rem]">
                 {/* Arc */}
                 <div className="relative shrink-0">
@@ -536,7 +536,7 @@ export default function GamificationView() {
                 const color = FEI_COLOR(idx.score);
                 const bgClass = idx.score >= 90 ? "bg-green-50 border-green-100" : idx.score >= 85 ? "bg-blue-50 border-blue-100" : "bg-amber-50 border-amber-100";
                 return (
-                  <div key={idx.code} className={`rounded-[0.8rem] border ${bgClass} p-[1.6rem]`}>
+                  <div key={idx.code} className={`rounded-[var(--ds-radius-card)] border ${bgClass} p-[1.6rem]`}>
                     <div className="flex items-start justify-between mb-[1rem]">
                       <div className="flex-1 min-w-0 pr-[1.2rem]">
                         <div className="flex items-center gap-[0.8rem] mb-[0.2rem]">
@@ -565,7 +565,7 @@ export default function GamificationView() {
         style={{ bottom: "53px", background: "linear-gradient(to top, rgba(255,255,255,1) 60%, rgba(255,255,255,0))" }}
       >
         <Link href="/share-card">
-          <button className={`w-full py-[1.6rem] bg-[#103E30] text-white font-extrabold text-[1.6rem] rounded-[0.8rem] shadow-none hover:opacity-90 transition-opacity flex items-center justify-center gap-[0.8rem]`}>
+          <button className={`w-full py-[1.6rem] bg-[var(--ds-ink)] text-white font-extrabold text-[1.6rem] rounded-[var(--ds-radius-card)] shadow-none hover:opacity-90 transition-opacity flex items-center justify-center gap-[0.8rem]`}>
             <Trophy size={18} aria-hidden />
             Xem thẻ thành tích · Voucher 10%
           </button>

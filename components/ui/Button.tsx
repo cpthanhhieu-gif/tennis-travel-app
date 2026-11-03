@@ -11,7 +11,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 /**
  * Button — Vietravel Design System
- * Shape: pill (border-radius: 4rem)
+ * Shape: shared --ds-radius-control token
  * Size base: padding 1.2rem, font 1.4rem / 600
  */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -28,7 +28,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const base =
-      "inline-flex items-center justify-center gap-2 font-bold rounded-[2.4rem] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] min-w-[44px] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none";
+      "inline-flex items-center justify-center gap-2 font-bold rounded-[var(--ds-radius-control)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] min-w-[44px] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none";
 
     const variants: Record<string, string> = {
       // Primary Blue — CTA chính

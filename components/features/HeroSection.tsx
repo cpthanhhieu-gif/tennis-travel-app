@@ -35,7 +35,7 @@ export default function HeroSection({ searchQuery, onSearch, filterSbu, onFilter
     <>
       <section
         className="relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, #dbeafe 0%, #eff6ff 40%, #f0fdf4 100%)" }}
+        style={{ background: "linear-gradient(160deg, var(--ds-palette-dbeafe) 0%, var(--ds-palette-eff6ff) 40%, var(--ds-palette-f0fdf4) 100%)" }}
       >
         <div className="absolute top-[-4rem] right-[-3rem] w-[18rem] h-[18rem] rounded-full bg-white/60 blur-2xl pointer-events-none" />
         <div className="absolute top-[6rem] left-[-4rem] w-[14rem] h-[14rem] rounded-full bg-sky-100/80 blur-2xl pointer-events-none" />

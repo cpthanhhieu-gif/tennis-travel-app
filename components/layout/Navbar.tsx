@@ -31,7 +31,7 @@ export default function Navbar() {
       {/* Logo */}
       <Link
         href="/"
-        className="flex items-center gap-[0.8rem] mr-[3.2rem] focus:outline-none focus:ring-2 focus:ring-brand-primary rounded-[0.8rem] p-1"
+        className="flex items-center gap-[0.8rem] mr-[3.2rem] focus:outline-none focus:ring-2 focus:ring-brand-primary rounded-[var(--ds-radius-card)] p-1"
         aria-label="Tennis Travel Experience — Trang chủ"
       >
         <Dumbbell size={22} className="text-brand-primary" aria-hidden="true" />
@@ -51,7 +51,7 @@ export default function Navbar() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`px-[1.2rem] py-[0.8rem] rounded-[0.8rem] text-[1.4rem] font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary min-h-[44px] flex items-center ${
+                className={`px-[1.2rem] py-[0.8rem] rounded-[var(--ds-radius-card)] text-[1.4rem] font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-primary min-h-[44px] flex items-center ${
                   active
                     ? "text-brand-primary bg-brand-tint font-bold"
                     : "text-neutral-50 hover:text-brand-primary hover:bg-brand-tint-light"
@@ -71,7 +71,7 @@ export default function Navbar() {
           <Trophy size={12} aria-hidden="true" />
           {mockUser.tier}
         </Badge>
-        <div className="flex items-center gap-[0.8rem] px-[1.2rem] py-[0.6rem] rounded-[0.8rem] bg-neutral-03 border border-neutral-10">
+        <div className="flex items-center gap-[0.8rem] px-[1.2rem] py-[0.6rem] rounded-[var(--ds-radius-card)] bg-neutral-03 border border-neutral-10">
           <User size={16} className="text-brand-primary" aria-hidden="true" />
           <span className="text-[1.4rem] text-neutral-90 font-medium">{mockUser.firstName}</span>
           <Badge variant="brand">{mockUser.acePoints.toLocaleString("vi-VN")} Ace Points</Badge>

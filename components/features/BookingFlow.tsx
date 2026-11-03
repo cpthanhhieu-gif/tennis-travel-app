@@ -59,7 +59,7 @@ export default function BookingFlow() {
         <div className="flex items-center justify-between mb-[1.6rem]">
           <button
             onClick={handleBack}
-            className="flex items-center gap-[0.4rem] text-neutral-40 hover:text-brand-primary transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary rounded-[0.8rem] p-[0.8rem] min-h-[44px] min-w-[44px]"
+            className="flex items-center gap-[0.4rem] text-neutral-40 hover:text-brand-primary transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary rounded-[var(--ds-radius-card)] p-[0.8rem] min-h-[44px] min-w-[44px]"
             aria-label="Quay lại bước trước"
           >
             <ChevronLeft size={20} aria-hidden="true" />

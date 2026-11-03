@@ -2,7 +2,7 @@
 
 /**
  * ProgressBar — Vietravel Design System
- * Track: neutral-03 (#F7F7F7) or semi-transparent
+ * Track: neutral-03 (var(--ds-canvas)) or semi-transparent
  * Fill: brand-primary / brand-light / success
  */
 interface ProgressBarProps {

@@ -64,7 +64,7 @@ function BotText({ text }: { text: string }) {
 /* ─── Typing dots ─────────────────────────────────────────────── */
 function TypingDots() {
   return (
-    <div className="flex items-center gap-[0.4rem] px-[1.2rem] py-[1rem] bg-neutral-05 rounded-[0.8rem] rounded-tl-[0.3rem] w-fit">
+    <div className="flex items-center gap-[0.4rem] px-[1.2rem] py-[1rem] bg-neutral-05 rounded-[var(--ds-radius-card)] rounded-tl-[0.3rem] w-fit">
       {[0, 1, 2].map((i) => (
         <span key={i} className="w-[0.6rem] h-[0.6rem] bg-neutral-30 rounded-full animate-bounce"
           style={{ animationDelay: `${i * 0.15}s`, animationDuration: "0.8s" }} />
@@ -282,7 +282,7 @@ export default function ChatbotWidget() {
                     {QUICK_PROMPTS.map(({ label, flowKey }) => (
                       <button key={flowKey}
                         onClick={() => handleQuickPrompt(flowKey, label)}
-                        className="w-full text-left px-[1.4rem] py-[1.2rem] rounded-[0.8rem] bg-[#F4F6F1] border border-[#CCD7C8] text-[1.3rem] font-medium text-neutral-70 hover:bg-brand-tint hover:border-brand-primary hover:text-brand-primary transition-all duration-200">
+                        className="w-full text-left px-[1.4rem] py-[1.2rem] rounded-[var(--ds-radius-card)] bg-[var(--ds-canvas)] border border-[var(--ds-border)] text-[1.3rem] font-medium text-neutral-70 hover:bg-brand-tint hover:border-brand-primary hover:text-brand-primary transition-all duration-200">
                         {label}
                       </button>
                     ))}
@@ -319,7 +319,7 @@ export default function ChatbotWidget() {
 
             {/* Input */}
             <div className="shrink-0 px-[1.6rem] pt-[1rem] pb-[2.4rem] border-t border-neutral-05">
-              <div className="flex items-center gap-[1rem] bg-[#F4F6F1] rounded-[0.4rem] px-[1.6rem] py-[0.8rem]">
+              <div className="flex items-center gap-[1rem] bg-[var(--ds-canvas)] rounded-[var(--ds-radius-control)] px-[1.6rem] py-[0.8rem]">
                 <input ref={inputRef} type="text" value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}

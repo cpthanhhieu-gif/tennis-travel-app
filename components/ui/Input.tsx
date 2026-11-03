@@ -1,13 +1,13 @@
 /**
  * Input — Vietravel Design System
- * Background: #F7F7F7 (neutral-03), no border
- * Label empty: color #999999 / weight 500
- * Label filled: color #0391FF (brand-light) / weight 700
+ * Background: var(--ds-canvas) (neutral-03), no border
+ * Label empty: color var(--ds-palette-999999) / weight 500
+ * Label filled: color var(--ds-palette-0391ff) (brand-light) / weight 700
  * Error: red outline + message
  */
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -21,9 +21,12 @@ export default function Input({
   hint,
   id,
   className = "",
+  onFocus,
+  onBlur,
   ...props
 }: InputProps) {
-  const inputId = id || label.toLowerCase().replace(/\s+/g, "-");
+  const generatedId = useId();
+  const inputId = id || generatedId;
   const [focused, setFocused] = useState(false);
   const hasValue = Boolean(props.value || props.defaultValue);
   const isActive = focused || hasValue;
@@ -52,13 +55,13 @@ export default function Input({
         aria-invalid={!!error}
         onFocus={(e) => {
           setFocused(true);
-          props.onFocus?.(e);
+          onFocus?.(e);
         }}
         onBlur={(e) => {
           setFocused(false);
-          props.onBlur?.(e);
+          onBlur?.(e);
         }}
-        className={`w-full px-[1.6rem] py-[1.2rem] rounded-[0.4rem] bg-neutral-01 border border-[#758875] text-[1.6rem] text-neutral-90 placeholder-neutral-30 focus:outline-none focus:ring-2 min-h-[48px] transition-shadow duration-150 ${
+        className={`w-full px-[1.6rem] py-[1.2rem] rounded-[var(--ds-radius-control)] bg-neutral-01 border border-[var(--ds-input-border)] text-[1.6rem] text-neutral-90 placeholder-neutral-30 focus:outline-none focus:ring-2 min-h-[48px] transition-shadow duration-150 ${
           error
             ? "ring-2 ring-error"
             : focused

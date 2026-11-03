@@ -9,9 +9,9 @@ export default function HomeFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-[0.8rem] mb-[1.2rem]">
-              <Dumbbell size={26} className="text-[#FFDA00]" aria-hidden="true" />
+              <Dumbbell size={26} className="text-[var(--ds-palette-ffda00)]" aria-hidden="true" />
               <div>
-                <p className="font-bold text-[1.6rem] text-[#FFDA00]">
+                <p className="font-bold text-[1.6rem] text-[var(--ds-palette-ffda00)]">
                   Tennis Travel Experience
                 </p>
                 <p className="text-white/50 text-[1.2rem]">by Vietravel</p>

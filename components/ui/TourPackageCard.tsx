@@ -80,7 +80,7 @@ export default function TourPackageCard({ pkg, className = "" }: Props) {
         {/* MyLeague badge — SBU2 only */}
         {pkg.sbu === 2 && (
           <div className="flex items-center gap-[0.5rem] mb-[0.8rem]">
-            <span className="inline-flex items-center gap-[0.4rem] px-[0.8rem] py-[0.3rem] rounded-full bg-[#1a3a6b] text-white text-[1.0rem] font-bold">
+            <span className="inline-flex items-center gap-[0.4rem] px-[0.8rem] py-[0.3rem] rounded-full bg-[var(--ds-palette-1a3a6b)] text-white text-[1.0rem] font-bold">
               🏆 Tích hợp MyLeague.vn
             </span>
           </div>

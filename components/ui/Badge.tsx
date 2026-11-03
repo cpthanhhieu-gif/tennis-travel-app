@@ -20,8 +20,8 @@ interface BadgeProps {
 }
 
 const tierStyles: Record<string, string> = {
-  Member: "bg-[#E6F2FF] text-[#004A82]",
-  Gold:   "bg-[#FFF3CC] text-[#7A5C00]",
+  Member: "bg-[var(--ds-palette-e6f2ff)] text-[var(--ds-palette-004a82)]",
+  Gold:   "bg-[var(--ds-palette-fff3cc)] text-[var(--ds-palette-7a5c00)]",
   Diamond:"bg-purple-light text-purple",
 };
 

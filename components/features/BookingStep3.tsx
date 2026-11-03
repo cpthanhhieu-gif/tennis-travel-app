@@ -119,7 +119,7 @@ export default function BookingStep3({ onNext }: Props) {
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Yêu cầu ăn chay, dị ứng thực phẩm, phòng loại đặc biệt..."
-            className="w-full px-[1.6rem] py-[1.2rem] rounded-[0.8rem] bg-neutral-03 text-[1.6rem] text-neutral-90 placeholder-neutral-30 focus:outline-none focus:ring-2 focus:ring-brand-light resize-none border-0"
+            className="w-full px-[1.6rem] py-[1.2rem] rounded-[var(--ds-radius-card)] bg-neutral-03 text-[1.6rem] text-neutral-90 placeholder-neutral-30 focus:outline-none focus:ring-2 focus:ring-brand-light resize-none border-0"
           />
         </div>
       </div>

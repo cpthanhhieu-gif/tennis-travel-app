@@ -109,13 +109,13 @@ export default function QualitySection() {
           {/* Score row */}
           <div
             className="flex items-center gap-[1.6rem] px-[2rem] py-[2rem]"
-            style={{ background: "linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%)" }}
+            style={{ background: "linear-gradient(135deg, var(--ds-palette-eff6ff) 0%, var(--ds-palette-f0fdf4) 100%)" }}
           >
             <div className="relative w-[7.2rem] h-[7.2rem] shrink-0">
               <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
-                <circle cx="40" cy="40" r="34" fill="none" stroke="#e5e7eb" strokeWidth="7" />
+                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--ds-palette-e5e7eb)" strokeWidth="7" />
                 <circle
-                  cx="40" cy="40" r="34" fill="none" stroke="#2563eb" strokeWidth="7"
+                  cx="40" cy="40" r="34" fill="none" stroke="var(--ds-palette-2563eb)" strokeWidth="7"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 34}`}
                   strokeDashoffset={`${2 * Math.PI * 34 * (1 - composite / 100)}`}
@@ -133,7 +133,7 @@ export default function QualitySection() {
               {compositePass && (
                 <span className="inline-flex items-center gap-[0.4rem] bg-green-50 text-green-700 text-[1.1rem] font-bold px-[0.8rem] py-[0.3rem] rounded-full mt-[0.6rem]">
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <circle cx="6" cy="6" r="5.5" fill="#16a34a"/>
+                    <circle cx="6" cy="6" r="5.5" fill="var(--ds-palette-16a34a)"/>
                     <path d="M3.5 6l1.7 1.7 3.3-3.3" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   Đạt chuẩn Signature

@@ -23,16 +23,16 @@ export default function Card({
   const variants: Record<string, string> = {
     // Standard white card
     default:
-      "bg-neutral-01 rounded-[0.8rem] border border-[rgba(0,0,0,0.05)] shadow-[rgba(0,0,0,0.08)_0px_2px_8px] p-6",
+      "bg-neutral-01 rounded-[var(--ds-radius-card)] border border-[var(--ds-border)] shadow-none p-6",
     // Filter/List card (tour, hotel)
     filter:
-      "bg-neutral-01 rounded-[0.5rem] border border-neutral-05 overflow-hidden",
+      "bg-neutral-01 rounded-[var(--ds-radius-card)] border border-neutral-05 overflow-hidden",
     // Light brand-tint background card
     tint:
-      "bg-brand-tint-light rounded-[0.8rem] border border-brand-tint p-6",
+      "bg-brand-tint-light rounded-[var(--ds-radius-card)] border border-brand-tint p-6",
     // Dark sport card (gamification, achievement)
     sport:
-      "bg-navy-800 rounded-[0.8rem] border border-navy-700 shadow-elevated p-6",
+      "bg-navy-800 rounded-[var(--ds-radius-card)] border border-navy-700 shadow-elevated p-6",
   };
 
   const interactive = onClick

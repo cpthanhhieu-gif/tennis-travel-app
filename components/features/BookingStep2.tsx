@@ -68,7 +68,7 @@ export default function BookingStep2({ onNext }: Props) {
         {switchTour&&packageDecision===null&&(()=>{const t=tours.find(t=>t.id===switchTour)!;const schedule=t.departureSchedules.find(d=>d.code===switchCode);return <section className="ntrp-switch-panel"><h3 className="text-[2rem] font-bold">Lịch và giá gói gợi ý</h3><label htmlFor="switch-schedule">Lịch khởi hành {t.name}</label><select id="switch-schedule" className="w-full border p-[1.2rem] text-[1.6rem]" value={switchCode} onChange={e=>setSwitchCode(e.target.value)}><option value="">Chọn ngày khởi hành</option>{t.departureSchedules.map(d=><option key={d.code} value={d.code}>{d.dateLabel} · {d.price.toLocaleString("vi-VN")}đ/người</option>)}</select>{schedule&&<p>Tổng mới: {(coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)).toLocaleString("vi-VN")}đ / {booking.numPeople} người.</p>}{booking.numPeople>packageCapacity(t.packageId)&&<p role="alert">Gói này tối đa {packageCapacity(t.packageId)} khách. Quay lại bước chọn tour để điều chỉnh số người.</p>}<Button disabled={!schedule||booking.numPeople>packageCapacity(t.packageId)} onClick={()=>{if(!schedule||booking.numPeople>packageCapacity(t.packageId))return;updateBooking({tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureDate:schedule.date,departureCode:schedule.code,totalPrice:coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)});updateNtrpQuizState({packageDecision:true});setSwitchTour(null);onNext();}}>Áp dụng gói & lịch đã chọn</Button></section>;})()}
         {/* Decision confirmed feedback */}
         {hasMismatch && packageDecision !== null && (
-          <div className="flex items-center gap-[1rem] bg-success-light border border-success/30 rounded-[0.8rem] p-[1.6rem] mb-[2.4rem]">
+          <div className="flex items-center gap-[1rem] bg-success-light border border-success/30 rounded-[var(--ds-radius-card)] p-[1.6rem] mb-[2.4rem]">
             <CheckCircle2 size={18} className="text-success shrink-0" aria-hidden="true" />
             <p className="text-[1.4rem] text-success font-medium text-left">
               {packageDecision
@@ -125,7 +125,7 @@ export default function BookingStep2({ onNext }: Props) {
       {/* Single question card */}
       <fieldset
         key={q.id}
-        className={`bg-neutral-01 rounded-[0.8rem] border border-neutral-10 shadow-[rgba(0,0,0,0.08)_0px_2px_8px] p-[2rem] mb-[2.4rem] transition-opacity duration-200 ${
+        className={`bg-neutral-01 rounded-[var(--ds-radius-card)] border border-neutral-10 shadow-[rgba(0,0,0,0.08)_0px_2px_8px] p-[2rem] mb-[2.4rem] transition-opacity duration-200 ${
           advancing ? "opacity-40" : "opacity-100"
         }`}
       >
@@ -137,7 +137,7 @@ export default function BookingStep2({ onNext }: Props) {
           {q.options.map((opt) => (
             <label
               key={opt.value}
-              className={`flex items-center gap-[1.2rem] p-[1.2rem] rounded-[0.8rem] cursor-pointer transition-all duration-150 min-h-[44px] ${
+              className={`flex items-center gap-[1.2rem] p-[1.2rem] rounded-[var(--ds-radius-card)] cursor-pointer transition-all duration-150 min-h-[44px] ${
                 answers[q.id] === opt.value
                   ? "bg-brand-tint border border-brand-primary"
                   : "hover:bg-neutral-03 border border-transparent"
@@ -171,7 +171,7 @@ export default function BookingStep2({ onNext }: Props) {
           type="button"
           onClick={() => setCurrentQ((i) => Math.max(0, i - 1))}
           disabled={currentQ === 0}
-          className="flex items-center gap-[0.4rem] px-[1.4rem] py-[1rem] rounded-[0.8rem] border border-neutral-10 text-neutral-40 text-[1.4rem] hover:border-brand-light hover:text-brand-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+          className="flex items-center gap-[0.4rem] px-[1.4rem] py-[1rem] rounded-[var(--ds-radius-card)] border border-neutral-10 text-neutral-40 text-[1.4rem] hover:border-brand-light hover:text-brand-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors min-h-[44px]"
           aria-label="Câu trước"
         >
           <ChevronLeft size={16} aria-hidden="true" />
@@ -183,7 +183,7 @@ export default function BookingStep2({ onNext }: Props) {
             type="button"
             onClick={() => setCurrentQ((i) => Math.min(ntrpQuiz.length - 1, i + 1))}
             disabled={answers[q.id] === undefined}
-            className="flex-1 py-[1rem] rounded-[0.8rem] bg-neutral-03 border border-neutral-10 text-neutral-70 font-semibold text-[1.4rem] hover:border-brand-light disabled:opacity-30 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+            className="flex-1 py-[1rem] rounded-[var(--ds-radius-card)] bg-neutral-03 border border-neutral-10 text-neutral-70 font-semibold text-[1.4rem] hover:border-brand-light disabled:opacity-30 disabled:cursor-not-allowed transition-colors min-h-[44px]"
           >
             Câu tiếp theo
           </button>

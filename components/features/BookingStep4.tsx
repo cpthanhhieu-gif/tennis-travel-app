@@ -80,7 +80,7 @@ export default function BookingStep4({ onConfirm }: Props) {
       </div>
 
       {/* Guarantees */}
-      <div className="bg-success-light border border-success/30 rounded-[0.8rem] p-[1.6rem] mb-[2.4rem]">
+      <div className="bg-success-light border border-success/30 rounded-[var(--ds-radius-card)] p-[1.6rem] mb-[2.4rem]">
         <ul className="space-y-[0.8rem]">
           {[
             pkg.id === "sbu2" ? "Báo giá trong 1 ngày làm việc" : pkg.id === "sbu3" ? "Xác nhận trong 24 giờ" : "Xác nhận sau khi đặt cọc",

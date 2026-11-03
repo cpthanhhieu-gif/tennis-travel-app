@@ -40,7 +40,7 @@ export default function DestinationsSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,14,26,0.75)] to-transparent" />
               <div className="absolute bottom-[1.2rem] left-[1.2rem]">
                 <h3 className="text-[2rem] font-bold text-white leading-tight">{dest.name}</h3>
-                <p className="text-[#FFDA00] text-[1.2rem]">{dest.resort}</p>
+                <p className="text-[var(--ds-palette-ffda00)] text-[1.2rem]">{dest.resort}</p>
               </div>
             </div>
 

@@ -1,0 +1,29 @@
+"use client";
+import {useState} from "react";
+import Link from "next/link";
+import {ArrowRight,Bell,Search,Luggage,Hotel,Plane,Gift,Ticket,Globe,BookOpen,Compass,House,LayoutGrid,UserRound,PlaySquare,CalendarDays,Trophy,X} from "lucide-react";
+import Modal from "@/components/ui/Modal";
+const services=[{label:"Tour trọn gói",Icon:Luggage},{label:"Khách sạn",Icon:Hotel},{label:"Vé máy bay",Icon:Plane},{label:"Combo ưu đãi",Icon:Gift},{label:"Travel Ace",Icon:Trophy,active:true},{label:"Vé tham quan",Icon:Ticket},{label:"Visa",Icon:Globe},{label:"Tìm booking",Icon:BookOpen}];
+export default function VietravelHome(){
+ const [query,setQuery]=useState(""),[notice,setNotice]=useState("");
+ const normalize=(v:string)=>v.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").toLowerCase();
+ const matches=services.filter(s=>normalize(s.label).includes(normalize(query.trim())));
+ const unavailable=(label:string)=>setNotice(`${label} chưa có trong bản trải nghiệm này. Bạn có thể khám phá đầy đủ dịch vụ du lịch kết hợp tennis tại Travel Ace.`);
+ return <div className="vtr-shell">
+ <a className="travel-skip" href="#vietravel-main">Bỏ qua điều hướng</a>
+ <header className="vtr-hero"><div className="vtr-hero-inner">
+ <div className="vtr-top"><Link href="/vietravel" className="vtr-logo" aria-label="Vietravel · trang chủ">Vietravel<span>YOUR JOURNEY · YOUR VALUE</span></Link><div className="vtr-top-actions"><button type="button" aria-label="Thông báo" onClick={()=>unavailable("Thông báo")}><Bell size={22}/></button><button type="button" onClick={()=>setNotice("Bản trải nghiệm hiện hỗ trợ tiếng Việt.")} aria-label="Ngôn ngữ: tiếng Việt">VI</button></div></div>
+ <div className="vtr-hero-copy"><span className="vtr-eyebrow">MỖI CHUYẾN ĐI, MỘT TRẢI NGHIỆM MỚI</span><h1>Bạn muốn đi đâu?</h1><p>Khám phá những hành trình dành riêng cho bạn.</p></div>
+ <div className="vtr-search"><Search size={24} aria-hidden="true"/><label className="sr-only" htmlFor="vietravel-search">Tìm dịch vụ Vietravel</label><input id="vietravel-search" type="search" placeholder="Tìm dịch vụ: tour, Travel Ace…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button type="button" aria-label="Xóa tìm kiếm" onClick={()=>setQuery("")}><X size={20}/></button>}<span className="vtr-search-divider"/><Compass size={24} aria-hidden="true"/></div>
+ <div className="vtr-promos"><button type="button" onClick={()=>unavailable("Combo theo mùa")}>Combo theo mùa</button><button type="button" onClick={()=>unavailable("Tour thu đông")}>Tour thu đông</button><Link href="/?entry=vietravel">Du lịch & tennis <ArrowRight size={16}/></Link></div>
+ </div></header>
+ <main id="vietravel-main" tabIndex={-1} className="vtr-main">
+ <section className="vtr-services" aria-labelledby="vtr-services-title"><div className="vtr-section-heading"><h2 id="vtr-services-title">Khám phá dịch vụ</h2><span>Dành cho chuyến đi của bạn</span></div><div className="vtr-service-grid">{matches.map(({label,Icon,active})=>active?<Link href="/?entry=vietravel" key={label} className="vtr-service vtr-service-ace"><span className="vtr-service-icon"><Icon size={30}/><span className="vtr-new">Mới</span></span><strong>{label}</strong><small>Du lịch & tennis</small></Link>:<button type="button" key={label} className="vtr-service" onClick={()=>unavailable(label)}><span className="vtr-service-icon"><Icon size={30}/></span><strong>{label}</strong></button>)}</div>{!matches.length&&<div className="vtr-empty" role="status"><p>Chưa tìm thấy dịch vụ phù hợp.</p><button type="button" onClick={()=>setQuery("")}>Xem tất cả dịch vụ</button></div>}</section>
+ <section className="vtr-ace-banner" aria-labelledby="vtr-ace-title"><div className="vtr-ace-art" aria-hidden="true"><div className="vtr-court"><div/><span/></div><div className="vtr-ball"/><span className="vtr-art-label">ACE YOUR NEXT JOURNEY</span></div><div className="vtr-ace-copy"><span className="vtr-eyebrow">TRAVEL ACE · DU LỊCH KẾT HỢP TENNIS</span><h2 id="vtr-ace-title">Mang đam mê<br/>đi xa hơn.</h2><p>Ra sân, khám phá điểm đến và tận hưởng kỳ nghỉ cùng những người chung đam mê.</p><div className="vtr-ace-tags"><span><CalendarDays size={16}/>Học & chơi</span><span><Trophy size={16}/>Thi đấu</span><span><Compass size={16}/>Nghỉ dưỡng</span></div><Link className="vtr-cta" href="/?entry=vietravel">Khám phá Travel Ace <ArrowRight size={20}/></Link></div></section>
+ <section className="vtr-discover"><div><span className="vtr-eyebrow">MỘT HÀNH TRÌNH, NHIỀU KẾT NỐI</span><h2>Trải nghiệm của bạn<br/>bắt đầu từ đây.</h2></div><div className="vtr-discover-card"><Trophy size={26}/><h3>Chọn gói phù hợp</h3><p>Tìm trải nghiệm theo mục tiêu học, chơi, thi đấu hoặc nghỉ dưỡng.</p><Link href="/?entry=vietravel">Xem các gói <ArrowRight size={16}/></Link></div><div className="vtr-discover-card"><CalendarDays size={26}/><h3>Đồng hành suốt chuyến đi</h3><p>Theo dõi lịch, chuẩn bị cho hành trình và lưu lại thành tích của bạn.</p><Link href="/pre-tour">Mở hành trình <ArrowRight size={16}/></Link></div></section>
+ <p className="vtr-demo-note">Bản trải nghiệm tích hợp · Travel Ace đã có thể khám phá. Các dịch vụ Vietravel khác đang được minh họa.</p>
+ </main>
+ <nav className="vtr-bottom" aria-label="Điều hướng Vietravel"><Link href="/vietravel" aria-current="page"><House size={22}/><span>Trang chủ</span></Link>{[{label:"Tiện ích",Icon:LayoutGrid},{label:"Khuyến mãi",Icon:Ticket},{label:"Video",Icon:PlaySquare},{label:"Tài khoản",Icon:UserRound}].map(({label,Icon})=><button type="button" key={label} onClick={()=>unavailable(label)}><Icon size={22}/><span>{label}</span></button>)}</nav>
+ <Modal isOpen={!!notice} onClose={()=>setNotice("")} title="Thông tin bản trải nghiệm"><p>{notice}</p><div className="vtr-modal-actions"><button className="ds-link" type="button" onClick={()=>setNotice("")}>Đóng</button><Link href="/?entry=vietravel" className="ds-cta">Mở Travel Ace</Link></div></Modal>
+ </div>;
+}

@@ -646,3 +646,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 :where(input,select,textarea)[aria-invalid=true]{border-color:var(--ds-danger)}
 @media(max-width:767px){:root{--ds-gutter:16px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Explicit parent destination; independent of in-module Back navigation. */
+.travel-parent{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px max(16px,calc((100% - 1184px)/2));font-size:13px;font-weight:600;color:var(--ds-primary);background:var(--ds-surface);border-bottom:1px solid var(--ds-border)}
+.travel-parent:hover{background:var(--ds-subtle)}

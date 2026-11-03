@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { BookingLogin } from "./BookingAccess";
 import Button from "@/components/ui/Button";
 import { useBooking } from "@/lib/BookingContext";
-import { tourPackages, tours, formatVND, formatVNDShort } from "@/lib/mock-data";
+import { tourPackages, tours, formatVND } from "@/lib/mock-data";
 // destinations import removed — Step4 now reads from tours[]
 import { Check } from "lucide-react";
 
@@ -69,15 +69,16 @@ export default function BookingStep4({ onConfirm }: Props) {
         {[{title:"Chuyến đi & người tham gia",step:1,items:rows.slice(0,-3)},{title:"Thông tin liên hệ",step:3,items:rows.slice(-3)}].map(group=><section className="booking-review-group" key={group.title}><header><h3>{group.title}</h3><button type="button" className="ui-text-button" onClick={()=>setStep(group.step)}>Chỉnh sửa</button></header><dl>{group.items.map(({label,value})=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>)}
         {/* Total */}
         {pkg.id==="sbu2"?<section className="ds-quality"><h3>Chờ báo giá theo nhu cầu đoàn</h3><p>Chi phí phụ thuộc quy mô được chốt, lịch và các dịch vụ yêu cầu. Chưa cần đặt cọc khi gửi yêu cầu.</p></section>:<div className="border-t border-neutral-10 mt-[1.6rem] pt-[1.6rem]">
-          <div className="flex justify-between items-baseline">
+          <div className="booking-price-total">
             <span className="text-neutral-50 font-semibold text-[1.6rem]">{pkg.id==="sbu3"?"Chi phí gói cơ bản tham khảo":"Tổng giá gói đã chọn"}</span>
-            <span className="text-[2.6rem] font-extrabold text-brand-secondary">
-              {formatVNDShort(total)}
+            <span className="booking-price-amount">
+              {formatVND(total)}
             </span>
           </div>
-          <p className="text-neutral-30 text-[1.2rem] mt-[0.4rem] text-right">
-            {formatVND(pricePerPerson)} × {booking.numPeople-booking.numCompanions} người chơi + {formatVND(companionRate(booking.packageId))} × {booking.numCompanions} người đi cùng
-          </p>
+          <div className="booking-price-breakdown" aria-label="Chi tiết giá gói">
+            {booking.numPeople>booking.numCompanions&&<p><span>{booking.numPeople-booking.numCompanions} người chơi × {formatVND(pricePerPerson)}</span><strong>{formatVND(pricePerPerson*(booking.numPeople-booking.numCompanions))}</strong></p>}
+            {booking.numCompanions>0&&<p><span>{booking.numCompanions} người đi cùng × {formatVND(companionRate(booking.packageId))}</span><strong>{formatVND(companionRate(booking.packageId)*booking.numCompanions)}</strong></p>}
+          </div>
           {pkg.id==="sbu3"&&<p>Chưa gồm dịch vụ bổ sung, phụ thu phòng; giá cuối cùng theo phương án được xác nhận. Chưa cần thanh toán khi gửi yêu cầu.</p>}
         </div>}
       </div>

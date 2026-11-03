@@ -223,7 +223,7 @@ async function postLocal(req:NextRequest){
  if(o.completedAt)return NextResponse.json({error:"Chuyến đã kết thúc"},{status:409});
  if(b.action==="saveOperations"){
  if(!validOperations(b.details)||b.details.size>o.numPeople)return NextResponse.json({error:"Kiểm tra thông tin sân, HLV và quy mô nhóm"},{status:400});
- o.operations={...b.details,updatedAt:new Date().toISOString()};if(o.groupChange?.status==="pending"){o.groupChange.status="accepted";o.groupChange.resolution="Điều phối đã cập nhật thông tin nhóm theo chuyến.";o.groupChange.resolvedAt=new Date().toISOString();}addRequestEvent(o,"created","Đã cập nhật sân, HLV và phân nhóm theo lịch");
+ o.trainingGroup=undefined;o.operations={...b.details,updatedAt:new Date().toISOString()};if(o.groupChange?.status==="pending"){o.groupChange.status="accepted";o.groupChange.resolution="Điều phối đã cập nhật thông tin nhóm theo chuyến.";o.groupChange.resolvedAt=new Date().toISOString();}addRequestEvent(o,"created","Đã cập nhật sân, HLV và phân nhóm theo lịch");
  }else{
  if(requestBlocked(o))return NextResponse.json({error:"Cần xử lý thông tin yêu cầu trước khi gửi phương án"},{status:409});
  if(o.paid>0||o.offer?.acceptedAt||o.groupPlanToken)return NextResponse.json({error:"Không sửa báo giá đã chấp thuận, thanh toán hoặc chia sẻ thành viên"},{status:409});
@@ -320,7 +320,7 @@ async function postLocal(req:NextRequest){
    const group=trainingGroups(o).find(g=>g.key===b.groupKey);if(!group)return NextResponse.json({error:"Nhóm không thuộc gói của chuyến"},{status:400});
    if(pkg!=="sbu2"&&!o.ntrpLevel)return NextResponse.json({error:"Khách chưa có NTRP, chờ đánh giá trước khi phân nhóm"},{status:409});
    if(b.action==="assignTrainingGroup"&&o.groupChange?.status==="pending")return NextResponse.json({error:"Xử lý yêu cầu điều chỉnh đang chờ trước"},{status:409});
-   o.trainingGroup={key:group.key,assignedAt:new Date().toISOString()};
+   o.operations=undefined;o.trainingGroup={key:group.key,assignedAt:new Date().toISOString()};
    if(b.action==="resolveGroupChange"){o.groupChange!.status="accepted";o.groupChange!.resolution="Đã cập nhật nhóm theo điều phối.";o.groupChange!.resolvedAt=new Date().toISOString();}
   }
   await save(s,scope);return NextResponse.json(view(s));

@@ -1,8 +1,9 @@
+import type {OperationDetails} from "./operations";
 import {tours} from "./mock-data";
 import {tripItinerary,type Activity} from "./trip-itinerary";
 export type TrainingGroup={key:string;name:string;ntrpMin:number;ntrpMax:number;coach:string;court:number;players:{name:string;ntrp:number}[]};
 export type GroupChange={id:string;reason:string;status:"pending"|"accepted"|"declined";createdAt:string;resolvedAt?:string;resolution?:string};
-export type GroupOrder={tourId:string;departureCode:string;ntrpLevel?:number;trainingGroup?:{key:string;assignedAt:string};activityUpdates?:Record<string,{location:string}>};
+export type GroupOrder={operations?:OperationDetails;tourId:string;departureCode:string;ntrpLevel?:number;trainingGroup?:{key:string;assignedAt:string};activityUpdates?:Record<string,{location:string}>};
 const names=["Minh Anh","Quang Huy","Thu Hà","Bảo Ngọc","Gia Bảo","Hoàng Nam"];
 const data:Record<string,TrainingGroup[]>={
  sbu1:[{key:"leisure-foundation",name:"Foundation — Làm quen tennis",ntrpMin:1.5,ntrpMax:2.5,coach:"HLV Minh An",court:1,players:names.slice(0,5).map((name,i)=>({name,ntrp:i%2?2:1.5}))},{key:"leisure-rally",name:"Rally — Củng cố kỹ thuật",ntrpMin:2.5,ntrpMax:3.5,coach:"HLV Thanh Trúc",court:2,players:names.slice(0,5).map((name,i)=>({name,ntrp:i%2?3:2.5}))}],
@@ -12,7 +13,8 @@ const data:Record<string,TrainingGroup[]>={
 export function trainingGroups(order:{tourId:string}){const t=tours.find(t=>t.id===order.tourId);return data[t?.packageId??""]??[];}
 export function selectedTrainingGroup(order:GroupOrder){return trainingGroups(order).find(g=>g.key===order.trainingGroup?.key);}
 export function sessionAssignment(order:GroupOrder,activity:Activity){
- const g=selectedTrainingGroup(order);if(!g||!["court","clinic","competition"].includes(activity.kind))return null;
+ if(!["court","clinic","competition"].includes(activity.kind))return null;
+ const g=selectedTrainingGroup(order),details=order.operations?.confirmed?order.operations:null;if(!g&&!details)return null;
  const t=tours.find(t=>t.id===order.tourId)!;const base=tripItinerary(order).flatMap(d=>d.activities).find(a=>a.id===activity.id);const override=order.activityUpdates?.[activity.id]?.location;
- return {coach:g.coach,court:override&&override!==base?.location?override:`${t.destinationName} · Sân số ${g.court}`,group:g.name};
+ return {coach:details?.coach??g!.coach,court:override&&override!==base?.location?override:details?.court??`${t.destinationName} · Sân số ${g!.court}`,group:details?.groupName??g!.name};
 }

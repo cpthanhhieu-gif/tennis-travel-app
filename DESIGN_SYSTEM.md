@@ -33,7 +33,7 @@ Các bản trong `../home-concepts` là tài liệu/prototype lịch sử, khôn
 - Next: `app/design-system/next.css`, đã triển khai bộ tham chiếu Vietravel từ 19 ảnh. Các override cho giao diện hiện hữu được scope dưới `:root[data-design-theme="next"]`; lớp `vt-*` dành component mới. Xem `app/design-system/NEXT_REFERENCE.md` để phân biệt phần quan sát và phần tự chuẩn hóa.
 - Vào `/design-preview` để chọn bộ cho trình duyệt hiện tại. Cookie dùng chung cho mọi đường dẫn, tồn tại 30 ngày; chuyển bộ không đụng dữ liệu nghiệp vụ. Cookie bị chặn thì lựa chọn không được ghi nhớ.
 - Chọn “Dùng Classic” để quay lại ngay. “Theo mặc định sản phẩm” xóa lựa chọn cá nhân.
-- Mặc định toàn sản phẩm nằm ở `DEFAULT_DESIGN_THEME` trong `lib/design-theme.ts`, hiện là `classic`. Sau khi duyệt Next, đổi sang `next` và triển khai. Đổi về `classic` rồi triển khai để rollback mặc định. Cookie preview cá nhân vẫn có ưu tiên; dùng nút “Theo mặc định sản phẩm” khi kiểm tra rollout.
+- Mặc định toàn sản phẩm nằm ở `DEFAULT_DESIGN_THEME` trong `lib/design-theme.ts`, hiện là `next` theo yêu cầu người dùng. Đổi về `classic` rồi triển khai để rollback mặc định. Cookie preview cá nhân vẫn có ưu tiên; dùng nút “Theo mặc định sản phẩm” khi kiểm tra rollout.
 - Theme được xác định phía server trước khi trả HTML, tránh nháy màu khi tải. Vì layout đọc cookie, các trang dùng layout được render theo request thay vì xuất HTML tĩnh; cân nhắc tác động cache khi triển khai.
 
 ## Quy trình nhận bộ thiết kế mới

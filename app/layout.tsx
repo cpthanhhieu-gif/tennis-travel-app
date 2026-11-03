@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./design-system/next.css";
 import { cookies } from "next/headers";
 import { DESIGN_THEME_COOKIE, resolveDesignTheme } from "@/lib/design-theme";
 

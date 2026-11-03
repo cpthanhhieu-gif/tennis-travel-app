@@ -1,3 +1,2 @@
 /* Theme entry point: retain Classic; opt into Next per browser or product default. */
 @import "./classic.css";
-@import "./next.css";

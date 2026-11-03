@@ -1,6 +1,81 @@
-/* New design system overrides belong here. Classic is the complete fallback.
-   Intentionally identical until the new specifications are supplied.
-   Scope ALL token and component overrides to this selector. */
+/* Reconstructed from the user's Vietravel screenshots; not official tokens. */
 :root[data-design-theme="next"] {
-  /* Example once approved: --ds-primary: ...; */
+  --ds-primary:#1046c8; --ds-primary-hover:#0a389f; --ds-primary-pressed:#082c7d;
+  --ds-booking:#dc1306; --ds-booking-hover:#b91006;
+  --ds-ink:#191919; --ds-muted:#62676f; --ds-canvas:#f4f7ff; --ds-surface:#fff;
+  --ds-subtle:#d9f1ff; --ds-border:#e0e3e8; --ds-input-border:#a2a8b1;
+  --ds-accent:#d9f1ff; --ds-accent-hover:#c5e8ff;
+  --ds-success:#197342; --ds-success-soft:#e9f7ef;
+  --ds-warning:#855300; --ds-warning-soft:#fff5dc;
+  --ds-danger:#b91c1c; --ds-danger-soft:#fff0ee;
+  --ds-font:"Segoe UI",Arial,sans-serif;
+  --ds-radius-control:12px; --ds-radius-card:16px; --ds-radius-dialog:24px;
+  --ds-shadow-card:0 3px 14px rgb(24 39 65 / 9%);
+  --ds-shadow-floating:0 8px 32px rgb(24 39 65 / 16%);
+  --ds-palette-d9eeff:#d9f1ff; --ds-palette-f1f9ff:#f4f7ff;
+  --ds-palette-999999:#62676f; --ds-palette-dddddd:#e0e3e8;
+  --ds-palette-0a1628:#092665; --ds-palette-1e3a5f:#1046c8;
+  --ds-palette-1e4976:#0a389f; --ds-palette-1a6091:#075ca8;
+  --ds-palette-edf2e8:#f4f7ff; --ds-palette-dde8db:#e3ecff;
+  --ds-palette-dde4d9:#e0e3e8; --ds-palette-eef3ec:#f4f7ff;
+  --ds-palette-edf0eb:#edf1f8; --ds-palette-eaf0e6:#e9f0ff;
+  --ds-palette-426c40:#62676f; --ds-palette-c5d9cc:#d4dfef;
+  --ds-palette-e0eadd:#e9f0ff; --ds-palette-a4b8aa:#a2a8b1;
+  --ds-palette-eef3e8:#f4f7ff; --ds-palette-103e3012:#1046c812;
+  --ds-palette-d0dfd3:#d4dfef; --ds-palette-e5eae1:#e9edf3;
+  --ds-palette-b4c5b0:#b6c6e2; --ds-palette-d5dfd0:#d4dfef;
+  --ds-palette-83968b:#a2a8b1; --ds-palette-f0f3f1:#f0f2f6;
+  --ds-palette-65736b:#62676f; --ds-palette-9aac9f:#a2a8b1;
+  --ds-palette-103e3006:#1046c806; --ds-palette-f7f9f7:#f7f9ff;
+  --ds-palette-f2f6f3:#f4f7ff; --ds-palette-fafcfb:#fafbff;
+  --ds-palette-e9eee5:#e6f1ff; --ds-palette-4b6453:#62676f;
+  --ds-palette-d8e1cf:#d4e6ff; --ds-palette-bdcbb8:#b6c6e2;
+  --ds-palette-59705f:#62676f; --ds-palette-e3e9e3:#e0e3e8;
+  --ds-palette-6a826c:#7183a3; --ds-palette-34593f:#1046c8;
+  --ds-palette-f1f5ee:#f4f7ff; --ds-palette-c5d1c5:#a2a8b1;
 }
+:root[data-design-theme="next"] body{background:var(--ds-canvas);color:var(--ds-ink);line-height:1.6}
+:root[data-design-theme="next"] :is(h1,h2,h3){letter-spacing:-.02em}
+:root[data-design-theme="next"] :is(.ds-navbar,.ds-bottomnav){background:var(--ds-surface);box-shadow:var(--ds-shadow-card)}
+:root[data-design-theme="next"] :is(.app-tour-card,.app-personal-card,.app-resume-card,.ds-tour,.ds-summary,.ui-entry-card,.admin-panel,.passport-entry,.passport-stamp-summary,.premium-benefit-card,.profile-tennis,.journey-card){border-radius:var(--ds-radius-card);background:var(--ds-surface);border-color:var(--ds-border);box-shadow:var(--ds-shadow-card);overflow:hidden}
+:root[data-design-theme="next"] .ds-hero{background:linear-gradient(125deg,#073683,var(--ds-primary));color:white;border-radius:var(--ds-radius-card);overflow:hidden}
+:root[data-design-theme="next"] :is(.app-tour-body,.ds-tour-body){padding:20px}
+:root[data-design-theme="next"] :is(.app-search-box,.ds-search input){background:var(--ds-surface);border:1px solid var(--ds-input-border);border-radius:var(--ds-radius-control);min-height:52px}
+:root[data-design-theme="next"] :is(.ds-cta,.vt-booking-button){background:var(--ds-booking);color:white;border-color:var(--ds-booking);border-radius:var(--ds-radius-control);min-height:44px;box-shadow:none}
+:root[data-design-theme="next"] :is(.ds-cta,.vt-booking-button):hover{background:var(--ds-booking-hover)}
+:root[data-design-theme="next"] .ds-cta.ds-lime{background:var(--ds-subtle);color:var(--ds-primary)}
+:root[data-design-theme="next"] :is(.ds-link,.ui-text-button){color:var(--ds-primary)}
+:root[data-design-theme="next"] :is(.ds-filters,.app-intent-chips,.premium-benefit-tabs) button{border-radius:999px;background:var(--ds-surface);color:var(--ds-ink);border:1px solid var(--ds-border);min-height:44px;padding:10px 18px}
+:root[data-design-theme="next"] :is(.ds-filters,.app-intent-chips,.premium-benefit-tabs) button[aria-pressed=true]{background:var(--ds-primary);border-color:var(--ds-primary);color:white}
+:root[data-design-theme="next"] .ui-tabs{background:var(--ds-surface);border-bottom:1px solid var(--ds-border)}
+:root[data-design-theme="next"] .ui-tabs button{border-radius:0;min-height:52px;color:var(--ds-ink)}
+:root[data-design-theme="next"] .ui-tabs button[aria-selected=true]{color:var(--ds-primary);border-bottom:3px solid var(--ds-primary);background:transparent}
+:root[data-design-theme="next"] :is(.ds-tag,.ui-badge){background:var(--ds-subtle);color:var(--ds-primary);border-radius:999px;padding:5px 12px}
+:root[data-design-theme="next"] :is(.ds-price,.ds-price-row strong,.app-tour-price strong){color:var(--ds-primary);font-variant-numeric:tabular-nums}
+:root[data-design-theme="next"] :is(input:not([type=checkbox]):not([type=radio]),select,textarea){border-radius:var(--ds-radius-control)}
+:root[data-design-theme="next"] :is(input,select,textarea)[aria-invalid=true]{border-color:var(--ds-danger)}
+:root[data-design-theme="next"] :is(button,a,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid var(--ds-primary);outline-offset:3px;box-shadow:0 0 0 2px white}
+:root[data-design-theme="next"] .ui-dialog{border-radius:var(--ds-radius-dialog);box-shadow:var(--ds-shadow-floating)}
+:root[data-design-theme="next"] .ui-dialog::backdrop{background:rgb(0 0 0 / 48%)}
+:root[data-design-theme="next"] .ui-dialog-surface{border-radius:var(--ds-radius-dialog);background:var(--ds-surface)}
+:root[data-design-theme="next"] .ui-dialog-header{background:var(--ds-surface);border-bottom:1px solid var(--ds-border)}
+:root[data-design-theme="next"] .admin-demo header{border-bottom:1px solid var(--ds-border);padding-bottom:24px}
+:root[data-design-theme="next"] .admin-demo .ds-cta{background:var(--ds-primary);border-color:var(--ds-primary)}
+:root[data-design-theme="next"] .admin-demo .ds-cta:hover{background:var(--ds-primary-hover)}
+:root[data-design-theme="next"] .admin-metrics>div{background:var(--ds-surface);border:1px solid var(--ds-border);box-shadow:var(--ds-shadow-card)}
+@media(max-width:767px){:root[data-design-theme="next"] .ui-dialog.ui-sheet,:root[data-design-theme="next"] .ui-sheet .ui-dialog-surface{border-radius:24px 24px 0 0}}
+
+/* Catalogue and reusable controls: these classes are only used by new components. */
+.vt-catalog{max-width:1180px;margin:auto;padding:40px 24px 80px;font-size:16px}
+.vt-catalog h1{font-size:36px;line-height:1.2;font-weight:750;margin:12px 0 20px}.vt-catalog h2{font-size:24px;font-weight:700;margin:0 0 20px}.vt-catalog h3{font-size:18px;font-weight:700;margin:0 0 12px}.vt-catalog p{margin:8px 0 16px}
+.vt-catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-block:24px}.vt-catalog-panel{min-width:0;padding:24px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-card);background:var(--ds-surface)}
+.vt-catalog-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:16px 0}.vt-swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px}.vt-swatch{border:1px solid var(--ds-border);border-radius:12px;overflow:hidden}.vt-swatch>div{height:64px}.vt-swatch p{padding:8px;margin:0;font-size:13px}
+.vt-alert{display:flex;gap:12px;padding:16px;border-radius:var(--ds-radius-control);margin-block:12px;align-items:flex-start}.vt-alert svg{flex-shrink:0}.vt-alert p{margin:0}.vt-alert-info{color:var(--ds-primary);background:var(--ds-subtle)}.vt-alert-success{color:var(--ds-success);background:var(--ds-success-soft)}.vt-alert-warning{color:var(--ds-warning);background:var(--ds-warning-soft)}.vt-alert-error{color:var(--ds-danger);background:var(--ds-danger-soft)}
+.vt-field{display:grid;gap:8px;margin-block:16px;font-size:14px;font-weight:600}.vt-field :is(select,textarea){width:100%;padding:12px 16px;background:var(--ds-surface);border:1px solid var(--ds-input-border);color:var(--ds-ink);font:inherit;font-size:16px;min-height:48px;border-radius:var(--ds-radius-control)}
+.vt-choice{display:flex;gap:12px;align-items:center;min-height:44px;font-size:14px}.vt-choice input{width:20px;height:20px;accent-color:var(--ds-primary)}.vt-switch{display:inline-flex;align-items:center;gap:12px;min-height:44px;font-size:14px}.vt-switch-track{position:relative;flex-shrink:0;width:44px;height:26px;background:var(--ds-muted);border-radius:999px}.vt-switch-track:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;background:white;border-radius:50%;transition:transform var(--ds-motion)}.vt-switch[aria-checked=true] .vt-switch-track{background:var(--ds-primary)}.vt-switch[aria-checked=true] .vt-switch-track:after{transform:translateX(18px)}
+.vt-stepper{display:inline-flex;gap:16px;align-items:center}.vt-stepper button{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--ds-input-border);border-radius:50%;background:var(--ds-surface)}.vt-stepper output{min-width:24px;text-align:center;color:var(--ds-primary);font-weight:700}
+.vt-empty{text-align:center;padding:32px 16px;border:1px dashed var(--ds-border);border-radius:var(--ds-radius-card)}.vt-skeleton{height:16px;background:var(--ds-border);border-radius:8px;margin:12px 0}.vt-skeleton:last-child{width:60%}
+.vt-table-wrap{overflow:auto;max-width:100%;border:1px solid var(--ds-border);border-radius:var(--ds-radius-control)}.vt-table{width:100%;border-collapse:collapse;text-align:left;font-size:14px}.vt-table :is(th,td){padding:16px;border-bottom:1px solid var(--ds-border);white-space:nowrap}.vt-table th{background:var(--ds-canvas);font-weight:700}.vt-table tbody tr:last-child td{border:0}.vt-table caption{text-align:left;padding:16px;font-weight:700}.vt-status{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--ds-subtle);color:var(--ds-primary);font-size:12px;font-weight:700}
+.vt-booking-summary{background:var(--ds-canvas);border-radius:var(--ds-radius-card);overflow:hidden;border:1px solid var(--ds-border)}.vt-booking-summary>h3{background:var(--ds-subtle);padding:16px}.vt-booking-summary>div{padding:20px}.vt-booking-summary strong{color:var(--ds-booking,var(--ds-primary));font-size:24px;font-variant-numeric:tabular-nums}.vt-booking-summary .vt-booking-button{display:flex;justify-content:center;width:100%;margin-top:16px;padding:12px 20px}
+@media(max-width:767px){.vt-catalog{padding:24px 16px 64px}.vt-catalog h1{font-size:28px}.vt-catalog-grid{grid-template-columns:1fr}.vt-catalog-panel{padding:20px}}
+@media(prefers-reduced-motion:reduce){.vt-switch-track:after{transition:none}}

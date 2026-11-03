@@ -10,13 +10,15 @@ export function seedScenario(id:ScenarioId){
  const t=tours.find(t=>t.packageId===(id==="club"?"sbu2":"sbu1"))!;const d=t.departureSchedules[0];
  const count=id==="club"?16:1,total=coupleTotal(t.packageId,d.price,count,0);
  const completedAt=new Date().toISOString();
- const order={id:`demo-${id}-primary`,key:`demo-${id}-primary`,tourId:t.id,name:profile.name,departureCode:d.code,numPeople:count,numCompanions:0,playerRate:d.price,companionRate:companionRate(t.packageId),total,deposit:Math.round(total*(id==="club"?.5:.3)),paid:id==="returning"?total:0,status:id==="returning"?"Đã hoàn thành":"Chờ báo giá đoàn",payment:id==="returning"?"success":"pending",points:id==="returning"?Math.floor(total*2/100000):0,...(id==="returning"?{startedAt:completedAt,completedAt,ntrpLevel:3.5,ntrpLabel:getNtrpLevel(3.5).label}:{})};
+ const order={id:`demo-${id}-primary`,key:`demo-${id}-primary`,tourId:t.id,name:profile.name,departureCode:d.code,numPeople:count,numCompanions:0,...(id==="club"?{groupRequest:{min:12,max:16,dates:t.departureSchedules.slice(0,2).map(d=>d.date),budget:d.price,format:"Đánh đôi",courts:4,gala:true,companions:0}}:{}),playerRate:d.price,companionRate:companionRate(t.packageId),total,deposit:Math.round(total*(id==="club"?.5:.3)),paid:id==="returning"?total:0,status:id==="returning"?"Đã hoàn thành":"Chờ báo giá đoàn",payment:id==="returning"?"success":"pending",points:id==="returning"?Math.floor(total*2/100000):0,...(id==="returning"?{startedAt:completedAt,completedAt,ntrpLevel:3.5,ntrpLabel:getNtrpLevel(3.5).label}:{})};
  return {sessions:{},profile,orders:id==="club"||id==="returning"?[order]:[],ledger:id==="returning"?[{key:`${order.id}:tour`,orderId:order.id,kind:"tour",amount:order.points,createdAt:completedAt}]:[],...(level?{ntrpProfile:{level,label:getNtrpLevel(level).label,assessedAt:completedAt}}:{}),demo:{scenario:id,seedVersion:1,createdAt:completedAt,bookingPreset:id==="couple"?{packageId:"sbu3",numPeople:2,numCompanions:1}:null}};
 }
 export const scenarioKey=(scope?:string)=>isScenarioId(scope)?`scenarios/${scope}/store`:"store";
 export async function ensureScenario(id:ScenarioId){
  const key=scenarioKey(id);const existing=await readDocument<ReturnType<typeof seedScenario>>(key);
  if(!existing){await writeDocument(key,seedScenario(id));return;}
+ // Add the missing request context to the original group demo without resetting progress.
+ if(id==="club"){const order=existing.orders.find(o=>o.id==="demo-club-primary");if(order&&!order.groupRequest){order.groupRequest=seedScenario("club").orders[0].groupRequest;await writeDocument(key,existing);}}
  // Upgrade older demo profiles without resetting bookings or replacing saved contacts.
  if(existing.profile&&(!existing.profile.phone||!existing.profile.email)){const defaults=seedScenario(id).profile;existing.profile={...existing.profile,phone:existing.profile.phone||defaults.phone,email:existing.profile.email||defaults.email};await writeDocument(key,existing);}
 }

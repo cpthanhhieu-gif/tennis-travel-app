@@ -20,7 +20,7 @@ export async function GET(req:NextRequest){return apiStorage(req,async()=>{
  const token=req.cookies.get("tt-session")?.value;
  const authenticated=!!token&&store.sessions[createHash("sha256").update(token).digest("hex")]>Date.now();
  const order=store.orders.find(o=>!o.completedAt)??store.orders[0];
- const response=NextResponse.json({room,scenario:scope??null,changed,revision:shared?.revision,customer:store.profile?.name,booking:order?.id,stage:order?.status,coach:order?.operations?.coach??(order?selectedTrainingGroup(order)?.coach:undefined),syncedAt:new Date().toISOString()},{headers:{"Cache-Control":"no-store"}});
+ const response=NextResponse.json({room,scenario:scope??null,entryPath:order?"/pre-tour":"/",changed,revision:shared?.revision,customer:store.profile?.name,booking:order?.id,stage:order?.status,coach:order?.operations?.coach??(order?selectedTrainingGroup(order)?.coach:undefined),syncedAt:new Date().toISOString()},{headers:{"Cache-Control":"no-store"}});
  const options={path:"/",sameSite:"strict" as const,secure:req.nextUrl.protocol==="https:",maxAge:86400};
  if(changed||!authenticated){
   // The room link is the existing demo capability; never grant admin rights here.

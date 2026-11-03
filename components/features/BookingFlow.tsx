@@ -6,6 +6,7 @@ import { ChevronLeft, Check, CalendarDays, Users, ArrowRight } from "lucide-reac
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { useBooking } from "@/lib/BookingContext";
+import DemoScenarioGuide from "./DemoScenarioGuide";
 import BookingStep1 from "./BookingStep1";
 import BookingStep2 from "./BookingStep2";
 import BookingStep3 from "./BookingStep3";
@@ -53,6 +54,7 @@ export default function BookingFlow() {
     <div className={`ds-container ds-booking booking-unified ${step===1?"booking-compact":""}`}>
 
       <header className="ds-booking-title"><p className="ds-eyebrow">ĐẶT CHUYẾN ĐI</p><h1>{STEPS[visibleStep - 1]}</h1><p>{isGroup ? "Quy mô đoàn · Liên hệ đại diện · Yêu cầu báo giá" : "Chọn lịch · Đánh giá trình độ · Xem lại thông tin"}</p></header>
+      <DemoScenarioGuide packageId={booking.packageId}/>
       {/* Step progress */}
       <div className="mb-[3.2rem]">
         {/* Top row: back + step count */}

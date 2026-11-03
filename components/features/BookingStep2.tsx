@@ -1,4 +1,6 @@
 "use client";
+import DemoScenarioGuide from "./DemoScenarioGuide";
+import {demoParty,browserScenario} from "@/lib/demo-experience";
 import {coupleTotal} from "@/lib/couple-pricing";
 import {requestErrorMessage} from "@/lib/request-error";
 
@@ -11,7 +13,7 @@ import { packageCapacity, ntrpQuiz, getNtrpLevel, tourPackages, tours } from "@/
 interface Props { onNext: () => void }
 
 export default function BookingStep2({ onNext }: Props) {
-  const { booking, updateBooking, ntrpQuizState, updateNtrpQuizState } = useBooking();
+  const { booking, setStep, updateBooking, ntrpQuizState, updateNtrpQuizState } = useBooking();
   const { answers, showResult, ntrpResult, originalPackageId, packageDecision } = ntrpQuizState;
 
   const [currentQ, setCurrentQ] = useLocalState(0); // index 0–4
@@ -65,7 +67,7 @@ export default function BookingStep2({ onNext }: Props) {
             </div>
           </>}
         </section>}
-        {switchTour&&packageDecision===null&&(()=>{const t=tours.find(t=>t.id===switchTour)!;const schedule=t.departureSchedules.find(d=>d.code===switchCode);return <section className="ntrp-switch-panel"><h3 className="text-[2rem] font-bold">Lịch và giá gói gợi ý</h3><label htmlFor="switch-schedule">Lịch khởi hành {t.name}</label><select id="switch-schedule" className="w-full border p-[1.2rem] text-[1.6rem]" value={switchCode} onChange={e=>setSwitchCode(e.target.value)}><option value="">Chọn ngày khởi hành</option>{t.departureSchedules.map(d=><option key={d.code} value={d.code}>{d.dateLabel} · {d.price.toLocaleString("vi-VN")}đ/người</option>)}</select>{schedule&&<p>Tổng mới: {(coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)).toLocaleString("vi-VN")}đ / {booking.numPeople} người.</p>}{booking.numPeople>packageCapacity(t.packageId)&&<p role="alert">Gói này tối đa {packageCapacity(t.packageId)} khách. Quay lại bước chọn tour để điều chỉnh số người.</p>}<Button disabled={!schedule||booking.numPeople>packageCapacity(t.packageId)} onClick={()=>{if(!schedule||booking.numPeople>packageCapacity(t.packageId))return;updateBooking({tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureDate:schedule.date,departureCode:schedule.code,totalPrice:coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)});updateNtrpQuizState({packageDecision:true});setSwitchTour(null);onNext();}}>Áp dụng gói & lịch đã chọn</Button></section>;})()}
+        {switchTour&&packageDecision===null&&(()=>{const t=tours.find(t=>t.id===switchTour)!;const schedule=t.departureSchedules.find(d=>d.code===switchCode);return <section className="ntrp-switch-panel"><h3 className="text-[2rem] font-bold">Lịch và giá gói gợi ý</h3><DemoScenarioGuide packageId={t.packageId}/><label htmlFor="switch-schedule">Lịch khởi hành {t.name}</label><select id="switch-schedule" className="w-full border p-[1.2rem] text-[1.6rem]" value={switchCode} onChange={e=>setSwitchCode(e.target.value)}><option value="">Chọn ngày khởi hành</option>{t.departureSchedules.map(d=><option key={d.code} value={d.code}>{d.dateLabel} · {d.price.toLocaleString("vi-VN")}đ/người</option>)}</select>{schedule&&t.packageId!=="sbu2"&&<p>Gói cơ bản tham khảo: {(coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)).toLocaleString("vi-VN")}đ / {booking.numPeople} người.</p>}{booking.numPeople>packageCapacity(t.packageId)&&<p role="alert">Gói này tối đa {packageCapacity(t.packageId)} khách. Quay lại bước chọn tour để điều chỉnh số người.</p>}<Button disabled={!schedule||booking.numPeople>packageCapacity(t.packageId)} onClick={()=>{if(!schedule||booking.numPeople>packageCapacity(t.packageId))return;updateBooking({tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureDate:schedule.date,departureCode:schedule.code,totalPrice:coupleTotal(t.packageId,schedule.price,booking.numPeople,booking.numCompanions)});updateNtrpQuizState({packageDecision:true});setSwitchTour(null);if(t.packageId==="sbu2"){const party=demoParty(browserScenario(),t.packageId);updateBooking({...party,participants:undefined,groupRequest:undefined,premiumRequest:undefined});setStep(1);}else onNext();}}>Áp dụng gói & lịch đã chọn</Button></section>;})()}
         {/* Decision confirmed feedback */}
         {hasMismatch && packageDecision !== null && (
           <div className="flex items-center gap-[1rem] bg-success-light border border-success/30 rounded-[var(--ds-radius-card)] p-[1.6rem] mb-[2.4rem]">

@@ -1,5 +1,6 @@
 "use client";
 
+import {browserScenario,demoParty} from "@/lib/demo-experience";
 import {coupleTotal,companionRate} from "@/lib/couple-pricing";
 import { useEffect, useState } from "react";
 import GroupRequestFields from "./GroupRequestFields";
@@ -74,6 +75,10 @@ export default function BookingStep1({ onNext }: Props) {
   useEffect(()=>{updateBooking({tourId:selectedTour.id,packageId:selectedTour.packageId,destination:selectedTour.destinationId,departureDate:selectedSchedule.date,departureCode:selectedSchedule.code,numPeople:people,numCompanions:companions,totalPrice:coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions)});},[selectedTourId,scheduleCode,people,companions,updateBooking]);
 
   const handleSelectTour = (tour: Tour) => {
+    if((tour.packageId==="sbu2")!==(selectedTour.packageId==="sbu2")){
+      const party=demoParty(browserScenario(),tour.packageId);setPeople(party.numPeople);setCompanions(party.numCompanions);updateBooking({participants:undefined,groupRequest:undefined,premiumRequest:undefined});
+    }
+
     updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions)});
     const limit=packageCapacity(tour.packageId);
     if(people>limit){const nextCompanions=Math.min(companions,limit-1);setCompanions(nextCompanions);setPeople(limit);}

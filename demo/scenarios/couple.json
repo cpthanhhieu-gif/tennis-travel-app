@@ -12,9 +12,9 @@
   "id": "couple",
   "name": "Cặp đôi — trải nghiệm cho cả hai",
   "problem": "Người mua lo người đi cùng không chơi tennis thiếu hoạt động, khó hiểu tổng chi phí.",
-  "goal": "Hiểu quyền lợi mỗi người, tổng giá và luồng xác nhận Premium.",
-  "entryPath": "/tours/sbu3",
-  "entryIntent": "Chi tiết Premium; cấu hình hai người được chuẩn bị cho bước Booking, chưa gửi yêu cầu.",
+  "goal": "Hiểu giá và quyền lợi người chơi/người đi cùng; Leisure và Premium bán khách lẻ, Tournament theo đoàn/CLB.",
+  "entryPath": "/",
+  "entryIntent": "Khám phá cả 3 gói; dữ liệu mẫu theo kịch bản, quy trình xác nhận theo gói.",
   "initialData": {
     "account": {
       "alias": "Khách Cặp Đôi Demo",
@@ -40,14 +40,14 @@
     "ledger": []
   },
   "steps": [
-    "Xem Premium và hoạt động người đi cùng.",
+    "Xem cả 3 gói: Leisure khách lẻ lịch cố định; Premium khách lẻ theo yêu cầu; Tournament đăng ký qua đại diện đoàn/CLB.",
     "Mở Booking, kiểm tra một người chơi và một người đi cùng; chọn ngày.",
     "Dùng lại hoặc đánh giá lại NTRP, nhập liên hệ và gửi yêu cầu.",
     "Theo dõi phương án, tự chấp thuận và đặt cọc mô phỏng.",
     "Mở chuẩn bị theo từng người."
   ],
   "completionSignals": [
-    "Yêu cầu Premium có đúng hai người với hai vai khác nhau.",
+    "Số người và vai trò khớp với lựa chọn; mẫu ban đầu 1 người chơi + 1 người đi cùng, có thể thay đổi.",
     "Tổng giá phân biệt người chơi và người đi cùng.",
     "Không yêu cầu NTRP tennis cho người đi cùng.",
     "Sau sự kiện gửi phương án, khách tìm được thao tác chấp thuận và chuẩn bị."

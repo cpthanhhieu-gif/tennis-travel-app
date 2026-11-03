@@ -12,9 +12,9 @@
   "id": "personal",
   "name": "Cá nhân — chọn đúng tour",
   "problem": "Khách chưa biết trình độ, lịch và chi phí có phù hợp với mình.",
-  "goal": "Tự chọn Leisure phù hợp và hiểu trạng thái đặt chỗ, bước tiếp theo.",
-  "entryPath": "/?package=sbu1",
-  "entryIntent": "Màn Khám phá, nhấn mạnh Leisure; tham số lọc cần được kết nối ở bước triển khai.",
+  "goal": "Khám phá 3 gói và chọn hình thức đăng ký được hỗ trợ; Leisure là hành trình thử nhanh.",
+  "entryPath": "/",
+  "entryIntent": "Khám phá cả 3 gói; dữ liệu mẫu theo kịch bản, quy trình xác nhận theo gói.",
   "initialData": {
     "account": {
       "alias": "Khách Cá nhân Demo",
@@ -31,8 +31,8 @@
     "ledger": []
   },
   "steps": [
-    "Xem gói Leisure, lịch và điều kiện.",
-    "Chọn lịch và một người chơi.",
+    "Xem cả 3 gói: Leisure khách lẻ lịch cố định; Premium khách lẻ theo yêu cầu; Tournament đăng ký qua đại diện đoàn/CLB.",
+    "Mẫu 1 người chơi; chọn ngày và có thể đổi số người hoặc đặt giúp.",
     "Tự đánh giá NTRP, nhập liên hệ và xem lại.",
     "Gửi đặt chỗ; mở Hành trình để kiểm tra trạng thái và cọc."
   ],

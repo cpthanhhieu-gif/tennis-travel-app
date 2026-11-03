@@ -4,6 +4,7 @@ import {type GroupRequest,type GroupQuote,validGroupRequest} from "@/lib/group-r
 import type {PremiumRequest} from "@/lib/premium-request";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
+import {browserScenario,demoParty} from "./demo-experience";
 import {browserStorageKey} from "./demo-scope";
 import {coupleTotal} from "./couple-pricing";
 import { getNtrpLevel, tours } from "@/lib/mock-data";
@@ -89,11 +90,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     draftKey.current=browserStorageKey(`tennis-booking-draft-v1:${params.get("package")??"all"}:${params.get("destination")??"all"}:${params.get("ref")??"direct"}`);
     setBooking(prev=>({...prev,referralToken:params.get("ref")??""}));
     try{const raw=sessionStorage.getItem(draftKey.current);
-    if(!raw&&browserStorageKey("scope").startsWith("demo:personal:")){setBooking(prev=>({...prev,numPeople:1,numCompanions:0}));}
-    if(!raw&&browserStorageKey("scope").startsWith("demo:couple:")){
-      const tour=tours.find(t=>t.packageId==="sbu3")!;const d=tour.departureSchedules[0];
-      setBooking(prev=>({...prev,tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:d.code,departureDate:d.date,numPeople:2,numCompanions:1,totalPrice:coupleTotal(tour.packageId,d.price,2,1)}));
-    }
+    if(!raw){const scenario=browserScenario();if(scenario){const packageId=params.get("package")??(scenario==="club"?"sbu2":scenario==="couple"?"sbu3":"sbu1");const t=tours.find(t=>t.packageId===packageId)??tours[0];const d=t.departureSchedules[0];const party=demoParty(scenario,t.packageId);setBooking(prev=>({...prev,...party,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,totalPrice:coupleTotal(t.packageId,d.price,party.numPeople,party.numCompanions)}));}}
     if(raw){const saved=JSON.parse(raw);const t=tours.find(t=>t.id===saved.booking?.tourId);const schedule=t?.departureSchedules.find(d=>d.code===saved.booking?.departureCode);
       if(saved.version===1&&t&&schedule&&Number.isInteger(saved.booking.numPeople)&&saved.booking.numPeople>=1&&saved.booking.numPeople<=20){
         setBooking({...defaultBooking,...saved.booking,notes:"",tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:schedule.code,departureDate:schedule.date,numCompanions:Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0,totalPrice:coupleTotal(t.packageId,schedule.price,saved.booking.numPeople,Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0)});

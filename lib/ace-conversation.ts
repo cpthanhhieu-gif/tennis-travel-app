@@ -9,6 +9,7 @@ export type AcePreferences = {
   numCompanions?: number;
   goal?: "learn" | "compete" | "relax";
   budget?: number;
+  budgetFlexible?: boolean;
   quizAnswers: number[];
   level?: number;
   diet?: string;
@@ -24,7 +25,7 @@ const diets = ["Không có yêu cầu đặc biệt", "Ăn chay", "Không ăn h�
 const goalNames = { learn: "học kỹ thuật", compete: "thi đấu & giao lưu", relax: "nghỉ dưỡng & kết nối" };
 export function preferenceSummary(p: AcePreferences): string {
   if(p.groupNeeds)return groupNeedsSummary(p.groupNeeds);
-  return [p.numPeople && `Số khách: ${p.numPeople}${p.numCompanions !== undefined ? ` (${p.numCompanions} người đi cùng)` : ""}`, p.party && `Đi cùng: ${p.party}`, p.goal && `Mục tiêu: ${goalNames[p.goal]}`, p.level && `NTRP tự đánh giá: ${p.level}`, p.budget && `Ngân sách: tối đa ${p.budget.toLocaleString("vi-VN")} đ/người`, p.diet && `Ăn uống: ${p.diet}`].filter(Boolean).join("\n");
+  return [p.numPeople && `Số khách: ${p.numPeople}${p.numCompanions !== undefined ? ` (${p.numCompanions} người đi cùng)` : ""}`, p.party && `Đi cùng: ${p.party}`, p.goal && `Mục tiêu: ${goalNames[p.goal]}`, p.level && `NTRP tự đánh giá: ${p.level}`, p.budgetFlexible && "Ngân sách: linh hoạt", p.budget && `Ngân sách: tối đa ${p.budget.toLocaleString("vi-VN")} đ/người`, p.diet && `Ăn uống: ${p.diet}`].filter(Boolean).join("\n");
 }
 export function aceRecommendation(p: AcePreferences): AceReply {
   if(p.groupNeeds)return groupRecommendation(p.groupNeeds,p);
@@ -70,7 +71,7 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
   if (state.step === "budget") {
     const budgetPackage = tourPackages.find(item => input === `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`);
     const typedBudget=parseAceBudget(input);
-    if (budgetPackage || typedBudget!==undefined || input === "Linh hoạt theo trải nghiệm") { p.budget = budgetPackage?.priceRange.min??typedBudget; return answer("diet", { text: "Bạn có yêu cầu ăn uống nào không?", chips: diets }); }
+    if (budgetPackage || typedBudget!==undefined || input === "Linh hoạt theo trải nghiệm") { p.budget = budgetPackage?.priceRange.min??typedBudget;p.budgetFlexible=input === "Linh hoạt theo trải nghiệm"; return answer("diet", { text: "Bạn có yêu cầu ăn uống nào không?", chips: diets }); }
   }
   if (state.step === "quiz") {
     const question = ntrpQuiz[p.quizAnswers.length];

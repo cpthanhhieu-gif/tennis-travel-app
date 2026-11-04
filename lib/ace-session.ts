@@ -10,6 +10,7 @@ export function normalizeAcePreferences(v: unknown): AcePreferences {
   const p: AcePreferences = { quizAnswers: [] }; if (!object(v)) return p;
   for (const k of ["party", "diet"] as const) if (typeof v[k] === "string" && v[k].trim()) p[k] = v[k].slice(0, 500);
   if (["learn", "compete", "relax"].includes(String(v.goal))) p.goal = v.goal as AcePreferences["goal"];
+  if(v.budgetFlexible===true)p.budgetFlexible=true;
   if (typeof v.budget === "number" && Number.isFinite(v.budget) && v.budget > 0 && v.budget <= 1e10) p.budget = v.budget;
   if (typeof v.level === "number" && [1.5, 2.5, 3.5, 4.5, 5].includes(v.level)) p.level = v.level;
   if (typeof v.packageId === "string" && tourPackages.some(p => p.id === v.packageId)) p.packageId = v.packageId;

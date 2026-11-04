@@ -1,0 +1,26 @@
+/** Curated Vietnamese utterances used by the runtime matcher, not customer messages. */
+export type AceLanguageIntent = "tour"|"quiz"|"catalog"|"greeting"|"solo"|"bothPlayers"|"onePlayer"|"coupleUnknown"|"learn"|"compete"|"relax"|"flexible"|"noDiet"|"vegetarian"|"seafood"|"lactose"|"clarifyGoal";
+export const aceLanguageExamples: {intent:AceLanguageIntent; examples:string[]}[] = [
+ {intent:"tour",examples:["Tư vấn giúp mình chuyến tennis","Ace ơi gợi ý chuyến đi nhé","Mình muốn tìm chuyến chơi tennis","Có thể tư vấn tour cho mình không?","Tìm giúp mình gói đi chơi tennis","Cho mình xin gợi ý tour","Mình đang tìm tour tennis","Muốn đi du lịch kết hợp tennis","Tư vấn chuyến đi giúp em","Có gói nào phù hợp với mình?"]},
+ {intent:"quiz",examples:["Mình muốn biết trình độ tennis","Đánh giá trình độ giúp mình","Cho mình thử bài NTRP","Test NTRP giúp em","Mình chơi ở trình độ nào?","Kiểm tra trình độ của mình nhé","Muốn tự đánh giá tennis","Bắt đầu bài đánh giá NTRP"]},
+ {intent:"catalog",examples:["Cho mình xem các gói khác","Còn lựa chọn nào khác không?","Xem toàn bộ tour","Có những gói nào?","Cho xem tất cả tour","Mình muốn xem thêm lựa chọn","Đổi sang xem gói khác","Liệt kê các gói tour"]},
+ {intent:"greeting",examples:["Chào Ace","Hello Ace","Hi Ace","Xin chào","Chào bạn","Ace ơi","Alo Ace","Chào em nhé"]},
+ {intent:"solo",examples:["Mình đi một mình","Tôi đi riêng một người","Đi một mình thôi","Chỉ có mình đi","Một khách thôi","Em đi solo","Mình đi 1 người","Đi một người chơi tennis","Chi minh di thoi","Tui đi một mình"]},
+ {intent:"bothPlayers",examples:["Hai người cùng chơi","Hai vợ chồng đều chơi tennis","Cả hai vợ chồng đều chơi","Mình và vợ đều chơi tennis","Mình với chồng đều đánh tennis","Hai đứa đều chơi","Hai người đều chơi tennis","Đi hai người và cả hai đều chơi","2 người cùng đánh tennis","Hai bạn đều là người chơi","2 đứa cùng chơi"]},
+ {intent:"onePlayer",examples:["Một người chơi, một người đi cùng","Hai vợ chồng đi, mình chơi tennis còn vợ không chơi","Mình đánh tennis còn vợ chỉ nghỉ dưỡng","Mình chơi còn chồng không chơi","Một người đánh tennis một người nghỉ dưỡng","Hai người, chỉ một người chơi","2 khách gồm 1 người chơi và 1 người đi cùng","Mình chơi tennis, bạn đi cùng không chơi","Mình đi với vợ, chỉ mình chơi tennis","Hai vợ chồng chỉ có chồng chơi tennis","Hai vợ chồng chỉ có vợ chơi tennis"]},
+ {intent:"coupleUnknown",examples:["Mình đi với vợ","Mình đi cùng chồng","Hai vợ chồng đi","Hai đứa đi cùng nhau","Mình đi với bạn gái","Đi cùng bạn trai","Bọn mình có hai người","Tụi mình đi 2 người","2 vợ chồng","Hai khách nhé","Mình và người yêu đi","Đi với vợ"]},
+ {intent:"learn",examples:["Học kỹ thuật cùng nhau","Mình muốn học kỹ thuật","Muốn học tennis từ đầu","Ưu tiên học kỹ thuật","Cần HLV hướng dẫn kỹ thuật","Mục tiêu là cải thiện kỹ năng","Muốn tập bài bản hơn","Chủ yếu học và luyện kỹ thuật","Học tennis là chính","Muốn cải thiện cú đánh","Mình ưu tiên clinic"]},
+ {intent:"compete",examples:["Thi đấu & giao lưu","Mình muốn thi đấu","Ưu tiên thi đấu giao lưu","Muốn giao lưu đánh giải","Mục tiêu là thi đấu","Muốn chơi giải cùng mọi người","Chủ yếu giao lưu và thi đấu","Muốn đánh giải tennis","Thích thi đấu nội bộ","Mình muốn tham gia tournament","Ưu tiên match play"]},
+ {intent:"relax",examples:["Nghỉ dưỡng & kết nối","Mình muốn nghỉ dưỡng","Ưu tiên nghỉ dưỡng","Muốn kết hợp tennis với nghỉ ngơi","Chủ yếu thư giãn thôi","Muốn đi nghỉ cùng gia đình","Nghỉ ngơi là chính","Muốn nghỉ dưỡng kết hợp chơi tennis","Ưu tiên trải nghiệm thư giãn","Mình cần một chuyến sportcation","Muốn thư giãn cùng người thân"]},
+ {intent:"flexible",examples:["Ngân sách linh hoạt","Chưa chốt ngân sách","Mình chưa rõ ngân sách","Linh hoạt theo trải nghiệm","Ngân sách có thể điều chỉnh","Chưa có mức chi cụ thể","Chưa xác định chi phí","Không giới hạn ngân sách cụ thể"]},
+ {intent:"noDiet",examples:["Không có yêu cầu đặc biệt","Mình ăn bình thường","Không có yêu cầu ăn uống","Không cần thực đơn riêng","Ăn gì cũng được","Không kiêng món nào","Mình không có yêu cầu đặc biệt","Không có dị ứng hay kiêng ăn","Ăn uống bình thường thôi"]},
+ {intent:"vegetarian",examples:["Mình ăn chay","Tôi ăn chay trường","Vợ mình ăn chay","Chồng mình ăn chay","Cần suất ăn chay","Cho mình món chay","Người đi cùng ăn chay","Mình theo chế độ ăn chay"]},
+ {intent:"seafood",examples:["Mình không ăn hải sản","Vợ không ăn hải sản","Không dùng hải sản","Kiêng hải sản","Chồng mình kiêng hải sản","Người đi cùng không ăn hải sản","Cần thực đơn không hải sản","Mình không ăn đồ biển"]},
+ {intent:"lactose",examples:["Mình không dùng lactose","Không dùng sữa có lactose","Cần thực đơn không lactose","Mình kiêng lactose","Người đi cùng không dùng lactose","Vợ mình không dùng lactose"]},
+ {intent:"clarifyGoal",examples:["Mình không muốn thi đấu","Không thích nghỉ dưỡng","Không muốn học kỹ thuật","Mình vừa muốn học vừa muốn thi đấu","Muốn học kỹ thuật và nghỉ dưỡng","Mình chưa rõ mục tiêu"]}
+];
+export const aceNaturalDemoPrompts=[
+ "Hai vợ chồng đi, mình chơi tennis còn vợ không chơi; ưu tiên nghỉ dưỡng; 30 triệu mỗi người; vợ mình ăn chay",
+ "Mình đi một mình; muốn học tennis từ đầu; 7 triệu mỗi người; mình không ăn hải sản",
+ "Nhóm mình có 8 người; ưu tiên thi đấu giao lưu; ngân sách linh hoạt"
+];

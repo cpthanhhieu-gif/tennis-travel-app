@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import "./ace-chat.css";
-import {matchAceScript,advisorFollowups} from "@/lib/ace-script";
+import {respondToAceText} from "@/lib/ace-natural";
+import {aceNaturalDemoPrompts} from "@/lib/ace-language-data";
+import {advisorFollowups} from "@/lib/ace-script";
 import GroupNeedsEditor from "./GroupNeedsEditor";
 import {applyGroupNeeds,groupRecommendation,type GroupNeeds} from "@/lib/ace-group";
 import { useAdvisorConversation } from "./use-advisor-conversation";
@@ -261,14 +263,19 @@ export default function ChatbotWidget() {
       setMessages(prev=>prev.some(m=>m.id===id)?prev:[...prev,{id,role:"bot",text:"Đã gửi câu hỏi đến nhân viên tư vấn. Phản hồi sẽ xuất hiện trong cuộc trò chuyện này.",at:new Date().toISOString()}]);
     }
   };
-  const handleSend = () => {
-    const text = inputVal.trim();
+  const handleNaturalText = (text:string) => {
     if (!text || advisor.busy) return;
     setInputVal("");
-    const scripted=matchAceScript(conversation.current,text);
-    if(scripted)handleChip(scripted,text);
-    else void sendToAdvisor(text);
+    const response=respondToAceText(conversation.current,text);
+    if(response){
+      setHumanMode(false);setEditingGroup(false);
+      if(response.state!==conversation.current)setSelection(undefined);
+      conversation.current=response.state;
+      setMessages(prev=>[...prev,{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"user",text},{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"bot",...response.reply}]);
+    }else void sendToAdvisor(text);
   };
+
+  const handleSend = () => handleNaturalText(inputVal.trim());
 
   /* ─── Derived values ─── */
   const latestMessage=messages.at(-1);
@@ -339,6 +346,8 @@ export default function ChatbotWidget() {
                 </div>
               )}
 
+              {messages.length<=1&&!humanMode&&<details className="text-[1.2rem] mb-[1rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center">Thử kể kế hoạch bằng lời của bạn</summary><div className="flex flex-col gap-[0.8rem]">{aceNaturalDemoPrompts.map(text=><button key={text} disabled={typing||advisor.busy} className="ace-chat-chip text-left" onClick={()=>setInputVal(text)}>{text}</button>)}</div><p>Chọn câu mẫu để điền vào ô chat; bạn có thể sửa trước khi gửi.</p></details>}
+
               {messages.map((msg) => (
                 <div key={msg.id}
                   className={`flex flex-col gap-[0.8rem] ${msg.role === "user" ? "items-end" : "items-start"}`}>
@@ -353,7 +362,7 @@ export default function ChatbotWidget() {
                   {((msg.role === "bot" && !humanMode && msg.chips)||continuationChips) && msg.id === latestMessage?.id && (
                     <div className="ace-chat-chips">
                       {(continuationChips??msg.chips??[]).map((chip) => (
-                        <button key={chip} disabled={typing||advisor.busy} onClick={() => handleChip(matchAceScript(conversation.current,chip)??chip,chip)}
+                        <button key={chip} disabled={typing||advisor.busy} onClick={() => handleNaturalText(chip)}
                           className="ace-chat-chip">
                           {chip}
                         </button>

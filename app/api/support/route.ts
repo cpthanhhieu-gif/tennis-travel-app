@@ -1,3 +1,4 @@
+import { normalizeAcePreferences, normalizeSelection } from "@/lib/ace-session";
 import { NextRequest, NextResponse } from "next/server";
 import { createHash, randomUUID } from "node:crypto";
 import { apiStorage, readDocument, writeDocument } from "@/lib/cloud-store";
@@ -49,6 +50,11 @@ export async function POST(req: NextRequest) {
     if (body.action === "status" && !["new", "processing", "replied"].includes(String(body.status))) return json({ error: "Trạng thái không hợp lệ." }, 400);
     const key = `global/support/${id}`;
     const existing = await readDocument<SupportThread>(key);
+    const clientMessageId = typeof body.clientMessageId === "string" && body.clientMessageId.length > 0 && body.clientMessageId.length <= 120 ? body.clientMessageId : undefined;
+    if (body.action === "send" && clientMessageId && existing?.messages.some(m => m.clientMessageId === clientMessageId && m.role === "customer")) {
+      if (existing.messages.find(m => m.clientMessageId === clientMessageId)?.text !== text) return json({ error: "Tin nhắn đã được sử dụng." }, 409);
+      return json({ thread: existing });
+    }
     if (requestId && existing?.messages.some(m => m.id === requestId)) {
       if (existing.messages.find(m => m.id === requestId)?.text !== text) return json({ error: "Mã tin nhắn đã được sử dụng." }, 409);
       return json({ thread: existing });
@@ -70,7 +76,9 @@ export async function POST(req: NextRequest) {
     if (body.action === "send") {
       thread.contact = typeof body.contact === "string" ? body.contact.trim().slice(0, 200) : thread.contact;
       thread.context = typeof body.context === "string" ? body.context.slice(0, 16000) : thread.context;
-      thread.messages.push({ id: requestId!, role: "customer", text: text!, at: now }); thread.status = "new";
+      if (body.needs) thread.needs = normalizeAcePreferences(body.needs);
+      if (body.selection) thread.selection = normalizeSelection(body.selection);
+      thread.messages.push({ id: requestId!, role: "customer", text: text!, at: now, clientMessageId }); thread.status = "new";
     } else if (body.action === "reply") { thread.messages.push({ id: randomUUID(), role: "advisor", text: text!, at: now }); thread.status = "replied"; }
     else thread.status = body.status as SupportThread["status"];
     thread.updatedAt = now;

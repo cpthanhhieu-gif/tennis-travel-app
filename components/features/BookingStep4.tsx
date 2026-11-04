@@ -45,6 +45,7 @@ export default function BookingStep4({ onConfirm }: Props) {
     { label: "Người đăng ký / liên hệ", value: booking.name || "Chưa nhập" },
     { label: "Điện thoại", value: booking.phone || "Chưa nhập" },
     { label: "Email", value: booking.email || "Chưa nhập" },
+    ...(booking.notes ? [{ label: "Nhu cầu & ghi chú", value: booking.notes }] : []),
   ];
 
   const handleConfirm = async () => {

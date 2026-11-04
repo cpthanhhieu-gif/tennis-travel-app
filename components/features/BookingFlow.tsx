@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { useBooking } from "@/lib/BookingContext";
 import DemoScenarioGuide from "./DemoScenarioGuide";
+import BookingConsultation from "./BookingConsultation";
 import BookingStep1 from "./BookingStep1";
 import BookingStep2 from "./BookingStep2";
 import BookingStep3 from "./BookingStep3";
@@ -55,6 +56,7 @@ export default function BookingFlow() {
 
       <header className="ds-booking-title"><p className="ds-eyebrow">ĐẶT CHUYẾN ĐI</p><h1>{STEPS[visibleStep - 1]}</h1><p>{isGroup ? "Quy mô đoàn · Liên hệ đại diện · Yêu cầu báo giá" : "Chọn lịch · Đánh giá trình độ · Xem lại thông tin"}</p></header>
       <DemoScenarioGuide packageId={booking.packageId}/>
+      <BookingConsultation/>
       {/* Step progress */}
       <div className="mb-[3.2rem]">
         {/* Top row: back + step count */}
@@ -115,7 +117,7 @@ export default function BookingFlow() {
       <div className="ds-booking-grid">
       {/* Step content */}
       <div className="mb-[3.2rem]">
-        <div hidden={step !== 1}><BookingStep1 onNext={handleNext} /></div>
+        <div hidden={step !== 1}><BookingStep1 key={booking.aceConsultation?.signature ?? "initial"} onNext={handleNext} /></div>
         {step === 2 && <BookingStep2 onNext={handleNext} />}
         {step === 3 && <BookingStep3 onNext={handleNext} />}
         {step === 4 && <BookingStep4 onConfirm={handleNext} />}

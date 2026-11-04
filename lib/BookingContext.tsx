@@ -28,6 +28,7 @@ export interface BookingState {
   phone: string;
   email: string;
   notes: string;
+  aceConsultation?: { signature: string; summary: string };
   groupRequest?:GroupRequest; groupQuote?:GroupQuote; groupPlanToken?:string; groupAdviceRequested?:boolean; premiumRequest?:PremiumRequest; offerRevision?:{reason:string;at:string};
   totalPrice: number;
 }
@@ -93,7 +94,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     if(!raw){const scenario=browserScenario();if(scenario){const packageId=params.get("package")??(scenario==="club"?"sbu2":scenario==="couple"?"sbu3":"sbu1");const t=tours.find(t=>t.packageId===packageId)??tours[0];const d=t.departureSchedules[0];const party=demoParty(scenario,t.packageId);setBooking(prev=>({...prev,...party,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,totalPrice:coupleTotal(t.packageId,d.price,party.numPeople,party.numCompanions)}));}}
     if(raw){const saved=JSON.parse(raw);const t=tours.find(t=>t.id===saved.booking?.tourId);const schedule=t?.departureSchedules.find(d=>d.code===saved.booking?.departureCode);
       if(saved.version===1&&t&&schedule&&Number.isInteger(saved.booking.numPeople)&&saved.booking.numPeople>=1&&saved.booking.numPeople<=20){
-        setBooking({...defaultBooking,...saved.booking,notes:"",tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:schedule.code,departureDate:schedule.date,numCompanions:Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0,totalPrice:coupleTotal(t.packageId,schedule.price,saved.booking.numPeople,Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0)});
+        setBooking({...defaultBooking,...saved.booking,notes:typeof saved.booking.notes==="string"?saved.booking.notes.slice(0,2000):"",tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:schedule.code,departureDate:schedule.date,numCompanions:Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0,totalPrice:coupleTotal(t.packageId,schedule.price,saved.booking.numPeople,Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0)});
         if(saved.quiz?.answers&&typeof saved.quiz.answers==="object")setNtrpQuizState({...defaultNtrpQuizState,...saved.quiz});
         if(Number.isInteger(saved.step)&&saved.step>=1&&saved.step<=4)setStep(t.packageId==="sbu2"&&saved.step===2?3:saved.step);
         setRestoredDraft(true);
@@ -102,7 +103,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     if(explicitDeparture){const t=tours.find(t=>t.packageId===params.get("package"));const d=t?.departureSchedules.find(d=>d.code===explicitDeparture);if(t&&d){setBooking(prev=>({...prev,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,totalPrice:coupleTotal(t.packageId,d.price,prev.numPeople,prev.numCompanions)}));setStep(1);}}
     }catch{/* A malformed or unavailable draft does not block booking. */}setHydrated(true);
   },[]);
-  useEffect(()=>{if(!hydrated)return;try{const {notes,...safeBooking}=booking;sessionStorage.setItem(draftKey.current,JSON.stringify({version:1,booking:safeBooking,quiz:ntrpQuizState,step}));}catch{/* Booking remains usable if storage is unavailable. */}},[booking,ntrpQuizState,step,hydrated]);
+  useEffect(()=>{if(!hydrated)return;try{sessionStorage.setItem(draftKey.current,JSON.stringify({version:1,booking,quiz:ntrpQuizState,step}));}catch{/* Booking remains usable if storage is unavailable. */}},[booking,ntrpQuizState,step,hydrated]);
   const updateBooking=useCallback((updates:Partial<BookingState>)=>{
     setBooking(prev=>{const changed=Object.entries(updates).some(([k,v])=>prev[k as keyof BookingState]!==v);if(!changed)return prev;const realChange=Object.keys(updates).some(k=>k!=="submissionKey"&&prev[k as keyof BookingState]!==updates[k as keyof BookingState]);return {...prev,...updates,...(realChange?{submissionKey:""}:{})};});
   },[]);

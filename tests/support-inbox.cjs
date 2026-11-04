@@ -11,7 +11,10 @@ function load(file, deps = {}) {
 const docs = new Map();
 const model = load("lib/support-inbox.ts");
 const storage = { apiStorage: async (_req, fn) => fn(), readDocument: async key => docs.has(key) ? structuredClone(docs.get(key)) : null, writeDocument: async (key, value) => { docs.set(key, structuredClone(value)); } };
-const route = load("app/api/support/route.ts", { "next/server": { NextResponse: Response }, "node:crypto": crypto, "@/lib/cloud-store": storage, "@/lib/demo-auth": { isAdmin: req => req.testAdmin === true }, "@/lib/support-inbox": model });
+const data = load("lib/mock-data.ts");
+const conversation = load("lib/ace-conversation.ts", { "./mock-data": data });
+const session = load("lib/ace-session.ts", { "./mock-data": data, "./ace-conversation": conversation, "./demo-scope": {} });
+const route = load("app/api/support/route.ts", { "next/server": { NextResponse: Response }, "node:crypto": crypto, "@/lib/cloud-store": storage, "@/lib/demo-auth": { isAdmin: req => req.testAdmin === true }, "@/lib/support-inbox": model, "@/lib/ace-session": session });
 const a = "a".repeat(64), b = "b".repeat(64);
 function req(method, body, { admin = false, token = a, query = "", origin = "https://app.test" } = {}) {
   const url = "https://app.test/api/support" + query;
@@ -25,12 +28,16 @@ const send = (text, extra = {}) => ({ action: "send", requestId: crypto.randomUU
   assert.equal((await route.GET(req("GET", undefined, { query: "?admin=1" }))).status, 403);
   assert.equal((await route.POST(req("POST", send("Hello"), { origin: "https://other.test" }))).status, 403);
   assert.equal((await route.GET(req("GET", undefined, { token: "invalid" }))).status, 401);
-  const message = send("Nhóm mình muốn học kỹ thuật và ăn chay");
+  const message = send("Nhóm mình muốn học kỹ thuật và ăn chay", { clientMessageId: "chat:one", needs: { goal: "learn", diet: "Ăn chay", quizAnswers: [] }, selection: { packageId: "sbu1", departureCode: data.tours[0].departureSchedules[0].code } });
   let response = await route.POST(req("POST", message));
   assert.equal(response.status, 200);
   const original = (await response.json()).thread;
   assert.equal(original.status, "new");
   assert.equal(original.messages.length, 1);
+  assert.equal(original.needs.diet, "Ăn chay");
+  assert.equal(original.selection.packageId, "sbu1");
+  assert.equal(original.messages[0].clientMessageId, "chat:one");
+  assert.equal((await route.POST(req("POST", { ...message, requestId: crypto.randomUUID() }))).status, 200);
   assert.notEqual(original.id, a);
   assert.equal(JSON.stringify([...docs.values()]).includes(a), false);
   assert.equal((await route.POST(req("POST", message))).status, 200);

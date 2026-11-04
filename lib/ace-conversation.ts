@@ -2,6 +2,8 @@ import { getNtrpLevel, ntrpQuiz, tourPackages } from "./mock-data";
 
 export type AcePreferences = {
   party?: string;
+  numPeople?: number;
+  numCompanions?: number;
   goal?: "learn" | "compete" | "relax";
   budget?: number;
   quizAnswers: number[];
@@ -17,7 +19,7 @@ const goals = ["Học kỹ thuật cùng nhau", "Thi đấu & giao lưu", "Ngh�
 const diets = ["Không có yêu cầu đặc biệt", "Ăn chay", "Không ăn hải sản", "Không lactose", "Yêu cầu ăn uống khác"];
 const goalNames = { learn: "học kỹ thuật", compete: "thi đấu & giao lưu", relax: "nghỉ dưỡng & kết nối" };
 export function preferenceSummary(p: AcePreferences): string {
-  return [p.party && `Đi cùng: ${p.party}`, p.goal && `Mục tiêu: ${goalNames[p.goal]}`, p.level && `NTRP tự đánh giá: ${p.level}`, p.budget && `Ngân sách: tối đa ${p.budget.toLocaleString("vi-VN")} đ/người`, p.diet && `Ăn uống: ${p.diet}`].filter(Boolean).join("\n");
+  return [p.numPeople && `Số khách: ${p.numPeople}${p.numCompanions !== undefined ? ` (${p.numCompanions} người đi cùng)` : ""}`, p.party && `Đi cùng: ${p.party}`, p.goal && `Mục tiêu: ${goalNames[p.goal]}`, p.level && `NTRP tự đánh giá: ${p.level}`, p.budget && `Ngân sách: tối đa ${p.budget.toLocaleString("vi-VN")} đ/người`, p.diet && `Ăn uống: ${p.diet}`].filter(Boolean).join("\n");
 }
 function result(p: AcePreferences): AceReply {
   const packageId = p.packageId ?? (p.goal === "compete" ? "sbu2" : p.goal === "relax" ? "sbu3" : "sbu1");

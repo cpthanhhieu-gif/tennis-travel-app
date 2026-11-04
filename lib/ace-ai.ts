@@ -16,6 +16,8 @@ export function cleanPreferences(value: unknown): AcePreferences {
   if (typeof value.budget === "number" && Number.isFinite(value.budget) && value.budget > 0 && value.budget <= 1e10) p.budget = value.budget;
   if (typeof value.level === "number" && Number.isFinite(value.level) && value.level >= 1 && value.level <= 7) p.level = value.level;
   if (typeof value.packageId === "string" && ids.includes(value.packageId)) p.packageId = value.packageId;
+  if (typeof value.numPeople === "number" && Number.isInteger(value.numPeople) && value.numPeople >= 1 && value.numPeople <= 20) p.numPeople = value.numPeople;
+  if (typeof value.numCompanions === "number" && Number.isInteger(value.numCompanions) && value.numCompanions >= 0 && value.numCompanions < (p.numPeople ?? 21)) p.numCompanions = value.numCompanions;
   if (Array.isArray(value.quizAnswers)) p.quizAnswers = value.quizAnswers.filter((v): v is number => typeof v === "number" && Number.isFinite(v) && v >= 1 && v <= 7).slice(0, 5);
   return p;
 }

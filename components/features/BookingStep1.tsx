@@ -49,6 +49,7 @@ export default function BookingStep1({ onNext }: Props) {
   const [scheduleCode, setScheduleCode] = useState(booking.departureCode || firstSchedule.code);
 
   useEffect(() => {
+    if(booking.aceConsultation)return;
     if(restoredDraft&&!["departure","players"].some(key=>new URLSearchParams(window.location.search).has(key)))return;
     const params = new URLSearchParams(window.location.search);
     const packageId = params.get("package");

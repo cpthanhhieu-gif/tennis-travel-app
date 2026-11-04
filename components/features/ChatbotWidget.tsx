@@ -214,7 +214,7 @@ export default function ChatbotWidget() {
           width={88}
           height={88}
           unoptimized
-          className="w-[8.8rem] h-[8.8rem] object-contain"
+          className="w-[14rem] h-[14rem] sm:w-[8.8rem] sm:h-[8.8rem] object-contain"
         />
       </button>
 

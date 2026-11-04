@@ -36,8 +36,8 @@ export function groupNeedsSummary(g: GroupNeeds): string {
  return [`${g.total} khách · ${g.total-g.companions} người chơi · ${g.companions} người đi cùng`,...g.cohorts.map(c=>`• ${c.count} người ${groupLevelLabels[c.level].toLowerCase()} · ${groupGoalLabels[c.goal].toLowerCase()}`),`Ưu tiên chung: ${groupGoalLabels[g.mainGoal]}`,g.budget?`Ngân sách: tối đa ${formatVND(g.budget)}/người chơi`:"Ngân sách linh hoạt",g.dietary.length?`Ăn uống (có thể trùng người giữa các loại): ${g.dietary.map(d=>`${d.count} người ${dietaryLabels[d.kind].toLowerCase()}${d.note?` — ${d.note}`:""}`).join("; ")}`:"Chưa có yêu cầu ăn uống riêng"].join("\n");
 }
 export function applyGroupNeeds(previous: AcePreferences, needs: GroupNeeds): AcePreferences {
- const next={...previous,groupNeeds:needs,numPeople:needs.total,numCompanions:needs.companions,party:"Nhóm theo nhu cầu",budget:needs.budget,diet:needs.dietary.length?needs.dietary.map(d=>`${d.count} người ${dietaryLabels[d.kind]}${d.note?`: ${d.note}`:""}`).join("; "):"Không có yêu cầu đặc biệt",goal:needs.mainGoal==="balanced"?undefined:needs.mainGoal};
- delete next.packageId;
+ const next={...previous,groupNeeds:needs,numPeople:needs.total,numCompanions:needs.companions,party:"Nhóm theo nhu cầu",budget:needs.budget,budgetFlexible:needs.budget===undefined,diet:needs.dietary.length?needs.dietary.map(d=>`${d.count} người ${dietaryLabels[d.kind]}${d.note?`: ${d.note}`:""}`).join("; "):"Không có yêu cầu đặc biệt",goal:needs.mainGoal==="balanced"?undefined:needs.mainGoal};
+ delete next.packageId;delete next.dietCount;
  return next;
 }
 export function groupRecommendation(g: GroupNeeds, preferences?: AcePreferences): AceReply {

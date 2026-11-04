@@ -31,7 +31,7 @@ function fact(text:string):Fact|undefined{
  if(/^(?:khong phai|khong di|khong muon|chua chac|co the|neu|hoac)\b/.test(s))return {intent:"clarify",text:"Ace chưa chắc bạn đang muốn thay đổi điều gì. Bạn nói rõ số khách, mục tiêu hoặc yêu cầu mới giúp mình nhé; nhu cầu trước đó vẫn được giữ."};
 }
 function unchanged(state:AceState,text:string,chips?:string[]):Response{return {state,reply:{text,chips}};}
-function finish(state:AceState,ack:string):Response{
+export function continueAceConversation(state:AceState,ack:string):Response{
  const p=state.preferences;
  if(p.numPeople===undefined)return {state:{...state,step:"party"},reply:{text:`${ack}\nBạn dự định đi bao nhiêu người?`,chips:["Đi một mình","Hai người cùng chơi","Một người chơi, một người đi cùng","Nhóm 5–10 người","CLB 10–20 người"]}};
  if(p.numPeople>2)return {state:{...state,step:"group"},reply:{text:`${ack}\nAce đã ghi nhận ${p.numPeople} khách. Bạn xác nhận số người chơi, người đi cùng và từng nhóm nhu cầu trong bản tóm tắt bên dưới; Ace chưa mặc định tất cả đều chơi tennis.`}};
@@ -85,9 +85,10 @@ export function respondToAceText(state:AceState,text:string):Response|undefined{
  }
  if(conflict||(flexible&&budget!==undefined)||(diets.includes("Không có yêu cầu đặc biệt")&&diets.length>1))return unchanged(state,"Trong tin nhắn có thông tin chưa thống nhất. Bạn xác nhận lại số khách, ưu tiên chính hoặc ngân sách giúp Ace nhé; mình chưa thay đổi nhu cầu đã lưu.");
  if(count!==undefined){p.numPeople=count;p.numCompanions=companions??(count===state.preferences.numPeople?state.preferences.numCompanions:undefined);p.party=count===1?"Đi một mình":count===2?(p.numCompanions===0?"Hai người cùng chơi":p.numCompanions===1?"Một người chơi, một người đi cùng":"Hai người — chờ xác nhận vai trò"):`Nhóm ${count} người`;delete p.packageId;}
+ if(p.dietCount!==undefined&&p.numPeople!==undefined&&p.dietCount>p.numPeople)delete p.dietCount;
  if(goal){p.goal=goal;delete p.packageId;}
  if(budget!==undefined||flexible){p.budget=budget;p.budgetFlexible=flexible;}
- if(diets.length){const none=diets.includes("Không có yêu cầu đặc biệt");const previous=p.diet&&p.diet!=="Không có yêu cầu đặc biệt"?[p.diet]:[];p.diet=none?"Không có yêu cầu đặc biệt":[...new Set([...previous,...diets])].join("; ");if(p.diet.length>500)return unchanged(state,"Yêu cầu ăn uống quá dài để lưu đầy đủ. Bạn rút gọn hoặc nhờ tư vấn viên ghi nhận giúp nhé.");}
+ if(diets.length){delete p.dietCount;const none=diets.includes("Không có yêu cầu đặc biệt");const previous=p.diet&&p.diet!=="Không có yêu cầu đặc biệt"?[p.diet]:[];p.diet=none?"Không có yêu cầu đặc biệt":[...new Set([...previous,...diets])].join("; ");if(p.diet.length>500)return unchanged(state,"Yêu cầu ăn uống quá dài để lưu đầy đủ. Bạn rút gọn hoặc nhờ tư vấn viên ghi nhận giúp nhé.");}
  const summary=preferenceSummary(p);
- return finish({step:state.step,preferences:p},`Ace đã ghi nhận:\n${summary}`);
+ return continueAceConversation({step:state.step,preferences:p},`Ace đã ghi nhận:\n${summary}`);
 }

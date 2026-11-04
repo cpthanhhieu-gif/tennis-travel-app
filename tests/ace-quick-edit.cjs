@@ -1,0 +1,32 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript');
+const cache=new Map();function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file).exports;const module={exports:{}};cache.set(file,module);vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,jsx:ts.JsxEmit.ReactJSX}}).outputText,{module,exports:module.exports,require:n=>{if(n.startsWith('.')||n.startsWith('@/')){const base=n.startsWith('@/')?path.resolve(n.slice(2)):path.resolve(path.dirname(file),n);return load(base+(fs.existsSync(base+'.ts')?'.ts':'.tsx'));}return require(n);},Intl,Date,console});return module.exports;}
+const {applyAceQuickEdit:edit,compactAceNeeds}=load('lib/ace-quick-edit.ts'),{respondToAceText:respond}=load('lib/ace-natural.ts'),{normalizeAcePreferences}=load('lib/ace-session.ts');
+const initial={step:'idle',preferences:{numPeople:2,numCompanions:1,party:'Một người chơi, một người đi cùng',goal:'relax',budget:30000000,diet:'Vợ ăn chay',dietCount:1,level:3.5,quizAnswers:[2.5,3.5,3.5,2.5,3.5],packageId:'sbu3'}};
+const original=JSON.stringify(initial),budget=edit(initial,{field:'budget',amount:7000000,flexible:false});
+assert.equal(JSON.stringify(initial),original);assert.equal(budget.state.preferences.budget,7000000);for(const key of ['numPeople','numCompanions','party','goal','diet','dietCount','level','quizAnswers','packageId'])assert.equal(JSON.stringify(budget.state.preferences[key]),JSON.stringify(initial.preferences[key]),key);
+assert.match(budget.reply.text,/vượt ngân sách/);
+const flexible=edit(initial,{field:'budget',flexible:true});assert.equal(flexible.state.preferences.budget,undefined);assert.equal(flexible.state.preferences.budgetFlexible,true);
+for(const amount of [undefined,NaN,Infinity,-1,0,99999,1.5,1e11])assert.throws(()=>edit(initial,{field:'budget',amount,flexible:false}));
+const goal=edit(initial,{field:'goal',goal:'learn'});assert.equal(goal.reply.packageIds[0],'sbu1');assert.equal(goal.state.preferences.packageId,undefined);assert.equal(goal.state.preferences.diet,'Vợ ăn chay');assert.equal(goal.state.preferences.budget,30000000);
+const diet=edit(initial,{field:'diet',text:'Một người dị ứng tôm',count:1});assert.equal(diet.state.preferences.diet,'Một người dị ứng tôm');assert.equal(diet.state.preferences.numCompanions,1);assert.equal(diet.state.preferences.budget,30000000);
+assert.throws(()=>edit(initial,{field:'diet',text:'Ăn chay',count:3}));assert.throws(()=>edit(initial,{field:'diet',text:'   '}));assert.throws(()=>edit(initial,{field:'diet',text:'x'.repeat(501)}));
+assert.equal(edit(initial,{field:'diet',text:'Không có yêu cầu đặc biệt',count:1}).state.preferences.dietCount,undefined);
+const party=edit(initial,{field:'party',total:1,companions:0});assert.equal(party.state.preferences.numPeople,1);assert.equal(party.state.preferences.goal,'relax');assert.equal(party.state.preferences.diet,'Vợ ăn chay');
+assert.throws(()=>edit(initial,{field:'party',total:2,companions:2}));assert.throws(()=>edit(initial,{field:'party',total:21,companions:0}));
+const needs={total:8,companions:0,mainGoal:'balanced',cohorts:[{count:3,goal:'learn',level:'beginner'},{count:5,goal:'compete',level:'advanced'}],dietary:[{kind:'vegetarian',count:2,note:''}],budget:15000000};
+const group={step:'idle',preferences:{...initial.preferences,numPeople:8,numCompanions:0,groupNeeds:needs}};
+const groupBudget=edit(group,{field:'budget',amount:10000000,flexible:false});assert.equal(groupBudget.state.preferences.groupNeeds.budget,10000000);assert.deepEqual(groupBudget.state.preferences.groupNeeds.cohorts,needs.cohorts);assert.deepEqual(groupBudget.state.preferences.groupNeeds.dietary,needs.dietary);assert.equal(needs.budget,15000000);assert.throws(()=>edit(group,{field:'goal',goal:'learn'}));
+const quiz={...initial,step:'quiz'};const quizEdit=edit(quiz,{field:'budget',amount:10000000,flexible:false});assert.equal(quizEdit.state.step,'quiz');assert.equal(JSON.stringify(quizEdit.state.preferences.quizAnswers),JSON.stringify(initial.preferences.quizAnswers));assert.equal(quizEdit.reply.packageIds,undefined);
+assert.equal(normalizeAcePreferences(JSON.parse(JSON.stringify(diet.state.preferences))).dietCount,1);assert.equal(normalizeAcePreferences({...initial.preferences,dietCount:3}).dietCount,undefined);
+assert.equal(respond(initial,'Mình dị ứng tôm').state.preferences.dietCount,undefined);
+assert.match(compactAceNeeds(initial.preferences),/2 khách · 1 người chơi · 1 người đi cùng/);
+console.log('Passed: independent edits, budget recalculation/flexibility, group preservation, dietary counts, limits, immutable state, quiz continuity and session restoration.');
+
+const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
+const Summary=load('components/features/AceNeedsSummary.tsx').default;
+const html=renderToStaticMarkup(React.createElement(Summary,{preferences:initial.preferences,busy:false,onSave:()=>{},onEditGroup:()=>{}}));
+for(const text of ['Nhu cầu của bạn','2 khách','1 người chơi','1 người đi cùng','Đổi ngân sách','Đổi mục tiêu','Đổi ăn uống','1 người · Vợ ăn chay'])assert.ok(html.includes(text),text);
+assert.ok(html.includes('<details open=""'));
+const grouped=renderToStaticMarkup(React.createElement(Summary,{preferences:group.preferences,busy:false,onSave:()=>{},onEditGroup:()=>{}}));
+assert.ok(grouped.includes('Đổi ngân sách'));assert.ok(grouped.includes('Sửa quy mô, mục tiêu &amp; ăn uống'));
+console.log('Passed: rendered summary shows known roles/dietary count, direct edit buttons and group budget entry.');

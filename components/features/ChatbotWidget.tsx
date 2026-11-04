@@ -6,6 +6,8 @@ import "./ace-chat.css";
 import {respondToAceText} from "@/lib/ace-natural";
 import {aceNaturalDemoPrompts} from "@/lib/ace-language-data";
 import {advisorFollowups} from "@/lib/ace-script";
+import AceNeedsSummary from "./AceNeedsSummary";
+import {applyAceQuickEdit,type AceQuickEdit} from "@/lib/ace-quick-edit";
 import GroupNeedsEditor from "./GroupNeedsEditor";
 import {applyGroupNeeds,groupRecommendation,type GroupNeeds} from "@/lib/ace-group";
 import { useAdvisorConversation } from "./use-advisor-conversation";
@@ -238,6 +240,14 @@ export default function ChatbotWidget() {
       { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "bot", ...response.reply },
     ]);
   };
+  const saveQuickEdit = (edit:AceQuickEdit) => {
+    if(advisor.busy)throw Error("Chờ tin nhắn hiện tại gửi xong rồi cập nhật nhé.");
+    const response=applyAceQuickEdit(conversation.current,edit);
+    conversation.current=response.state;setHumanMode(false);setEditingGroup(false);
+    if(edit.field==="party"||edit.field==="goal")setSelection(undefined);
+    const labels={party:"số khách",goal:"mục tiêu",budget:"ngân sách",diet:"ăn uống"};
+    setMessages(prev=>[...prev,{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"user",text:`Cập nhật ${labels[edit.field]}`},{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"bot",...response.reply}]);
+  };
   const saveGroupNeeds = (needs:GroupNeeds) => {
     const preferences=applyGroupNeeds(conversation.current.preferences,needs);
     conversation.current={step:"idle",preferences};setEditingGroup(false);setSelection(undefined);
@@ -324,6 +334,8 @@ export default function ChatbotWidget() {
               </div>
 
             </header>
+
+            <AceNeedsSummary key={sessionId.current} preferences={conversation.current.preferences} busy={typing||advisor.busy||editingGroup||conversation.current.step==="group"} onSave={saveQuickEdit} onEditGroup={()=>{setHumanMode(false);setEditingGroup(true);}}/>
 
             {/* Messages */}
             <div className="ace-chat-messages"

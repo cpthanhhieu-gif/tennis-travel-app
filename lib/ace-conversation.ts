@@ -13,6 +13,7 @@ export type AcePreferences = {
   quizAnswers: number[];
   level?: number;
   diet?: string;
+  dietCount?: number;
   packageId?: string;
 };
 export type AceState = { step: "idle" | "party" | "goal" | "budget" | "quiz" | "diet" | "group"; preferences: AcePreferences };
@@ -25,7 +26,7 @@ const diets = ["Không có yêu cầu đặc biệt", "Ăn chay", "Không ăn h�
 const goalNames = { learn: "học kỹ thuật", compete: "thi đấu & giao lưu", relax: "nghỉ dưỡng & kết nối" };
 export function preferenceSummary(p: AcePreferences): string {
   if(p.groupNeeds)return groupNeedsSummary(p.groupNeeds);
-  return [p.numPeople && `Số khách: ${p.numPeople}${p.numCompanions !== undefined ? ` (${p.numCompanions} người đi cùng)` : ""}`, p.party && `Đi cùng: ${p.party}`, p.goal && `Mục tiêu: ${goalNames[p.goal]}`, p.level && `NTRP tự đánh giá: ${p.level}`, p.budgetFlexible && "Ngân sách: linh hoạt", p.budget && `Ngân sách: tối đa ${p.budget.toLocaleString("vi-VN")} đ/người`, p.diet && `Ăn uống: ${p.diet}`].filter(Boolean).join("\n");
+  return [p.numPeople && `Số khách: ${p.numPeople}${p.numCompanions !== undefined ? ` (${p.numCompanions} người đi cùng)` : ""}`, p.party && `Đi cùng: ${p.party}`, p.goal && `Mục tiêu: ${goalNames[p.goal]}`, p.level && `NTRP tự đánh giá: ${p.level}`, p.budgetFlexible && "Ngân sách: linh hoạt", p.budget && `Ngân sách: tối đa ${p.budget.toLocaleString("vi-VN")} đ/người`, p.diet && `Ăn uống: ${p.dietCount ? `${p.dietCount} người · ` : ""}${p.diet}`].filter(Boolean).join("\n");
 }
 export function aceRecommendation(p: AcePreferences): AceReply {
   if(p.groupNeeds)return groupRecommendation(p.groupNeeds,p);
@@ -66,7 +67,7 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
   if (selected) { p.packageId = selected.id; return answer("idle", aceRecommendation(p)); }
   if(state.step==="group")return answer("group",{text:"Bạn hoàn tất thông tin nhóm trong phần bên dưới nhé; không cần khai báo tên từng người."});
   if (state.step === "party" && [...parties, "Một mình / cặp đôi"].includes(input)) { p.party = input;
-    if(input===parties[0]){p.numPeople=1;p.numCompanions=0;}else if(input===parties[1]){p.numPeople=2;p.numCompanions=0;}else if(input===parties[2]){p.numPeople=2;p.numCompanions=1;}else{delete p.numPeople;delete p.numCompanions;} if(input==="Nhóm 5–10 người"||input==="CLB 10–20 người")return answer("group",{text:"Mình sẽ hỏi lần lượt quy mô, các nhóm người chơi và ăn uống. Không cần tên từng người. Bạn điền tổng số khách trước nhé."});if(p.groupNeeds)delete p.diet;delete p.groupNeeds; return answer("goal", { text: "Mục tiêu chính của chuyến đi là gì?", chips: goals }); }
+    if(input===parties[0]){p.numPeople=1;p.numCompanions=0;}else if(input===parties[1]){p.numPeople=2;p.numCompanions=0;}else if(input===parties[2]){p.numPeople=2;p.numCompanions=1;}else{delete p.numPeople;delete p.numCompanions;} if(p.dietCount!==undefined&&(p.numPeople===undefined||p.dietCount>p.numPeople))delete p.dietCount; if(input==="Nhóm 5–10 người"||input==="CLB 10–20 người")return answer("group",{text:"Mình sẽ hỏi lần lượt quy mô, các nhóm người chơi và ăn uống. Không cần tên từng người. Bạn điền tổng số khách trước nhé."});if(p.groupNeeds)delete p.diet;delete p.groupNeeds; return answer("goal", { text: "Mục tiêu chính của chuyến đi là gì?", chips: goals }); }
   if (state.step === "goal" && goals.includes(input)) { p.goal = (["learn", "compete", "relax"] as const)[goals.indexOf(input)]; return answer("budget", { text: "Ngân sách dự kiến mỗi người là bao nhiêu?", chips: [...tourPackages.map(item => `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`), "Linh hoạt theo trải nghiệm"] }); }
   if (state.step === "budget") {
     const budgetPackage = tourPackages.find(item => input === `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`);
@@ -88,7 +89,7 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
   }
   if (state.step === "diet") {
     if (input === diets[4]) return answer("diet", { text: "Bạn nhập giúp Ace yêu cầu cụ thể, ví dụ dị ứng đậu phộng hoặc chế độ ăn riêng." });
-    p.diet = input.slice(0, 500);
+    p.diet = input.slice(0, 500);delete p.dietCount;
     return answer("idle", aceRecommendation(p));
   }
   if (state.step === "party") return answer("party", { text: "Chọn hình thức đi phù hợp nhé.", chips: parties });

@@ -16,6 +16,7 @@ export function normalizeAcePreferences(v: unknown): AcePreferences {
   if (typeof v.packageId === "string" && tourPackages.some(p => p.id === v.packageId)) p.packageId = v.packageId;
   if (typeof v.numPeople === "number" && Number.isInteger(v.numPeople) && v.numPeople >= 1 && v.numPeople <= 20) p.numPeople = v.numPeople;
   if (typeof v.numCompanions === "number" && Number.isInteger(v.numCompanions) && v.numCompanions >= 0 && v.numCompanions < (p.numPeople ?? 21)) p.numCompanions = v.numCompanions;
+  if(typeof v.dietCount==="number"&&Number.isInteger(v.dietCount)&&v.dietCount>=1&&p.numPeople!==undefined&&v.dietCount<=p.numPeople&&p.diet&&p.diet!=="Không có yêu cầu đặc biệt")p.dietCount=v.dietCount;
   if (Array.isArray(v.quizAnswers)) p.quizAnswers = v.quizAnswers.filter((n): n is number => typeof n === "number" && Number.isFinite(n) && n >= 1 && n <= 5).slice(0, 5);
   const group=parseGroupNeeds(v.groupNeeds);
   if(!group)return p;const normalized=applyGroupNeeds(p,group);if(p.packageId)normalized.packageId=p.packageId;return normalized;

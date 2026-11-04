@@ -1,3 +1,3 @@
-import DemoAccess from "@/components/features/DemoAccess";
-export const metadata={title:"Quản lý kịch bản — Tennis Travel"};
-export default function DemoPage(){return <DemoAccess/>;}
+import OperationsDashboard from "@/components/features/OperationsDashboard";
+export const metadata = { title: "Dashboard demo — Travel Ace", robots: { index: false, follow: false } };
+export default function DemoPage() { return <OperationsDashboard/>; }

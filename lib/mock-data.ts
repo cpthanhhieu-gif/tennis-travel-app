@@ -31,6 +31,7 @@ export interface TourPackage {
   color: string;
   image: string;
   sbu: number;
+  discovery: {primaryGoal:"learn"|"compete"|"relax";minGuests:number;beginnerFriendly:boolean};
 }
 
 export const tourPackages: TourPackage[] = [
@@ -51,6 +52,7 @@ export const tourPackages: TourPackage[] = [
     color: "#1e3a5f",
     image: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&q=80",
     sbu: 1,
+    discovery:{primaryGoal:"learn",minGuests:1,beginnerFriendly:true},
   },
   {
     id: "sbu2",
@@ -70,6 +72,7 @@ export const tourPackages: TourPackage[] = [
     color: "#b45309",
     image: "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&q=80",
     sbu: 2,
+    discovery:{primaryGoal:"compete",minGuests:8,beginnerFriendly:false},
   },
   {
     id: "sbu3",
@@ -90,6 +93,7 @@ export const tourPackages: TourPackage[] = [
     color: "#7c3aed",
     image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
     sbu: 3,
+    discovery:{primaryGoal:"relax",minGuests:1,beginnerFriendly:false},
   },
 ];
 

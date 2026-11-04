@@ -1,3 +1,4 @@
+import {explainAceRecommendation} from "./ace-recommendation";
 import {parseAceBudget} from "./ace-script";
 import { groupNeedsSummary, groupRecommendation, type GroupNeeds } from "./ace-group";
 import { getNtrpLevel, ntrpQuiz, tourPackages } from "./mock-data";
@@ -30,20 +31,7 @@ export function preferenceSummary(p: AcePreferences): string {
 }
 export function aceRecommendation(p: AcePreferences): AceReply {
   if(p.groupNeeds)return groupRecommendation(p.groupNeeds,p);
-  const packageId = p.packageId ?? (p.goal === "compete" ? "sbu2" : p.goal === "relax" ? "sbu3" : "sbu1");
-  if(packageId==="sbu2"&&p.numPeople!==undefined&&p.numPeople<8)return {
-    text:`**Tournament dành cho đoàn từ 8 khách.**\n${preferenceSummary(p)}\n\nBạn đang đi ${p.numPeople} người nên Ace chưa dẫn sang đăng ký đoàn. Bạn có thể xem Leisure hoặc Premium; hai gói này chưa bảo đảm có giải thi đấu tương đương Tournament. Nếu muốn tham gia cùng đoàn, hãy nhờ tư vấn viên kiểm tra.`,
-    packageIds:["sbu1","sbu3"],chips:["Gợi ý gói tour 🏖️","Tôi thuộc NTRP nào? 🎾"],preferences:{...p}
-  };
-  const selected = tourPackages.find(item => item.id === packageId)!;
-  const overBudget = p.budget && selected.priceRange.min > p.budget;
-  const beginnerCompetition = p.goal === "compete" && p.level && p.level < 3;
-  return {
-    text: `**Gợi ý theo nhu cầu của bạn**\n${preferenceSummary(p)}\n\n${selected.name} được gợi ý theo ${p.packageId ? "gói bạn chọn" : p.goal ? "mục tiêu chuyến đi" : "nhu cầu học và chơi"}.${overBudget ? "\nGói phù hợp mục tiêu đang vượt ngân sách. Bạn có thể xem thêm gói học & chơi có giá thấp hơn hoặc điều chỉnh ngân sách." : ""}${beginnerCompetition ? "\nBạn đang ở mức mới bắt đầu; nên ưu tiên học kỹ thuật trước. Hãy kiểm tra nhóm chơi phù hợp với HLV nếu vẫn muốn tham gia thi đấu." : ""}${p.level ? "\nNTRP là kết quả tự đánh giá; HLV xác nhận nhóm tập theo chuyến." : ""}${p.diet && p.diet !== diets[0] ? `\n\n**Yêu cầu ăn uống đã ghi nhận: ${p.diet}.** Các bữa ăn và cooking class cần được điều chỉnh, xác nhận với đơn vị tổ chức. Đây chưa phải thực đơn đã được xác nhận đáp ứng yêu cầu.` : ""}`,
-    packageIds: [...new Set([...(beginnerCompetition ? ["sbu1"] : []), packageId, ...(overBudget && packageId !== "sbu1" ? ["sbu1"] : [])])],
-    chips: ["Điều chỉnh ăn uống", "Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Xem tất cả gói tour"],
-    preferences: { ...p },
-  };
+  return explainAceRecommendation(p,preferenceSummary(p));
 }
 export function aceRespond(state: AceState, input: string): { state: AceState; reply: AceReply } {
   const p = { ...state.preferences, quizAnswers: [...state.preferences.quizAnswers] };

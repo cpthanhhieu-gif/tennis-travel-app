@@ -1,0 +1,28 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript');
+const cache=new Map();function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file).exports;const module={exports:{}};cache.set(file,module);vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>n.startsWith('.')?load(path.resolve(path.dirname(file),n)+'.ts'):require(n),Intl,Date});return module.exports;}
+const engine=load('lib/ace-recommendation.ts'),data=load('lib/mock-data.ts'),{aceRecommendation}=load('lib/ace-conversation.ts'),{applyAceQuickEdit}=load('lib/ace-quick-edit.ts');
+const base={numPeople:2,numCompanions:1,goal:'relax',budget:30000000,diet:'Vợ ăn chay',quizAnswers:[]};
+const rank=p=>engine.rankAcePackages(p),top=p=>rank(p).find(a=>a.eligible),suggest=p=>aceRecommendation(p);
+assert.equal(top(base).packageId,'sbu3');assert.equal(top({...base,budget:7000000}).packageId,'sbu1');
+const reduced=applyAceQuickEdit({step:'idle',preferences:base},{field:'budget',amount:7000000,flexible:false});assert.equal(reduced.reply.packageIds[0],'sbu1');assert.match(reduced.reply.text,/vượt ngân sách/);assert.match(reduced.reply.text,/chưa đáp ứng trọn vẹn/);assert.equal(reduced.state.preferences.diet,base.diet);
+assert.equal(top({...base,goal:'learn',level:1.5,budget:7000000}).packageId,'sbu1');
+const club={...base,numPeople:8,numCompanions:0,goal:'compete',level:3.5,budget:15000000};assert.equal(top(club).packageId,'sbu2');
+assert.equal(top({...club,level:1.5}).packageId,'sbu1');assert.match(suggest({...club,level:1.5}).text,/mới chơi/);
+assert.equal(engine.assessAcePackage({...club,numPeople:2},'sbu2').eligible,false);assert.equal(suggest({...club,numPeople:2}).packageIds.includes('sbu2'),false);assert.match(suggest({...club,numPeople:2}).text,/ít nhất 8 khách/);
+assert.equal(engine.assessAcePackage({...base,numPeople:20},'sbu3').eligible,false);assert.equal(top({...base,numPeople:20}).packageId,'sbu1');assert.match(suggest({...base,numPeople:20}).text,/vượt quy mô 16/);
+assert.equal(suggest({...base,numPeople:21}).packageIds.length,0);
+const cheap=suggest({...base,budget:1000000});assert.equal(cheap.packageIds[0],'sbu1');assert.match(cheap.text,/Chưa có gói nào/);assert.match(cheap.text,/vẫn vượt ngân sách/);
+assert.equal(engine.assessAcePackage(base,'sbu3').estimatedTotal,29900000+22900000);
+assert.equal(engine.assessAcePackage({...base,numPeople:3,numCompanions:1},'sbu3').estimatedTotal,29900000*2+22900000);
+assert.equal(engine.assessAcePackage({...base,numCompanions:undefined},'sbu3').estimatedTotal,undefined);
+const selected=suggest({...base,packageId:'sbu3',budget:7000000});assert.equal(selected.packageIds[0],'sbu1');assert.match(selected.text,/Gói bạn đang quan tâm/);
+const before=JSON.stringify(base);suggest(base);assert.equal(JSON.stringify(base),before);
+const premium=data.tours.find(t=>t.packageId==='sbu3'),departure=premium.departureSchedules[1],old=departure.price;departure.price=35000000;
+assert.equal(engine.assessAcePackage(base,'sbu3',departure.code).playerRate,35000000);assert.equal(engine.assessAcePackage(base,'sbu3',departure.code).affordable,false);departure.price=old;
+const leisure=data.tours.find(t=>t.packageId==='sbu1'),rates=leisure.departureSchedules.map(d=>d.price);leisure.departureSchedules.forEach(d=>d.price=8000000);assert.equal(engine.assessAcePackage({...base,budget:7000000},'sbu1').affordable,false);assert.equal(engine.assessAcePackage(base,'sbu1').playerRate,8000000);leisure.departureSchedules.forEach((d,i)=>d.price=rates[i]);
+const groups={total:8,companions:0,mainGoal:'balanced',cohorts:[{count:3,goal:'learn',level:'beginner'},{count:5,goal:'compete',level:'intermediate'}],dietary:[{count:2,kind:'vegetarian',note:''}],budget:15000000};
+const mixed=suggest({quizAnswers:[],groupNeeds:groups});assert.equal(mixed.packageIds[0],'sbu2');assert.match(mixed.text,/3 người muốn học/);assert.match(mixed.text,/2 người ăn chay/);assert.match(mixed.text,/chưa có gói nào/i);
+const smaller={...groups,total:7,cohorts:[{count:2,goal:'learn',level:'beginner'},{count:5,goal:'compete',level:'intermediate'}]};assert.equal(suggest({quizAnswers:[],groupNeeds:smaller}).packageIds.includes('sbu2'),false);
+assert.match(suggest({...base,level:5,goal:'learn'}).text,/ngoài khoảng tham khảo/);
+assert.equal(engine.assessAcePackage({...base,numCompanions:2},'sbu1').eligible,false);
+console.log('Passed: goal/level rankings, budget and party recalculation, group tradeoffs, real departure/companion prices, selected-package reassessment, capacity limits and no fabricated full match.');

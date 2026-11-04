@@ -1,4 +1,5 @@
-import { tourPackages, packageCapacity, formatVND } from "./mock-data";
+import {explainAceRecommendation} from "./ace-recommendation";
+import { formatVND } from "./mock-data";
 import type { AcePreferences, AceReply } from "./ace-conversation";
 export const groupLevelLabels = { beginner: "Mới chơi", intermediate: "Trung cấp", advanced: "Nâng cao", unknown: "Chưa xác định" };
 export const groupGoalLabels = { learn: "Học kỹ thuật", compete: "Thi đấu & giao lưu", relax: "Tennis & nghỉ dưỡng", balanced: "Cân bằng nhu cầu nhóm" };
@@ -41,36 +42,6 @@ export function applyGroupNeeds(previous: AcePreferences, needs: GroupNeeds): Ac
  return next;
 }
 export function groupRecommendation(g: GroupNeeds, preferences?: AcePreferences): AceReply {
- const goals={learn:0,compete:0,relax:0};for(const c of g.cohorts)goals[c.goal]+=c.count;
- const mixed=new Set([...g.cohorts.map(c=>c.goal),...(g.mainGoal!=="balanced"?[g.mainGoal]:[])]).size>1;
- const priority=g.mainGoal==="balanced"?(goals.compete>goals.learn&&goals.compete>=goals.relax?"compete":goals.relax>goals.learn?"relax":"learn"):g.mainGoal;
- const explicitlySelected=preferences?.packageId&&tourPackages.some(p=>p.id===preferences.packageId)?preferences.packageId:undefined;
- const id=explicitlySelected??(priority==="compete"?"sbu2":priority==="relax"?"sbu3":"sbu1");
- const pkg=tourPackages.find(p=>p.id===id)!;
- const met:string[]=[],gaps:string[]=[];
- met.push(...pkg.highlights.map(h=>`• ${h}`));
- if(id==="sbu1"&&goals.learn)met.unshift(`• Hướng học kỹ thuật của ${goals.learn} người phù hợp nội dung huấn luyện cơ bản của gói.`);
- if(id==="sbu2"&&goals.compete)met.unshift(`• ${goals.compete} người muốn thi đấu có chương trình vòng bảng và playoff để tham khảo.`);
- if(id==="sbu3")met.unshift("• Phù hợp ưu tiên kết hợp tennis, nghỉ dưỡng và phục hồi.");
- if(mixed)gaps.push("Nhóm có nhiều mục tiêu; chưa có gói nào trong danh mục được xác nhận đáp ứng trọn vẹn tất cả các nhóm.");
- if(id!=="sbu2"&&goals.compete)gaps.push(`${goals.compete} người muốn thi đấu: cần xác nhận thể thức phù hợp; không xem các buổi sân thông thường là quyền lợi giải đấu đã có.`);
- if(id!=="sbu1"&&goals.learn)gaps.push(`${goals.learn} người muốn học: cần xác nhận nội dung clinic và cách chia nhóm tập, không tự thêm buổi học vào gói.`);
- const beginners=g.cohorts.filter(c=>c.level==="beginner").reduce((s,c)=>s+c.count,0);
- if(id==="sbu2"&&beginners)gaps.push(`${beginners} người mới chơi: cần HLV xác nhận trình độ, nhóm tập và phương án tham gia; không mặc định tất cả đủ điều kiện thi đấu.`);
- if(g.cohorts.some(c=>c.level==="advanced")&&id==="sbu1")gaps.push("Có người nâng cao trong nhóm; huấn luyện cơ bản chưa đảm bảo đáp ứng mục tiêu nâng cao.");
- if(g.cohorts.some(c=>c.level==="unknown"))gaps.push("Cần xác nhận trình độ những người chưa xác định trước khi xếp nhóm.");
- if(g.total>packageCapacity(id))gaps.push(`${g.total} khách vượt quy mô ${packageCapacity(id)} khách/chuyến của gói; cần phương án khác, chưa thể đặt nguyên nhóm theo cấu hình này.`);
- if(id==="sbu2"&&g.total<8)gaps.push("Gói đoàn yêu cầu ít nhất 8 khách; nhóm hiện tại chưa đủ quy mô gửi yêu cầu theo luồng này.");
- if(g.budget&&pkg.priceRange.min>g.budget)gaps.push(`Giá từ ${formatVND(pkg.priceRange.min)}/người chơi vượt ngân sách ${formatVND(g.budget)}; cần điều chỉnh ngân sách hoặc chọn gói thay thế.`);
- for(const d of g.dietary)gaps.push(`${d.count} người ${dietaryLabels[d.kind].toLowerCase()}${d.note?` (${d.note})`:""}: cần đơn vị tổ chức xác nhận thực đơn/cooking class; chưa cam kết đáp ứng.`);
- if(g.budget&&tourPackages.every(p=>p.priceRange.min>g.budget!))gaps.push("Chưa có gói nào trong danh mục nằm trong ngân sách/người chơi này; cần điều chỉnh ngân sách, chưa có lựa chọn thay thế đã đáp ứng mức giá.");
- if(g.companions)gaps.push(`${g.companions} người đi cùng: cần xác nhận lịch hoạt động, quyền lợi và giá riêng; không tự tính là người chơi tennis.`);
- const alternatives:string[]=[];
- if(mixed){for(const goal of ["learn","compete","relax"] as const){const alt=goal==="learn"?"sbu1":goal==="compete"?"sbu2":"sbu3";if(goals[goal]&&alt!==id)alternatives.push(alt);}}
- if(g.budget&&pkg.priceRange.min>g.budget&&id!=="sbu1")alternatives.push("sbu1");
- if(g.total>packageCapacity(id)&&id!=="sbu1")alternatives.push("sbu1");
- if(id==="sbu2"&&(beginners||g.total<8))alternatives.push("sbu1");
- const distinct=[...new Set(alternatives)];
- const alternativeText=distinct.map(alt=>{const item=tourPackages.find(p=>p.id===alt)!;return `• ${item.name}: ${alt==="sbu1"?"ưu tiên học kỹ thuật cơ bản":alt==="sbu2"?"ưu tiên thi đấu cho đoàn từ 8 khách":"ưu tiên tennis và nghỉ dưỡng"}, từ ${formatVND(item.priceRange.min)}/người chơi; vẫn cần đối chiếu các nhu cầu còn lại.`;});
- return {text:`**Gợi ý cho nhóm của bạn**\n${groupNeedsSummary(g)}\n\n**Đề xuất: ${pkg.name}**\nChọn theo ${explicitlySelected?"gói bạn đã chủ động chọn":g.mainGoal==="balanced"?"mục tiêu được nhiều người trong nhóm ưu tiên nhất (nếu bằng nhau, ưu tiên học kỹ thuật)":"ưu tiên chung bạn đã chọn"}.\n\n**Nội dung phù hợp trong gói hiện có**\n${met.join("\n")}\n\n**Chưa đáp ứng / cần xác nhận**\n${gaps.length?gaps.map(s=>`• ${s}`).join("\n"):"• Lịch, sân và cách xếp nhóm cần xác nhận theo chuyến."}${alternativeText.length?`\n\n**Lựa chọn thay thế**\n${alternativeText.join("\n")}`:""}`,packageIds:[id,...distinct].slice(0,3),preferences:preferences?{...preferences}:undefined,chips:["Sửa nhu cầu nhóm","Xem tất cả gói tour"]};
+ const p:AcePreferences={...preferences,quizAnswers:preferences?.quizAnswers??[],groupNeeds:g,numPeople:g.total,numCompanions:g.companions,budget:g.budget};
+ return explainAceRecommendation(p,groupNeedsSummary(g));
 }

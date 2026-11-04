@@ -4,7 +4,7 @@ const vm = require("node:vm");
 const ts = require("typescript");
 function load(file, deps = {}) {
   const module = { exports: {} };
-  vm.runInNewContext(ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { module, exports: module.exports, require: name => deps[name], Intl });
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { module, exports: module.exports, require: name => deps[name] ?? (name === "./ace-recommendation" ? load("lib/ace-recommendation.ts", {"./mock-data":deps["./mock-data"],"./couple-pricing":load("lib/couple-pricing.ts")}) : undefined), Intl });
   return module.exports;
 }
 const data = load("lib/mock-data.ts");
@@ -16,14 +16,15 @@ function run(inputs, state = ace.initialAceState()) {
 }
 const tour = (goal, diet = "Ăn chay") => run([ace.aceStarts[0], "Một mình / cặp đôi", goal, "Linh hoạt theo trải nghiệm", diet]);
 assert.equal(tour("Học kỹ thuật cùng nhau").reply.packageIds[0], "sbu1");
-assert.equal(tour("Thi đấu & giao lưu").reply.packageIds[0], "sbu2");
+assert.equal(tour("Thi đấu & giao lưu").reply.packageIds[0], "sbu1");
+assert.match(tour("Thi đấu & giao lưu").reply.text,/Chưa rõ số khách/);
 assert.equal(tour("Nghỉ dưỡng & kết nối").reply.packageIds[0], "sbu3");
 const club = tour("Thi đấu & giao lưu", "Không ăn hải sản");
 assert.match(club.reply.text, /Không ăn hải sản/);
 assert.match(club.reply.text, /chưa phải thực đơn/);
 const changed = run(["Điều chỉnh ăn uống", "Không lactose"], club.state);
 assert.equal(changed.state.preferences.party, "Một mình / cặp đôi");
-assert.equal(changed.reply.packageIds[0], "sbu2");
+assert.equal(changed.reply.packageIds[0], "sbu1");
 assert.match(changed.reply.text, /Không lactose/);
 assert.equal(club.state.preferences.diet, "Không ăn hải sản");
 const budget = run([ace.aceStarts[0], "Một mình / cặp đôi", "Thi đấu & giao lưu", `Tối đa ${data.tourPackages[0].priceRange.min.toLocaleString("vi-VN")} đ/người`, "Ăn chay"]);

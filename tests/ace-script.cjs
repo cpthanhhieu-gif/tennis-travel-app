@@ -1,5 +1,5 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm"),ts=require("typescript");
-function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>deps[n],Intl});return module.exports;}
+function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require: name => deps[name] ?? (name === "./ace-recommendation" ? load("lib/ace-recommendation.ts", {"./mock-data":deps["./mock-data"],"./couple-pricing":load("lib/couple-pricing.ts")}) : undefined),Intl});return module.exports;}
 const data=load("lib/mock-data.ts"),router=load("lib/ace-script.ts",{"./mock-data":data});const group=load("lib/ace-group.ts",{"./mock-data":data});const ace=load("lib/ace-conversation.ts",{"./mock-data":data,"./ace-script":router,"./ace-group":group});
 const state=()=>ace.initialAceState();
 assert.equal(router.matchAceScript(state(),"tôi muốn gợi ý tour"),ace.aceStarts[0]);

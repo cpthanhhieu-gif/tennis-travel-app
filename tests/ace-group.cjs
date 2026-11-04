@@ -1,5 +1,5 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm"),ts=require("typescript");
-function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>deps[n],Intl,Date});return module.exports;}
+function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require: name => deps[name] ?? (name === "./ace-recommendation" ? load("lib/ace-recommendation.ts", {"./mock-data":deps["./mock-data"],"./couple-pricing":load("lib/couple-pricing.ts")}) : undefined),Intl,Date});return module.exports;}
 const data=load("lib/mock-data.ts"),group=load("lib/ace-group.ts",{"./mock-data":data});
 const ace=load("lib/ace-conversation.ts",{"./ace-script":load("lib/ace-script.ts",{"./mock-data":data}),"./mock-data":data,"./ace-group":group});
 const session=load("lib/ace-session.ts",{"./mock-data":data,"./ace-conversation":ace,"./ace-group":group,"./demo-scope":{}});
@@ -9,7 +9,7 @@ const mixed={...learn,cohorts:[{count:3,level:"beginner",goal:"learn"},{count:5,
 assert.equal(group.groupNeedsError(learn),null);assert.equal(group.groupNeedsError(mixed),null);
 const a=group.groupRecommendation(learn),b=group.groupRecommendation(compete),c=group.groupRecommendation(mixed);
 assert.equal(a.packageIds[0],"sbu1");assert.equal(b.packageIds[0],"sbu2");assert.equal(c.packageIds[0],"sbu2");assert.equal(c.packageIds.includes("sbu1"),true);
-assert.equal(group.groupRecommendation(mixed,{quizAnswers:[],packageId:"sbu3"}).packageIds[0],"sbu3");
+assert.equal(group.groupRecommendation(mixed,{quizAnswers:[],packageId:"sbu3"}).packageIds[0],"sbu2");
 assert.equal(group.groupRecommendation({...learn,mainGoal:"relax"}).packageIds.includes("sbu1"),true);
 assert.notEqual(b.text,c.text);assert.match(c.text,/chưa có gói nào/i);assert.match(c.text,/3 người muốn học/);assert.match(c.text,/2 người ăn chay/);
 const overlap={...mixed,dietary:[{count:8,kind:"vegetarian",note:""},{count:8,kind:"lactose",note:""}]};assert.equal(group.groupNeedsError(overlap),null);

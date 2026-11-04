@@ -6,6 +6,7 @@ import "./ace-chat.css";
 import {respondToAceText} from "@/lib/ace-natural";
 import {aceNaturalDemoPrompts} from "@/lib/ace-language-data";
 import {advisorFollowups} from "@/lib/ace-script";
+import {assessAcePackage} from "@/lib/ace-recommendation";
 import AceNeedsSummary from "./AceNeedsSummary";
 import {applyAceQuickEdit,type AceQuickEdit} from "@/lib/ace-quick-edit";
 import GroupNeedsEditor from "./GroupNeedsEditor";
@@ -51,16 +52,19 @@ function ProductCard({ packageId, onNavigate, preferences, selection, onChoose, 
   const remember = () => onChoose({ packageId, departureCode });
   const departure = tour.departureSchedules.find(item => item.code === departureCode);
   const days = departure ? tripItinerary({ tourId: tour.id, departureCode }) : [];
+  const assessment=preferences?assessAcePackage(preferences,p.id,departure?.code):undefined;
   const action = p.id === "sbu2" ? "Yêu cầu báo giá đoàn" : p.id === "sbu3" ? "Gửi yêu cầu chuyến đi" : "Chọn lịch & tiếp tục";
   return <article className="w-full max-w-[42rem] rounded-[1.4rem] border border-neutral-10 bg-white p-[1.4rem] space-y-[1rem]">
     <p className="text-[1.2rem] text-neutral-50">{tour.destinationName} · {tour.duration}</p>
     <h3 className="text-[1.5rem] font-bold text-neutral-90">{p.name}</h3>
     <p className="text-[1.3rem] text-neutral-60">{p.tagline}</p>
-    <p className="text-[1.4rem] font-bold text-brand-primary">Từ {formatVND(p.priceRange.min)} / người</p>
+    <p className="text-[1.4rem] font-bold text-brand-primary">{departure?"Giá lịch đang chọn":"Từ"} {formatVND(departure?.price??p.priceRange.min)} / người chơi</p>
+    {assessment&&!assessment.affordable&&<p className="text-[1.2rem] text-amber-800">Lịch đang chọn vượt ngân sách đã ghi nhận. Xem chi tiết đối chiếu bên dưới.</p>}
     <p className="text-[1.2rem] text-neutral-60">{tour.ntrpLabel}</p>
     <p className="text-[1.3rem]">{packageBenefits[p.id as keyof typeof packageBenefits]}</p>
     {preferences?.diet && <p className="text-[1.2rem] bg-brand-tint rounded-[0.8rem] p-[1rem]">Ăn uống: {preferences.diet}. {preferences.diet !== "Không có yêu cầu đặc biệt" && "Cần xác nhận điều chỉnh thực đơn với đơn vị tổ chức; lịch trình bên dưới là chương trình gốc."}</p>}
     {preferences && <details className="text-[1.2rem]"><summary className="cursor-pointer">Nhu cầu đã ghi nhận</summary><p className="whitespace-pre-line mt-[0.6rem]">{preferenceSummary(preferences)}</p></details>}
+    {assessment&&<details className="text-[1.2rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center font-semibold">Đối chiếu nhu cầu với lịch đang chọn</summary>{assessment.estimatedTotal!==undefined&&<p>Tổng giá cơ bản tham khảo: {formatVND(assessment.estimatedTotal)}; chưa gồm phụ thu/dịch vụ bổ sung.</p>}<p className="font-semibold">Điểm phù hợp</p><ul className="list-disc pl-[1.6rem]">{assessment.met.map((item,i)=><li key={i}>{item}</li>)}</ul><p className="font-semibold">Chưa đáp ứng / cần xác nhận</p><ul className="list-disc pl-[1.6rem]">{assessment.gaps.map((item,i)=><li key={i}>{item}</li>)}</ul></details>}
     <ul className="text-[1.2rem] text-neutral-60 list-disc pl-[1.6rem]">{p.highlights.map(h => <li key={h}>{h}</li>)}</ul>
     {tour.departureSchedules.length > 0 ? <label className="block text-[1.3rem] font-semibold">Lịch khởi hành
       <select aria-label={`Lịch khởi hành ${p.name}`} value={departureCode} onChange={e => { setDepartureCode(e.target.value); onChoose({ packageId, departureCode: e.target.value }); }} className="block w-full min-h-[4.4rem] border border-neutral-10 rounded-[0.8rem] px-[0.8rem] mt-[0.6rem] bg-white">
@@ -70,7 +74,7 @@ function ProductCard({ packageId, onNavigate, preferences, selection, onChoose, 
     {days.length > 0 && <details className="text-[1.3rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center font-semibold">Xem lịch trình theo ngày</summary><div className="space-y-[1rem]">{days.map(day => <section key={day.day}><h4 className="font-bold">Ngày {day.day} · {day.title}</h4><ul className="space-y-[0.6rem] mt-[0.6rem] text-neutral-60">{day.activities.map(a => <li key={a.id}>{a.time} · {a.title}{a.optional ? " (tùy chọn)" : ""}</li>)}</ul></section>)}</div></details>}
     <div className="flex flex-wrap gap-[0.8rem] text-[1.3rem] font-semibold">
       <Link onClick={() => { remember(); onNavigate(); }} href={`/tours/${p.id}?from=ace&consultation=${encodeURIComponent(entryId)}`} className="min-h-[4.4rem] inline-flex items-center border border-brand-primary text-brand-primary rounded-full px-[1.2rem]">Xem chi tiết tour</Link>
-      {p.id==="sbu2"&&preferences?.numPeople!==undefined&&preferences.numPeople<8 ? <p>Đăng ký đoàn từ 8 khách. Nhờ tư vấn viên kiểm tra khả năng tham gia cùng đoàn.</p> : departure && <Link onClick={() => { remember(); onNavigate(); }} href={`/booking?package=${p.id}&departure=${encodeURIComponent(departure.code)}&from=ace&consultation=${encodeURIComponent(entryId)}`} className="min-h-[4.4rem] inline-flex items-center bg-brand-primary text-white rounded-full px-[1.2rem]">{action}</Link>}
+      {assessment&&!assessment.eligible ? <p>{assessment.gaps.find(item=>/khách|quy mô|lịch/.test(item))??"Cần xác nhận điều kiện trước khi đăng ký."}</p> : departure && <Link onClick={() => { remember(); onNavigate(); }} href={`/booking?package=${p.id}&departure=${encodeURIComponent(departure.code)}&from=ace&consultation=${encodeURIComponent(entryId)}`} className="min-h-[4.4rem] inline-flex items-center bg-brand-primary text-white rounded-full px-[1.2rem]">{action}</Link>}
     </div>
   </article>;
 }
@@ -370,7 +374,7 @@ export default function ChatbotWidget() {
                       : <BotText text={msg.text} />}
                     {msg.at&&<time className="ace-chat-time" dateTime={msg.at}>{new Date(msg.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})}</time>}
                   </div>
-                  {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} preferences={msg.preferences} selection={selection} onChoose={chooseSelection} entryId={sessionId.current} />)}
+                  {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} preferences={conversation.current.preferences} selection={selection} onChoose={chooseSelection} entryId={sessionId.current} />)}
                   {((msg.role === "bot" && !humanMode && msg.chips)||continuationChips) && msg.id === latestMessage?.id && (
                     <div className="ace-chat-chips">
                       {(continuationChips??msg.chips??[]).map((chip) => (

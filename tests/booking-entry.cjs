@@ -1,5 +1,5 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm"),ts=require("typescript");
-function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>deps[n],Intl,Date,URLSearchParams});return module.exports;}
+function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require: name => deps[name] ?? (name === "./ace-recommendation" ? load("lib/ace-recommendation.ts", {"./mock-data":deps["./mock-data"],"./couple-pricing":load("lib/couple-pricing.ts")}) : undefined),Intl,Date,URLSearchParams});return module.exports;}
 const data=load("lib/mock-data.ts"),pricing=load("lib/couple-pricing.ts"),entry=load("lib/booking-entry.ts");
 const init=load("lib/booking-initialization.ts",{"./mock-data":data,"./couple-pricing":pricing,"./booking-entry":entry});
 const conversation=load("lib/ace-conversation.ts", {"./ace-script":load("lib/ace-script.ts",{"./mock-data":data}),"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});

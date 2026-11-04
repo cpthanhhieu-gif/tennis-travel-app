@@ -5,7 +5,7 @@ const ts = require("typescript");
 const env = {};
 function load(file, deps = {}) {
   const module = { exports: {} };
-  vm.runInNewContext(ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { module, exports: module.exports, require: name => deps[name], process: { env }, Intl, Date, URL, Response, Request, AbortSignal, Buffer, TextEncoder, fetch });
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { module, exports: module.exports, require: name => deps[name] ?? (name === "./ace-recommendation" ? load("lib/ace-recommendation.ts", {"./mock-data":deps["./mock-data"],"./couple-pricing":load("lib/couple-pricing.ts")}) : undefined), process: { env }, Intl, Date, URL, Response, Request, AbortSignal, Buffer, TextEncoder, fetch });
   return module.exports;
 }
 const data = load("lib/mock-data.ts");

@@ -1,3 +1,4 @@
+import {parseGroupNeeds,applyGroupNeeds} from "./ace-group";
 import { initialAceState, type AceState, type AcePreferences } from "./ace-conversation";
 import { tours, tourPackages } from "./mock-data";
 import { browserStorageKey } from "./demo-scope";
@@ -15,7 +16,8 @@ export function normalizeAcePreferences(v: unknown): AcePreferences {
   if (typeof v.numPeople === "number" && Number.isInteger(v.numPeople) && v.numPeople >= 1 && v.numPeople <= 20) p.numPeople = v.numPeople;
   if (typeof v.numCompanions === "number" && Number.isInteger(v.numCompanions) && v.numCompanions >= 0 && v.numCompanions < (p.numPeople ?? 21)) p.numCompanions = v.numCompanions;
   if (Array.isArray(v.quizAnswers)) p.quizAnswers = v.quizAnswers.filter((n): n is number => typeof n === "number" && Number.isFinite(n) && n >= 1 && n <= 5).slice(0, 5);
-  return p;
+  const group=parseGroupNeeds(v.groupNeeds);
+  if(!group)return p;const normalized=applyGroupNeeds(p,group);if(p.packageId)normalized.packageId=p.packageId;return normalized;
 }
 export function normalizeSelection(v: unknown): AceSelection | undefined {
   if (!object(v)) return; const t = tours.find(t => t.packageId === v.packageId);
@@ -25,7 +27,7 @@ export function parseAceSession(raw: string | null): AceSession | null {
   try {
     const v: unknown = JSON.parse(raw ?? "null"); if (!object(v) || v.version !== 1 || typeof v.id !== "string" || v.id.length > 80 || !object(v.state) || !Array.isArray(v.messages)) return null;
     const state = initialAceState(); state.preferences = normalizeAcePreferences(v.state.preferences);
-    if (["idle", "party", "goal", "budget", "quiz", "diet"].includes(String(v.state.step))) state.step = v.state.step as AceState["step"];
+    if (["idle", "party", "goal", "budget", "quiz", "diet", "group"].includes(String(v.state.step))) state.step = v.state.step as AceState["step"];
     if (state.step === "quiz" && state.preferences.quizAnswers.length >= 5) state.step = "idle";
     const messages: AceMessage[] = [];
     for (const m of v.messages.slice(-150)) {

@@ -12,8 +12,8 @@ const docs = new Map();
 const model = load("lib/support-inbox.ts");
 const storage = { apiStorage: async (_req, fn) => fn(), readDocument: async key => docs.has(key) ? structuredClone(docs.get(key)) : null, writeDocument: async (key, value) => { docs.set(key, structuredClone(value)); } };
 const data = load("lib/mock-data.ts");
-const conversation = load("lib/ace-conversation.ts", { "./mock-data": data });
-const session = load("lib/ace-session.ts", { "./mock-data": data, "./ace-conversation": conversation, "./demo-scope": {} });
+const conversation = load("lib/ace-conversation.ts", {"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
+const session = load("lib/ace-session.ts", {"./ace-group":load("lib/ace-group.ts",{"./mock-data":data}), "./mock-data": data, "./ace-conversation": conversation, "./demo-scope": {} });
 const route = load("app/api/support/route.ts", { "next/server": { NextResponse: Response }, "node:crypto": crypto, "@/lib/cloud-store": storage, "@/lib/demo-auth": { isAdmin: req => req.testAdmin === true }, "@/lib/support-inbox": model, "@/lib/ace-session": session });
 const a = "a".repeat(64), b = "b".repeat(64);
 function req(method, body, { admin = false, token = a, query = "", origin = "https://app.test" } = {}) {

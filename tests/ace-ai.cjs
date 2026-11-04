@@ -10,7 +10,7 @@ function load(file, deps = {}) {
 }
 const data = load("lib/mock-data.ts");
 const trips = load("lib/trip-itinerary.ts", { "./mock-data": data });
-const ai = load("lib/ace-ai.ts", { "./mock-data": data, "./trip-itinerary": trips });
+const ai = load("lib/ace-ai.ts", {"./ace-group":load("lib/ace-group.ts",{"./mock-data":data}), "./mock-data": data, "./trip-itinerary": trips });
 const input = ai.parseChatRequest({ messages: [{ role: "user", content: "Nhóm 8 người học tennis và ăn chay" }], preferences: { goal: "learn", diet: "Ăn chay", quizAnswers: [1, 2.5] } });
 const payload = (result, status = "completed") => ({ status, output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify(result) }] }] });
 const answer = { text: "Gói học & chơi phù hợp; thực đơn chay cần xác nhận.", packageIds: ["sbu1", "invented", "sbu1"], preferences: { party: "8 người", goal: "learn", diet: "Ăn chay", level: null, budget: 7000000, packageId: null } };
@@ -44,6 +44,12 @@ const answer = { text: "Gói học & chơi phù hợp; thực đơn chay cần x
   assert.equal(reply.preferences.quizAnswers.length, 2);
   assert.equal(reply.preferences.budget, 7000000);
   assert.equal(input.preferences.budget, undefined);
+  const groupNeeds={total:8,companions:0,mainGoal:"balanced",cohorts:[{count:3,level:"beginner",goal:"learn"},{count:5,level:"unknown",goal:"compete"}],dietary:[{count:2,kind:"vegetarian",note:""}],budget:null};
+  const groupReply=ai.parseAIResponse(payload({...answer,preferences:{...answer.preferences,groupNeeds}}),input.preferences);
+  assert.equal(groupReply.preferences.numPeople,8);assert.equal(groupReply.preferences.groupNeeds.dietary[0].count,2);
+  assert.throws(()=>ai.parseAIResponse(payload({...answer,preferences:{groupNeeds:{...groupNeeds,total:9}}}),input.preferences),e=>e.code==="AI_INVALID_RESPONSE");
+  assert.equal(ai.aceOutputSchema.properties.preferences.required.includes("groupNeeds"),true);
+
   assert.throws(() => ai.parseAIResponse(payload(answer, "incomplete"), input.preferences), error => error.code === "AI_INVALID_RESPONSE");
   assert.throws(() => ai.parseAIResponse(payload({ text: "", packageIds: [] }), input.preferences));
   await assert.rejects(ai.answerWithAI(input, async () => new Response("provider secret", { status: 401 })), error => error.code === "AI_UNAVAILABLE" && !error.message.includes("secret"));

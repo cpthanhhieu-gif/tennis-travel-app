@@ -8,13 +8,13 @@ function load(file, deps = {}) {
   return module.exports;
 }
 const data = load("lib/mock-data.ts");
-const ace = load("lib/ace-conversation.ts", { "./mock-data": data });
+const ace = load("lib/ace-conversation.ts", {"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
 function run(inputs, state = ace.initialAceState()) {
   let response;
   for (const input of inputs) { response = ace.aceRespond(state, input); state = response.state; }
   return response;
 }
-const tour = (goal, diet = "Ăn chay") => run([ace.aceStarts[0], "Nhóm 5–10 người", goal, "Linh hoạt theo trải nghiệm", diet]);
+const tour = (goal, diet = "Ăn chay") => run([ace.aceStarts[0], "Một mình / cặp đôi", goal, "Linh hoạt theo trải nghiệm", diet]);
 assert.equal(tour("Học kỹ thuật cùng nhau").reply.packageIds[0], "sbu1");
 assert.equal(tour("Thi đấu & giao lưu").reply.packageIds[0], "sbu2");
 assert.equal(tour("Nghỉ dưỡng & kết nối").reply.packageIds[0], "sbu3");
@@ -22,7 +22,7 @@ const club = tour("Thi đấu & giao lưu", "Không ăn hải sản");
 assert.match(club.reply.text, /Không ăn hải sản/);
 assert.match(club.reply.text, /chưa phải thực đơn/);
 const changed = run(["Điều chỉnh ăn uống", "Không lactose"], club.state);
-assert.equal(changed.state.preferences.party, "Nhóm 5–10 người");
+assert.equal(changed.state.preferences.party, "Một mình / cặp đôi");
 assert.equal(changed.reply.packageIds[0], "sbu2");
 assert.match(changed.reply.text, /Không lactose/);
 assert.equal(club.state.preferences.diet, "Không ăn hải sản");

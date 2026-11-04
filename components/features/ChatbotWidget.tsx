@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import GroupNeedsEditor from "./GroupNeedsEditor";
+import {applyGroupNeeds,groupRecommendation,type GroupNeeds} from "@/lib/ace-group";
 import { useAdvisorConversation } from "./use-advisor-conversation";
 import { readAceSession, saveAceSession, type AceMessage, type AceSelection } from "@/lib/ace-session";
 import { mergeAdvisorMessages } from "@/lib/ace-timeline";
@@ -102,6 +104,7 @@ export default function ChatbotWidget() {
   const [hydrated, setHydrated] = useState(false);
   const [selection, setSelection] = useState<AceSelection>();
   const [humanMode, setHumanMode] = useState(false);
+  const [editingGroup,setEditingGroup]=useState(false);
   const [contact, setContact] = useState("");
   const [supportRetry, setSupportRetry] = useState<{ text: string; clientMessageId: string } | null>(null);
   const advisor = useAdvisorConversation(thread => {
@@ -205,6 +208,7 @@ export default function ChatbotWidget() {
     setAiError(null);
     advisor.reset();
     sessionId.current = crypto.randomUUID();
+    setEditingGroup(false);
     setSelection(undefined); setHumanMode(false); setContact(""); setSupportRetry(null);
     conversation.current = initialAceState();
     setMessages([]);
@@ -223,6 +227,16 @@ export default function ChatbotWidget() {
       { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "user", text },
       { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "bot", ...response.reply },
     ]);
+  };
+  const saveGroupNeeds = (needs:GroupNeeds) => {
+    const preferences=applyGroupNeeds(conversation.current.preferences,needs);
+    conversation.current={step:"idle",preferences};setEditingGroup(false);setSelection(undefined);setAiError(null);
+    const reply=groupRecommendation(needs,preferences);
+    setMessages(prev=>[...prev,{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"bot",...reply}]);
+  };
+  const cancelGroupNeeds = () => {
+    conversation.current={...conversation.current,step:"idle"};setEditingGroup(false);
+    setMessages(prev=>[...prev,{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"bot",text:"Bạn có thể sửa nhu cầu nhóm khi sẵn sàng. Thông tin đã xác nhận trước đó vẫn được giữ.",chips:["Sửa nhu cầu nhóm","Gợi ý gói tour 🏖️"]}]);
   };
   const handleQuickPrompt = (_flowKey: string, label: string) => handleChip(label);
   const sendAI = async (text?: string) => {
@@ -280,7 +294,7 @@ export default function ChatbotWidget() {
     setInputVal("");
     if (humanMode) { void sendToAdvisor(text); return; }
     const last = messages[messages.length - 1];
-    if (last?.chips?.includes(text) || QUICK_PROMPTS.some(item => item.label === text) || conversation.current.step === "diet") handleChip(text);
+    if (last?.chips?.includes(text) || QUICK_PROMPTS.some(item => item.label === text) || ["diet","group"].includes(conversation.current.step)) handleChip(text);
     else void sendAI(text);
   };
 
@@ -411,6 +425,8 @@ export default function ChatbotWidget() {
                 </div>
               ))}
 
+              {!humanMode&&(editingGroup||conversation.current.step==="group")&&<GroupNeedsEditor key={`${sessionId.current}:group`} preferences={conversation.current.preferences} busy={typing||advisor.busy} onSave={saveGroupNeeds} onCancel={cancelGroupNeeds}/>}
+              {!humanMode&&conversation.current.preferences.groupNeeds&&conversation.current.step!=="group"&&!editingGroup&&<button type="button" disabled={typing||advisor.busy} onClick={()=>setEditingGroup(true)} className="text-brand-primary text-[1.3rem] font-semibold min-h-[4.4rem]">Sửa bản tóm tắt nhu cầu nhóm</button>}
               {aiError && <div role="status" className="rounded-[1.2rem] bg-neutral-05 p-[1.4rem] text-[1.3rem] space-y-[1rem]">
                 <p>{aiError}</p>
                 <button type="button" disabled={typing} onClick={() => void sendAI()} className="text-brand-primary font-semibold min-h-[4.4rem]">Thử lại câu hỏi</button>

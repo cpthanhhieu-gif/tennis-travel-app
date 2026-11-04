@@ -39,3 +39,10 @@ assert.equal(confirmedGroup.groupRequest.companions,1);
 const editedGroup=patcher.consultationBookingPatch({...group.booking,groupRequestEdited:true},{quizAnswers:[],numPeople:10,budget:14000000},true);
 assert.equal(editedGroup.numPeople,undefined);assert.equal(editedGroup.groupRequest,undefined);
 console.log("Passed: Ace couple in personal scenario, both-player roles, no forced Premium, confirmed draft/date priority, login restoration, independent exploration and draft separation.");
+
+assert.equal(restored.draftConflict.savedDate,data.tours[0].departureSchedules[1].dateLabel);
+assert.equal(restored.draftConflict.requestedDate,data.tours[0].departureSchedules[0].dateLabel);
+assert.equal(afterLogin.draftConflict,undefined);
+const newSchedule=init.initializeBooking(new URLSearchParams(`package=sbu1&departure=${data.tours[0].departureSchedules[0].code}`),false,"couple",defaults,null);
+assert.equal(newSchedule.booking.departureCode,data.tours[0].departureSchedules[0].code);
+assert.equal(newSchedule.step,1);

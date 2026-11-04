@@ -1,3 +1,4 @@
+import {completionWarnings} from "@/lib/tour-completion";
 import {validBookingParticipants,type BookingParticipant} from "@/lib/booking-participants";
 import {type PassportFields,reliableCompletion,validPassport} from "@/lib/passport";
 import {type ServiceFields,validServicePlan,safeDocumentUrl} from "@/lib/service-plan";
@@ -22,7 +23,7 @@ import {validActivityTime,type ActivityUpdate,type TripNotice,type ActivityStatu
 import {trainingGroups,type GroupChange} from "@/lib/training-groups";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-type Order = {participants?:BookingParticipant[];contactParticipates?:boolean;journeyShare?:{token:string}} & PassportFields & ServiceFields & PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;notes?:string;entrySource?:string;originScenario?:string;ntrpLevel?:number;ntrpLabel?:string;ntrpDeferred?:boolean;
+type Order = {completionReview?:{warnings:string[];reason:string;at:string};participants?:BookingParticipant[];contactParticipates?:boolean;journeyShare?:{token:string}} & PassportFields & ServiceFields & PreparationFields & PilotFields & {publication?:{token:string;alias:string;createdAt:string;expiresAt:string};referral?:{sourceOrderId:string;token:string;at:string};trainingGroup?:{key:string;assignedAt:string};groupChange?:GroupChange;activityUpdates?:Record<string,ActivityUpdate>;notices?:TripNotice[];history?:RequestEvent[];issue?:RequestIssue;id:string; key:string; tourId:string; name:string;phone?:string;email?:string;notes?:string;entrySource?:string;originScenario?:string;ntrpLevel?:number;ntrpLabel?:string;ntrpDeferred?:boolean;
   operations?:OperationDetails;offerVersions?:OfferVersion[];groupRequest?:GroupRequest; groupQuote?:GroupQuote; groupPlanToken?:string; groupAdviceRequested?:boolean; premiumRequest?:PremiumRequest; offerRevision?:{reason:string;at:string}; departureCode:string; numPeople:number;numCompanions?:number;playerRate?:number;companionRate?:number; total:number; deposit:number; paid:number; status:string; payment:string; points:number;activityChecks?:Record<string,boolean>;startedAt?:string;completedAt?:string;feiRating?:number;balancePayment?:string;offer?:{servicePlanId?:string;id:string;createdAt:string;acceptedAt?:string;total:number;deposit:number;departureCode:string}};
 type Store = {sessions: Record<string,number>; orders:Order[];ledger:PointEntry[];profile?:{name:string;phone:string;email:string};ntrpProfile?:{level:number;label:string;assessedAt:string}};
 
@@ -129,7 +130,7 @@ async function postLocal(req:NextRequest){
   if(!participants(o).some(p=>p.id===b.participant)||b.self!==true)return NextResponse.json({error:"Chọn đúng người tham gia và xác nhận tự đánh giá"},{status:400});
   if(b.action==="surveyFei"){
    const meal=surveyMeals(o).find(a=>a.id===b.mealId);if(!meal||!validFei(b.scores))return NextResponse.json({error:"Chọn bữa và nhập đủ 5 tiêu chí từ 0 đến 100"},{status:400});
-   if(!o.completedAt&&(!o.startedAt||o.activityUpdates?.[meal.id]?.status!=="done"))return NextResponse.json({error:"Bữa ăn chưa hoàn tất theo lịch vận hành"},{status:409});
+   if(!o.startedAt||o.activityUpdates?.[meal.id]?.status!=="done")return NextResponse.json({error:"Bữa ăn chưa hoàn tất theo lịch vận hành"},{status:409});
    o.feiResponses??=[];const previous=o.feiResponses.find(x=>x.participant===b.participant&&x.mealId===meal.id);
    if(previous&&FEI_CRITERIA.some(c=>previous.scores[c.key]!==b.scores[c.key]))return NextResponse.json({error:"Bữa này đã được gửi, không ghi đè phản hồi đã nộp"},{status:409});
    if(!previous)o.feiResponses.push({participant:b.participant,mealId:meal.id,scores:b.scores,score:feiMean(b.scores),version:"fei-pilot-v1",at:new Date().toISOString()});
@@ -397,6 +398,15 @@ async function postLocal(req:NextRequest){
     if(b.source!=="test-controls")return NextResponse.json({error:"Thao tác chỉ có trong điều khiển thử nghiệm"},{status:403});
     if(!o.startedAt&&!o.completedAt)return NextResponse.json({error:"Chuyến chưa bắt đầu"},{status:409});
     if(o.paid<o.total)return NextResponse.json({error:"Cần thanh toán đủ trước khi hoàn thành hành trình"},{status:409});
+    if(!o.completedAt){
+     const warnings=completionWarnings(o);
+     if(warnings.length){
+      const override=b.completionOverride;
+      if(!override||JSON.stringify(override.warnings)!==JSON.stringify(warnings)||typeof override.reason!=="string"||!override.reason.trim()||override.reason.length>1000)return NextResponse.json({error:"Còn việc chưa hoàn tất. Xem lại danh sách và xác nhận bỏ qua trong demo kèm lý do.",warnings},{status:409});
+      o.completionReview={warnings,reason:override.reason.trim(),at:new Date().toISOString()};
+      addRequestEvent(o,"completionOverride",`Kết thúc demo khi còn việc chưa hoàn tất: ${override.reason.trim()}`);
+     }
+    }
     o.completedAt ??= new Date().toISOString();o.status="Đã hoàn thành";
     if(!reliableCompletion(o))return NextResponse.json({error:"Dữ liệu bắt đầu, kết thúc hoặc thanh toán chưa hợp lệ"},{status:409});
     const passportTour=tours.find(t=>t.id===o.tourId),passportDate=passportTour?.departureSchedules.find(d=>d.code===o.departureCode);

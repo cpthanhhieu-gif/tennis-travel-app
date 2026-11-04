@@ -1,0 +1,63 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const vm = require("node:vm");
+const ts = require("typescript");
+const crypto = require("node:crypto");
+function load(file, deps = {}) {
+  const module = { exports: {} };
+  vm.runInNewContext(ts.transpileModule(fs.readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { module, exports: module.exports, require: name => deps[name], Intl, Date, Response, Request, Buffer, URL });
+  return module.exports;
+}
+const docs = new Map();
+const model = load("lib/support-inbox.ts");
+const storage = { apiStorage: async (_req, fn) => fn(), readDocument: async key => docs.has(key) ? structuredClone(docs.get(key)) : null, writeDocument: async (key, value) => { docs.set(key, structuredClone(value)); } };
+const route = load("app/api/support/route.ts", { "next/server": { NextResponse: Response }, "node:crypto": crypto, "@/lib/cloud-store": storage, "@/lib/demo-auth": { isAdmin: req => req.testAdmin === true }, "@/lib/support-inbox": model });
+const a = "a".repeat(64), b = "b".repeat(64);
+function req(method, body, { admin = false, token = a, query = "", origin = "https://app.test" } = {}) {
+  const url = "https://app.test/api/support" + query;
+  const r = new Request(url, { method, headers: { origin, "content-type": "application/json", "x-support-token": token }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+  r.nextUrl = new URL(url); r.testAdmin = admin; return r;
+}
+const send = (text, extra = {}) => ({ action: "send", requestId: crypto.randomUUID(), text, contact: "customer@example.test", context: "Nhóm 8 người, ăn chay", ...extra });
+(async () => {
+  assert.equal(model.validSupportToken(a), true);
+  assert.equal(model.validSupportToken("short"), false);
+  assert.equal((await route.GET(req("GET", undefined, { query: "?admin=1" }))).status, 403);
+  assert.equal((await route.POST(req("POST", send("Hello"), { origin: "https://other.test" }))).status, 403);
+  assert.equal((await route.GET(req("GET", undefined, { token: "invalid" }))).status, 401);
+  const message = send("Nhóm mình muốn học kỹ thuật và ăn chay");
+  let response = await route.POST(req("POST", message));
+  assert.equal(response.status, 200);
+  const original = (await response.json()).thread;
+  assert.equal(original.status, "new");
+  assert.equal(original.messages.length, 1);
+  assert.notEqual(original.id, a);
+  assert.equal(JSON.stringify([...docs.values()]).includes(a), false);
+  assert.equal((await route.POST(req("POST", message))).status, 200);
+  assert.equal((await (await route.GET(req("GET"))).json()).thread.messages.length, 1);
+  assert.equal((await (await route.GET(req("GET", undefined, { token: b }))).json()).thread, null);
+  assert.equal((await route.POST(req("POST", { action: "reply", id: original.id, text: "fake" }))).status, 403);
+  assert.equal((await route.GET(req("GET", undefined, { query: `?admin=1&id=${original.id}`, token: b }))).status, 403);
+  const inbox = await (await route.GET(req("GET", undefined, { admin: true, query: "?admin=1" }))).json();
+  assert.equal(inbox.threads.length, 1);
+  assert.equal(inbox.threads[0].contact, "customer@example.test");
+  response = await route.POST(req("POST", { action: "status", id: original.id, status: "processing" }, { admin: true }));
+  assert.equal((await response.json()).thread.status, "processing");
+  response = await route.POST(req("POST", { action: "reply", id: original.id, text: "Gói học & chơi phù hợp. Mình sẽ kiểm tra thực đơn chay." }, { admin: true }));
+  assert.equal(response.status, 200);
+  const customer = await (await route.GET(req("GET"))).json();
+  assert.equal(customer.thread.status, "replied");
+  assert.equal(customer.thread.messages.at(-1).role, "advisor");
+  assert.equal((await route.GET(req("GET"))).headers.get("cache-control"), "no-store");
+  response = await route.POST(req("POST", send("Mình đi 10 người nhé")));
+  assert.equal((await response.json()).thread.status, "new");
+  assert.equal((await route.POST(req("POST", send("x".repeat(2001))))).status, 400);
+  assert.equal((await route.POST(req("POST", { action: "send", text: "no request id" }))).status, 400);
+  const parallel = await Promise.all([route.POST(req("POST", send("One"))), route.POST(req("POST", send("Two")))]);
+  assert.equal(parallel.every(r => r.status === 200), true);
+  assert.equal((await (await route.GET(req("GET"))).json()).thread.messages.length, 5);
+  let last;
+  for (let i = 0; i < 10; i++) last = await route.POST(req("POST", send("More")));
+  assert.equal(last.status, 429);
+  console.log("Passed: customer isolation, admin authorization, create/list/reply/status, persistent retrieval, duplicate retries, concurrency, input validation and send throttling.");
+})().catch(error => { console.error(error); process.exitCode = 1; });

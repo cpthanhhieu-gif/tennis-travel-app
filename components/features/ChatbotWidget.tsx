@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import AdvisorChat from "./AdvisorChat";
 import Link from "next/link";
 import { tourPackages, tours, formatVND } from "@/lib/mock-data";
 import { packageBenefits, tripItinerary } from "@/lib/trip-itinerary";
@@ -350,6 +351,10 @@ export default function ChatbotWidget() {
                 <button type="button" disabled={typing} onClick={() => void sendAI()} className="text-brand-primary font-semibold min-h-[4.4rem]">Thử lại câu hỏi</button>
                 <div className="flex flex-wrap gap-[0.8rem]">{["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour"].map(label => <button key={label} type="button" disabled={typing} onClick={() => handleChip(label)} className="border border-brand-primary text-brand-primary rounded-full px-[1.2rem] min-h-[4.4rem]">{label}</button>)}</div>
               </div>}
+              <AdvisorChat
+                context={`${preferenceSummary(conversation.current.preferences)}\n\n${messages.slice(-12).map(m => `${m.role === "user" ? "Khách" : "Ace"}: ${m.text.slice(0, 1000)}`).join("\n\n")}`}
+                suggestedQuestion={messages.filter(m => m.role === "user").at(-1)?.text ?? ""}
+              />
               {typing && <div className="flex items-start"><TypingDots /></div>}
               <div ref={messagesEndRef} />
             </div>

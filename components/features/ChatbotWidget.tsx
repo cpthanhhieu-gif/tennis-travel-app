@@ -99,6 +99,10 @@ export default function ChatbotWidget() {
   const msgId           = useRef(1000);
   const welcomeFiredRef = useRef(false);
   const conversation = useRef(initialAceState());
+  const requestRef = useRef<AbortController | null>(null);
+  const retryRef = useRef<unknown>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  useEffect(() => () => requestRef.current?.abort(), []);
 
   useEffect(() => {
     const open = () => setPhase("opening");
@@ -146,6 +150,10 @@ export default function ChatbotWidget() {
   };
 
   const handleReset = () => {
+    requestRef.current?.abort();
+    requestRef.current = null;
+    retryRef.current = null;
+    setAiError(null);
     conversation.current = initialAceState();
     setMessages([]);
     setTyping(false);
@@ -153,6 +161,9 @@ export default function ChatbotWidget() {
   };
 
   const handleChip = (text: string) => {
+    if (requestRef.current) return;
+    setAiError(null);
+    retryRef.current = null;
     const response = aceRespond(conversation.current, text);
     conversation.current = response.state;
     setMessages(prev => [...prev,
@@ -161,11 +172,52 @@ export default function ChatbotWidget() {
     ]);
   };
   const handleQuickPrompt = (_flowKey: string, label: string) => handleChip(label);
+  const sendAI = async (text?: string) => {
+    if (requestRef.current) return;
+    let payload = retryRef.current;
+    if (text) {
+      const history = messages.map(message => ({ role: message.role === "bot" ? "assistant" : "user", content: message.text.slice(0, 6000) }));
+      history.push({ role: "user", content: text });
+      const recent = history.slice(-24);
+      while (recent.length > 1 && recent.reduce((sum, turn) => sum + turn.content.length, 0) > 30000) recent.shift();
+      payload = { messages: recent, preferences: conversation.current.preferences };
+      retryRef.current = payload;
+      setMessages(prev => [...prev, { id: msgId.current++, role: "user", text }]);
+    }
+    if (!payload) return;
+    const controller = new AbortController();
+    requestRef.current = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 30000);
+    setAiError(null);
+    setTyping(true);
+    let failureMessage = "Chưa kết nối được với Ace. Bạn thử lại nhé.";
+    try {
+      const response = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: controller.signal });
+      const reply = await response.json().catch(() => null);
+      if (requestRef.current !== controller) return;
+      if (!response.ok || !reply || typeof reply.text !== "string" || !Array.isArray(reply.packageIds)) {
+        failureMessage = typeof reply?.error === "string" ? reply.error : "Ace chưa trả lời được. Bạn thử lại nhé.";
+        throw new Error("AI_REQUEST_FAILED");
+      }
+      if (reply.preferences) conversation.current = { ...conversation.current, preferences: reply.preferences };
+      const packageIds = reply.packageIds.filter((id: unknown) => typeof id === "string" && tourPackages.some(p => p.id === id));
+      setMessages(prev => [...prev, { id: msgId.current++, role: "bot", text: reply.text, packageIds, preferences: reply.preferences, chips: reply.chips }]);
+      retryRef.current = null;
+    } catch {
+      if (requestRef.current !== controller) return;
+      setAiError(controller.signal.aborted ? "Ace phản hồi lâu hơn dự kiến. Bạn thử lại hoặc dùng các lựa chọn bên dưới nhé." : failureMessage);
+    } finally {
+      window.clearTimeout(timeout);
+      if (requestRef.current === controller) { requestRef.current = null; setTyping(false); }
+    }
+  };
   const handleSend = () => {
     const text = inputVal.trim();
-    if (!text) return;
+    if (!text || requestRef.current) return;
     setInputVal("");
-    handleChip(text);
+    const last = messages[messages.length - 1];
+    if (last?.chips?.includes(text) || QUICK_PROMPTS.some(item => item.label === text)) handleChip(text);
+    else void sendAI(text);
   };
 
   /* ─── Derived values ─── */
@@ -283,7 +335,7 @@ export default function ChatbotWidget() {
                   {msg.role === "bot" && msg.chips && msg.id === messages[messages.length - 1]?.id && (
                     <div className="flex flex-wrap gap-[0.6rem] max-w-[90%]">
                       {msg.chips.map((chip) => (
-                        <button key={chip} onClick={() => handleChip(chip)}
+                        <button key={chip} disabled={typing} onClick={() => handleChip(chip)}
                           className="px-[1.2rem] py-[0.7rem] rounded-full border border-brand-primary text-brand-primary text-[1.2rem] font-semibold bg-white hover:bg-brand-tint transition-colors">
                           {chip}
                         </button>
@@ -293,6 +345,11 @@ export default function ChatbotWidget() {
                 </div>
               ))}
 
+              {aiError && <div role="status" className="rounded-[1.2rem] bg-neutral-05 p-[1.4rem] text-[1.3rem] space-y-[1rem]">
+                <p>{aiError}</p>
+                <button type="button" disabled={typing} onClick={() => void sendAI()} className="text-brand-primary font-semibold min-h-[4.4rem]">Thử lại câu hỏi</button>
+                <div className="flex flex-wrap gap-[0.8rem]">{["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour"].map(label => <button key={label} type="button" disabled={typing} onClick={() => handleChip(label)} className="border border-brand-primary text-brand-primary rounded-full px-[1.2rem] min-h-[4.4rem]">{label}</button>)}</div>
+              </div>}
               {typing && <div className="flex items-start"><TypingDots /></div>}
               <div ref={messagesEndRef} />
             </div>
@@ -303,10 +360,11 @@ export default function ChatbotWidget() {
                 <input ref={inputRef} type="text" value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Nhập câu hỏi của bạn..."
+                  maxLength={2000}
+                  placeholder="Hỏi Ace về chuyến đi của bạn..."
                   className="flex-1 min-w-0 bg-transparent text-[1.6rem] text-neutral-90 placeholder:text-neutral-40 outline-none"
                   aria-label="Nhập câu hỏi" />
-                <button onClick={handleSend} disabled={!inputVal.trim()} aria-label="Gửi"
+                <button onClick={handleSend} disabled={!inputVal.trim() || typing} aria-label="Gửi"
                   className={`w-[4.4rem] h-[4.4rem] rounded-full flex items-center justify-center transition-all duration-200 ${
                     inputVal.trim() ? "bg-brand-primary hover:bg-brand-primary-dark" : "bg-neutral-10"
                   }`}>
@@ -314,7 +372,7 @@ export default function ChatbotWidget() {
                 </button>
               </div>
               <p className="text-neutral-40 text-[1.2rem] text-center mt-[0.8rem]">
-                Powered by Vietravel AI · Phản hồi trong vài giây
+                Ace · Hỗ trợ khám phá Travel Ace
               </p>
             </div>
           </div>

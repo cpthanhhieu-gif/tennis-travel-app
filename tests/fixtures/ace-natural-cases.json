@@ -397,13 +397,13 @@
     },
     {
       "text": "Mình đi một mình nhưng có thêm ba người nữa",
-      "outcome": "advisor",
+      "outcome": "clarify",
       "step": "idle",
       "expected": {}
     },
     {
       "text": "Hai người gồm hai người đi cùng không chơi",
-      "outcome": "advisor",
+      "outcome": "clarify",
       "step": "idle",
       "expected": {}
     },

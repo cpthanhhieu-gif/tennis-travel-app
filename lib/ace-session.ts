@@ -31,6 +31,11 @@ export function parseAceSession(raw: string | null): AceSession | null {
     const state = initialAceState(); state.preferences = normalizeAcePreferences(v.state.preferences);
     if (["idle", "party", "goal", "budget", "quiz", "diet", "group"].includes(String(v.state.step))) state.step = v.state.step as AceState["step"];
     if (state.step === "quiz" && state.preferences.quizAnswers.length >= 5) state.step = "idle";
+    const pending=v.state.partyClarification;
+    if(object(pending)&&["negative","conditional","conflict","uncertain"].includes(String(pending.reason))&&typeof pending.attempts==="number"&&Number.isInteger(pending.attempts)&&pending.attempts>=1&&pending.attempts<=2){
+      state.partyClarification={reason:pending.reason as NonNullable<AceState["partyClarification"]>["reason"],attempts:pending.attempts};
+      if(pending.reason==="uncertain"&&object(pending.candidate)&&pending.candidate.total===1&&pending.candidate.companions===0)state.partyClarification.candidate={total:1,companions:0};
+    }
     const messages: AceMessage[] = [];
     for (const m of v.messages.slice(-150)) {
       if (!object(m) || !["bot", "user", "advisor"].includes(String(m.role)) || typeof m.text !== "string" || typeof m.id !== "string" && typeof m.id !== "number") continue;

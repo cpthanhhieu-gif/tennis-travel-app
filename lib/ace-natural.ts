@@ -1,9 +1,10 @@
+import {readPartyLanguage,partyText,type PartyReading} from "./ace-party-language";
 import {aceLanguageExamples,type AceLanguageIntent} from "./ace-language-data";
 import {aceRespond,aceRecommendation,preferenceSummary,type AceState,type AcePreferences} from "./ace-conversation";
 import {matchAceScript,parseAceBudget} from "./ace-script";
 
 type Response=ReturnType<typeof aceRespond>;
-type Fact={intent:AceLanguageIntent}|{intent:"partyCount";count:number}|{intent:"budget";amount:number;basis:"person"|"total"|"unknown"}|{intent:"dietText";text:string}|{intent:"clarify";text:string};
+type Fact={intent:AceLanguageIntent}|{intent:"partyCount";count:number;companions?:number}|{intent:"budget";amount:number;basis:"person"|"total"|"unknown"}|{intent:"dietText";text:string}|{intent:"clarify";text:string};
 const fold=(text:string)=>text.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[đĐ]/g,"d").toLowerCase();
 export function normalizeAceLanguage(text:string){return fold(text).replace(/\b(?:ko|khong|hok|k)\b/g,"khong").replace(/\btui\b/g,"toi").replace(/\b(?:2|hai) vc\b/g,"2 vo chong").replace(/\bhai vo chong\b/g,"2 vo chong").replace(/(\d)\s*ng\b/g,"$1 nguoi").replace(/\bvs\b/g,"voi").replace(/[^a-z0-9]+/g," ").trim().replace(/^(?:(?:ace oi|minh|toi|em|tui minh|bon minh) )+/,"").replace(/(?: (?:nhe|nha|a|thoi))+$/,"");}
 const examples=new Map<string,AceLanguageIntent>();
@@ -11,6 +12,7 @@ for(const row of aceLanguageExamples)for(const text of row.examples){const key=n
 const globals={tour:"Gợi ý gói tour 🏖️",quiz:"Tôi thuộc NTRP nào? 🎾",catalog:"Xem tất cả gói tour"} as const;
 function fact(text:string):Fact|undefined{
  const s=normalizeAceLanguage(text);const intent=examples.get(s);if(intent)return {intent};
+ const party=readPartyLanguage(text);if(party?.kind==="known")return {intent:"partyCount",count:party.total,companions:party.companions};
  const count=s.match(/^(?:(?:nhom|doan|clb)(?: minh)?(?: co| di)?|di|co)?\s*(\d+) (?:nguoi|khach)$/);
  if(count){const n=Number(count[1]);return n<1||n>20?{intent:"clarify",text:"Ace hiện hỗ trợ ghi nhận từ 1–20 khách. Bạn xác nhận lại tổng số người giúp mình nhé."}:{intent:"partyCount",count:n};}
  const raw=fold(text).trim().replace(/[!?]$/,"").replace(/\b(?:nhe|nha|a|thoi)$/,"").trim();
@@ -41,19 +43,37 @@ export function continueAceConversation(state:AceState,ack:string):Response{
  if(!p.diet)return {state:{...state,step:"diet"},reply:{text:`${ack}\nBạn hoặc người đi cùng có yêu cầu ăn uống nào không?`,chips:["Không có yêu cầu đặc biệt","Ăn chay","Không ăn hải sản"]}};
  const reply=aceRecommendation(p);return {state:{...state,step:"idle"},reply:{...reply,text:`${ack}\n\n${reply.text}`}};
 }
+function clarifyParty(state:AceState,reading:Extract<PartyReading,{kind:"ask"}>):Response{
+ const pending={reason:reading.reason,attempts:Math.min(2,(state.partyClarification?.attempts??0)+1),...(reading.candidate?{candidate:reading.candidate}:{})};
+ const copy={negative:"Ace hiểu bạn không muốn đi theo hình thức vừa nhắc. Bạn dự định đi tổng cộng bao nhiêu người?",conditional:"Bạn đang hỏi một tình huống giả định hay muốn đăng ký chuyến thực tế? Ace chưa thay đổi số khách.",conflict:"Tin nhắn vừa nói đi một mình, vừa nhắc thêm người đi cùng. Bạn xác nhận tổng số khách và số người chơi giúp Ace nhé.",uncertain:reading.candidate?`Bạn muốn đăng ký cho ${reading.candidate.total} người, đúng không?`:"Ace chưa rõ bạn đi cùng ai. Bạn cho biết tổng số khách và có bao nhiêu người chơi tennis nhé."};
+ return {state:{...state,partyClarification:pending},reply:{text:copy[reading.reason]+(pending.attempts>=2?" Bạn có thể chọn phương án bên dưới hoặc nhờ tư vấn viên hỗ trợ; thông tin cũ vẫn được giữ.":""),chips:[...(reading.candidate?["Đúng, đăng ký 1 người"]:[]),"Đi một mình","Hai người cùng chơi","Một người chơi, một người đi cùng",...(reading.reason==="conditional"?["Chỉ đang tìm hiểu"]:[]),...(pending.attempts>=2?["Nhờ tư vấn viên hỗ trợ"]:[])]}};
+}
 /** Resolve only fully covered statements. Unknown/partly understood requests keep the advisor fallback. */
 export function respondToAceText(state:AceState,text:string):Response|undefined{
  if(!text.trim()||text.length>2000)return;
  if(/\b(?:huy|hoan tien|doi lich|hoa don|visa)\b/.test(fold(text)))return;
+ const pending=state.partyClarification;
+ const answer=partyText(text);
+ if(pending&&["chi dang tim hieu","de minh suy nghi them","bo qua cau hoi nay"].includes(answer)){const next={...state};delete next.partyClarification;return {state:next,reply:{text:"Mình giữ nguyên nhu cầu trước đó. Khi chốt người tham gia, bạn có thể nhập số khách hoặc chọn hình thức đi.",chips:["Gợi ý gói tour 🏖️","Xem tất cả gói tour"]}};}
+ if(pending&&["dung","dung roi","vang","ok","dong y","dung dang ky 1 nguoi"].includes(answer)){
+  if(pending.candidate){const clean={...state};delete clean.partyClarification;return respondToAceText(clean,"Đi một mình");}
+  return clarifyParty(state,{kind:"ask",reason:pending.reason});
+ }
+ const party=readPartyLanguage(text);
  const direct=fact(text);
+ if(party?.kind==="ask"&&(party.reason!=="uncertain"||!/[;,\n]|\s+(?:và|va)\s+/i.test(text))&&(!direct||direct.intent==="clarify")&&!(state.step==="quiz"&&matchAceScript(state,text)))return clarifyParty(state,party);
+ if(pending&&["khong","khong phai","chua ro","chua biet","chua hieu","sao","khong biet"].includes(answer))return clarifyParty(state,{kind:"ask",reason:pending.reason});
  if(direct&&direct.intent in globals)return aceRespond(state,globals[direct.intent as keyof typeof globals]);
  if(direct?.intent==="greeting")return unchanged(state,"Chào bạn! Bạn có thể kể kế hoạch bằng lời của mình, ví dụ “Hai vợ chồng đi, chỉ mình chơi tennis”.",["Gợi ý gói tour 🏖️","Tôi thuộc NTRP nào? 🎾"]);
  // The quiz has question-specific meanings; do not infer an NTRP level from a general statement.
+ if(state.step==="quiz"&&party?.kind==="known"&&!state.preferences.groupNeeds){const p={...state.preferences,quizAnswers:[...state.preferences.quizAnswers],numPeople:party.total,numCompanions:party.companions,party:party.total===1?"Đi một mình":`${party.total} khách`};delete p.packageId;const response=aceRespond({step:"quiz",preferences:p},"Tiếp tục kịch bản");response.reply.text=`Đã ghi nhận ${party.total} khách; giữ nguyên câu trả lời NTRP.\n${response.reply.text}`;return response;}
  if(state.step==="quiz"){const match=matchAceScript(state,text);return match?aceRespond(state,match):undefined;}
  const clauses=direct?[text]:text.split(/;|\n|(?<!\d)\.(?!\d)/).flatMap(part=>fact(part.trim())?[part]:part.split(/(?<!\d),(?!\d)|\s+(?:và|va)\s+/i)).map(s=>s.trim()).filter(Boolean);
  const facts=clauses.map(clause=>fact(clause));
  if(facts.some(f=>!f)){
   // Multi-clause input must not be partially applied or silently discard a request.
+  const unresolved=clauses.filter((_,i)=>!facts[i]);
+  if(unresolved.every(clause=>readPartyLanguage(clause)?.kind==="ask")){const reading=readPartyLanguage(unresolved[0]);if(reading?.kind==="ask")return clarifyParty(state,reading);}
   if(clauses.length>1)return;
   const scripted=matchAceScript(state,text);return scripted?aceRespond(state,scripted):undefined;
  }
@@ -71,7 +91,7 @@ export function respondToAceText(state:AceState,text:string):Response|undefined{
   else if(f.intent==="bothPlayers")setCount(2,0);
   else if(f.intent==="onePlayer")setCount(2,1);
   else if(f.intent==="coupleUnknown")setCount(2);
-  else if(f.intent==="partyCount")setCount(f.count,f.count===1?0:undefined);
+  else if(f.intent==="partyCount")setCount(f.count,f.companions??(f.count===1?0:undefined));
   else if(["learn","compete","relax"].includes(f.intent)){const next=f.intent as AcePreferences["goal"];if(goal&&goal!==next)conflict=true;goal=next;}
   else if(f.intent==="flexible")flexible=true;
   else if(f.intent==="budget"){

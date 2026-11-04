@@ -1,0 +1,27 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript');
+const cache=new Map();function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file).exports;const module={exports:{}};cache.set(file,module);vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>n.startsWith('.')?load(path.resolve(path.dirname(file),n)+'.ts'):require(n),Intl,Date});return module.exports;}
+const {respondToAceText:respond}=load('lib/ace-natural.ts'),{initialAceState}=load('lib/ace-conversation.ts'),sessions=load('lib/ace-session.ts'),{applyAceQuickEdit}=load('lib/ace-quick-edit.ts');
+let tested=0;const templates=[];
+for(const person of ['Tôi','Mình','Em','Anh'])for(const wish of ['muốn','định','dự định','sẽ'])templates.push(`${person} ${wish} đi một mình`);
+for(const text of [...templates,'Cho mình đi 1 người','Chỉ có tôi tham gia','Tôi muốn tham gia solo','Em định đăng ký một người','Mình chỉ muốn đi một khách','Toi muon di mot minh a','tối muốn đi một mình'])for(const step of ['idle','party','budget','diet']){const input={...initialAceState(),step};const before=JSON.stringify(input);const r=respond(input,text);assert.ok(r,text);assert.equal(r.state.preferences.numPeople,1,text);assert.equal(r.state.preferences.numCompanions,0,text);assert.equal(JSON.stringify(input),before);tested++;}
+const existing={step:'budget',preferences:{numPeople:2,numCompanions:1,goal:'relax',budget:30000000,diet:'Vợ ăn chay',quizAnswers:[2.5]}};
+for(const text of ['Tôi không muốn đi một mình','Mình ko định đi một mình','Nếu đi một mình thì sao?','Giả sử tôi đi một mình','Tôi có thể đi một mình được không?','Tôi đi một mình, còn vợ đi cùng','Mình đi một mình nhưng có thêm ba người nữa','Mình muốn đi cùng gia đình','Tôi đi cùng người nhà']){const r=respond(existing,text);assert.ok(r,text);assert.equal(JSON.stringify(r.state.preferences),JSON.stringify(existing.preferences),text);assert.ok(r.state.partyClarification,text);assert.ok(r.reply.chips?.length,text);tested++;}
+for(const [text,n] of [['Tôi muốn đi với vợ',2],['Em định đi cùng bạn gái',2],['Vợ chồng mình sẽ đi',2],['Tôi muốn đi ba người',3],['Nhóm mình dự định đi 8 người',8]]){const r=respond(initialAceState(),text);assert.ok(r,text);assert.equal(r.state.preferences.numPeople,n,text);assert.equal(r.state.preferences.numCompanions,undefined,text);tested++;}
+let uncertain=respond(existing,'Mình định đi một mình mà chưa rõ');assert.equal(uncertain.state.partyClarification.candidate.total,1);
+const saved=sessions.parseAceSession(JSON.stringify({version:1,id:'party-question',state:uncertain.state,messages:[],humanMode:false,open:false}));assert.equal(saved.state.partyClarification.candidate.total,1);
+const yes=respond(saved.state,'Đúng rồi');assert.equal(yes.state.preferences.numPeople,1);assert.equal(yes.state.partyClarification,undefined);assert.equal(yes.state.preferences.budget,30000000);assert.equal(yes.state.preferences.diet,'Vợ ăn chay');
+const no=respond(saved.state,'Không');assert.equal(no.state.preferences.numPeople,2);assert.equal(no.state.partyClarification.candidate,undefined);assert.ok(no.reply.chips.includes('Nhờ tư vấn viên hỗ trợ'));
+const third=respond(no.state,'Chưa hiểu');assert.equal(third.state.partyClarification.attempts,2);
+const corrected=respond(no.state,'Hai người cùng chơi');assert.equal(corrected.state.preferences.numCompanions,0);assert.equal(corrected.state.partyClarification,undefined);
+const conditional=respond(existing,'Nếu đi một mình thì sao?');assert.equal(conditional.state.partyClarification.candidate,undefined);assert.equal(respond(conditional.state,'Đúng').state.preferences.numPeople,2);assert.equal(respond(conditional.state,'Chỉ đang tìm hiểu').state.partyClarification,undefined);
+const quiz={...existing,step:'quiz'};const duringQuiz=respond(quiz,'Tôi muốn đi một mình');assert.equal(duringQuiz.state.step,'quiz');assert.equal(duringQuiz.state.preferences.quizAnswers.length,1);assert.equal(duringQuiz.state.preferences.numPeople,1);
+const quizQuestion=respond(quiz,'Mình định đi một mình mà chưa rõ');assert.equal(respond(quizQuestion.state,'Đúng').state.step,'quiz');
+const form=applyAceQuickEdit(quizQuestion.state,{field:'party',total:2,companions:0});assert.equal(form.state.partyClarification,undefined);
+for(const text of ['Tôi muốn hủy tour đã đặt','Mình đi một mình; tôi cần xuất hóa đơn','Có tour Nhật Bản không?','Tôi muốn hoàn tiền'])assert.equal(respond(existing,text),undefined,text);
+const compound=respond(initialAceState(),'Tôi muốn đi một mình; muốn học tennis từ đầu; 7 triệu mỗi người; mình không ăn hải sản');assert.equal(compound.state.preferences.numPeople,1);assert.equal(compound.state.preferences.budget,7000000);assert.equal(compound.state.preferences.goal,'learn');
+assert.equal(existing.preferences.numPeople,2);
+console.log(`Passed ${tested} independent party-language/context cases plus confirmation, rejection, ambiguity, persisted questions, quiz continuity and explicit advisor fallback.`);
+
+const negativeWithPartner=respond(existing,'Tôi không muốn đi một mình mà đi cùng vợ');assert.equal(negativeWithPartner.state.partyClarification.reason,'negative');assert.equal(negativeWithPartner.state.preferences.numPeople,2);
+
+assert.ok(respond(initialAceState(),'Tôi muốn đi cùng vợ, vợ không chơi tennis').state.partyClarification);

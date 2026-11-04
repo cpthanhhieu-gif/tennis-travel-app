@@ -17,7 +17,8 @@ export type AcePreferences = {
   dietCount?: number;
   packageId?: string;
 };
-export type AceState = { step: "idle" | "party" | "goal" | "budget" | "quiz" | "diet" | "group"; preferences: AcePreferences };
+export type AcePartyClarification={reason:"negative"|"conditional"|"conflict"|"uncertain";attempts:number;candidate?:{total:number;companions?:number}};
+export type AceState = { partyClarification?:AcePartyClarification; step: "idle" | "party" | "goal" | "budget" | "quiz" | "diet" | "group"; preferences: AcePreferences };
 export type AceReply = { text: string; chips?: string[]; packageIds?: string[]; preferences?: AcePreferences };
 export const initialAceState = (): AceState => ({ step: "idle", preferences: { quizAnswers: [] } });
 export const aceStarts = ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour", "Menu FEI cho tôi 🍜"];

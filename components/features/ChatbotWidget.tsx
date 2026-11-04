@@ -262,6 +262,7 @@ export default function ChatbotWidget() {
   const handleNaturalText = (text:string) => {
     if (!text || advisor.busy) return;
     setInputVal("");
+    if(text==="Nhờ tư vấn viên hỗ trợ"){void sendToAdvisor("Mình cần tư vấn viên hỗ trợ xác nhận số người tham gia và vai trò trong chuyến đi.");return;}
     const response=respondToAceText(conversation.current,text);
     if(response){
       if(response.state!==conversation.current)setExploringNewTrip(true);

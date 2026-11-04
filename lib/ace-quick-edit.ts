@@ -35,7 +35,7 @@ export function applyAceQuickEdit(state:AceState,edit:AceQuickEdit):{state:AceSt
  }
  const labels={party:"số khách và vai trò",goal:"mục tiêu",budget:"ngân sách",diet:"yêu cầu ăn uống"};
  const ack=`Đã cập nhật ${labels[edit.field]}. Các nhu cầu khác được giữ nguyên.${note}`;
- if(state.step==="quiz")return {state:{...state,preferences:p},reply:{text:`${ack}\nBạn có thể tiếp tục câu NTRP đang trả lời.`,chips:["Tiếp tục kịch bản"]}};
+ if(state.step==="quiz"){const next={...state,preferences:p};if(edit.field==="party")delete next.partyClarification;return {state:next,reply:{text:`${ack}\nBạn có thể tiếp tục câu NTRP đang trả lời.`,chips:["Tiếp tục kịch bản"]}};}
  if(p.groupNeeds){const reply=aceRecommendation(p);return {state:{step:"idle",preferences:p},reply:{...reply,text:`${ack}\n\n${reply.text}`}};}
  return continueAceConversation({step:state.step,preferences:p},ack);
 }

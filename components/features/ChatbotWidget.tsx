@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import "./ace-chat.css";
+import {matchAceScript} from "@/lib/ace-script";
 import GroupNeedsEditor from "./GroupNeedsEditor";
 import {applyGroupNeeds,groupRecommendation,type GroupNeeds} from "@/lib/ace-group";
 import { useAdvisorConversation } from "./use-advisor-conversation";
@@ -94,7 +95,7 @@ export default function ChatbotWidget() {
    */
   const [phase, setPhase] = useState<"closed" | "opening" | "open" | "closing">("closed");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [typing, setTyping]     = useState(false);
+  const typing = false;
   const [inputVal, setInputVal] = useState("");
   const [expanded,setExpanded]=useState(false);
   const dialogRef=useRef<HTMLDivElement>(null);
@@ -154,10 +155,6 @@ export default function ChatbotWidget() {
     setSelection(next);
     saveAceSession({ version: 1, id: sessionId.current, state: conversation.current, messages, selection: next, humanMode, open: false }, "chat");
   };
-  const requestRef = useRef<AbortController | null>(null);
-  const retryRef = useRef<unknown>(null);
-  const [aiError, setAiError] = useState<string | null>(null);
-  useEffect(() => () => requestRef.current?.abort(), []);
 
   useEffect(() => {
     const open = () => setPhase("opening");
@@ -219,35 +216,28 @@ export default function ChatbotWidget() {
   };
 
   const handleReset = () => {
-    requestRef.current?.abort();
-    requestRef.current = null;
-    retryRef.current = null;
-    setAiError(null);
     advisor.reset();
     sessionId.current = crypto.randomUUID();
     setEditingGroup(false);
     setSelection(undefined); setHumanMode(false); setContact(""); setSupportRetry(null);
     conversation.current = initialAceState();
     setMessages([]);
-    setTyping(false);
     setInputVal("");
   };
 
-  const handleChip = (text: string) => {
-    if (requestRef.current || advisor.busy) return;
+  const handleChip = (text: string, displayText = text) => {
+    if (advisor.busy) return;
     setHumanMode(false);
-    setAiError(null);
-    retryRef.current = null;
     const response = aceRespond(conversation.current, text);
     conversation.current = response.state;
     setMessages(prev => [...prev,
-      { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "user", text },
+      { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "user", text: displayText },
       { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "bot", ...response.reply },
     ]);
   };
   const saveGroupNeeds = (needs:GroupNeeds) => {
     const preferences=applyGroupNeeds(conversation.current.preferences,needs);
-    conversation.current={step:"idle",preferences};setEditingGroup(false);setSelection(undefined);setAiError(null);
+    conversation.current={step:"idle",preferences};setEditingGroup(false);setSelection(undefined);
     const reply=groupRecommendation(needs,preferences);
     setMessages(prev=>[...prev,{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"bot",...reply}]);
   };
@@ -256,63 +246,27 @@ export default function ChatbotWidget() {
     setMessages(prev=>[...prev,{id:`${sessionId.current}:${msgId.current++}`,at:new Date().toISOString(),role:"bot",text:"Bạn có thể sửa nhu cầu nhóm khi sẵn sàng. Thông tin đã xác nhận trước đó vẫn được giữ.",chips:["Sửa nhu cầu nhóm","Gợi ý gói tour 🏖️"]}]);
   };
   const handleQuickPrompt = (_flowKey: string, label: string) => handleChip(label);
-  const sendAI = async (text?: string) => {
-    if (requestRef.current) return;
-    let payload = retryRef.current;
-    if (text) {
-      const history = messages.map(message => ({ role: message.role === "user" ? "user" : "assistant", content: message.text.slice(0, 6000) }));
-      history.push({ role: "user", content: text });
-      const recent = history.slice(-24);
-      while (recent.length > 1 && recent.reduce((sum, turn) => sum + turn.content.length, 0) > 30000) recent.shift();
-      payload = { messages: recent, preferences: conversation.current.preferences };
-      retryRef.current = payload;
-      setMessages(prev => [...prev, { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "user", text }]);
-    }
-    if (!payload) return;
-    const controller = new AbortController();
-    requestRef.current = controller;
-    const timeout = window.setTimeout(() => controller.abort(), 30000);
-    setAiError(null);
-    setTyping(true);
-    let failureMessage = "Chưa kết nối được với Ace. Bạn thử lại nhé.";
-    try {
-      const response = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: controller.signal });
-      const reply = await response.json().catch(() => null);
-      if (requestRef.current !== controller) return;
-      if (!response.ok || !reply || typeof reply.text !== "string" || !Array.isArray(reply.packageIds)) {
-        failureMessage = typeof reply?.error === "string" ? reply.error : "Ace chưa trả lời được. Bạn thử lại nhé.";
-        throw new Error("AI_REQUEST_FAILED");
-      }
-      if (reply.preferences) conversation.current = { ...conversation.current, preferences: reply.preferences };
-      const packageIds = reply.packageIds.filter((id: unknown) => typeof id === "string" && tourPackages.some(p => p.id === id));
-      setMessages(prev => [...prev, { id: `${sessionId.current}:${msgId.current++}`, at: new Date().toISOString(), role: "bot", text: reply.text, packageIds, preferences: reply.preferences, chips: reply.chips }]);
-      retryRef.current = null;
-    } catch {
-      if (requestRef.current !== controller) return;
-      setAiError(controller.signal.aborted ? "Ace phản hồi lâu hơn dự kiến. Bạn thử lại hoặc dùng các lựa chọn bên dưới nhé." : failureMessage);
-    } finally {
-      window.clearTimeout(timeout);
-      if (requestRef.current === controller) { requestRef.current = null; setTyping(false); }
-    }
-  };
   const sendToAdvisor = async (text?: string) => {
-    if (advisor.busy || requestRef.current) return;
+    if (advisor.busy) return;
     const lastUser = messages.filter(m => m.role === "user").at(-1);
     const pending = text ? { text, clientMessageId: `${sessionId.current}:${msgId.current++}` } : supportRetry ?? (lastUser ? { text: lastUser.text.slice(0, 2000), clientMessageId: String(lastUser.id) } : { text: "Mình muốn được tư vấn thêm về chuyến đi.", clientMessageId: `${sessionId.current}:${msgId.current++}` });
     if (!messages.some(m => String(m.id) === pending.clientMessageId)) setMessages(prev => [...prev, { id: pending.clientMessageId, role: "user", text: pending.text, at: new Date().toISOString() }]);
-    setSupportRetry(pending); setAiError(null);
+    setSupportRetry(pending);
     const context = messages.slice(-12).map(m => `${m.role === "user" ? "Khách" : m.role === "advisor" ? "Tư vấn viên" : "Ace"}: ${m.text.slice(0, 1000)}`).join("\n\n");
     const sent = await advisor.send({ ...pending, contact, context, needs: conversation.current.preferences, selection });
-    if (sent) { setHumanMode(true); setSupportRetry(null); }
+    if (sent) {
+      setHumanMode(true); setSupportRetry(null);
+      const id=`handoff:${pending.clientMessageId}`;
+      setMessages(prev=>prev.some(m=>m.id===id)?prev:[...prev,{id,role:"bot",text:"Đã gửi câu hỏi đến nhân viên tư vấn. Phản hồi sẽ xuất hiện trong cuộc trò chuyện này.",at:new Date().toISOString()}]);
+    }
   };
   const handleSend = () => {
     const text = inputVal.trim();
-    if (!text || requestRef.current || advisor.busy) return;
+    if (!text || advisor.busy) return;
     setInputVal("");
-    if (humanMode) { void sendToAdvisor(text); return; }
-    const last = messages[messages.length - 1];
-    if (last?.chips?.includes(text) || QUICK_PROMPTS.some(item => item.label === text) || ["diet","group"].includes(conversation.current.step)) handleChip(text);
-    else void sendAI(text);
+    const scripted=matchAceScript(conversation.current,text);
+    if(scripted)handleChip(scripted,text);
+    else void sendToAdvisor(text);
   };
 
   /* ─── Derived values ─── */
@@ -358,7 +312,7 @@ export default function ChatbotWidget() {
                 <button type="button" className="ace-chat-expand" onClick={()=>setExpanded(v=>!v)} aria-label={expanded?"Thu nhỏ cửa sổ chat":"Mở rộng cửa sổ chat"} title={expanded?"Thu nhỏ":"Mở rộng"}>{expanded?<Minimize2 size={16}/>:<Maximize2 size={16}/>}</button>
                 <button type="button" onClick={handleClose} aria-label="Đóng chat" title="Thu gọn"><ChevronDown size={20}/></button>
               </div>
-              <div className="ace-chat-clouds" aria-hidden="true"/>
+
             </header>
 
             {/* Messages */}
@@ -406,13 +360,8 @@ export default function ChatbotWidget() {
                 </div>
               ))}
 
-              {!humanMode&&(editingGroup||conversation.current.step==="group")&&<GroupNeedsEditor key={`${sessionId.current}:group`} preferences={conversation.current.preferences} busy={typing||advisor.busy} onSave={saveGroupNeeds} onCancel={cancelGroupNeeds}/>}
+              {(editingGroup||conversation.current.step==="group")&&<div hidden={humanMode}><GroupNeedsEditor key={`${sessionId.current}:group`} preferences={conversation.current.preferences} busy={typing||advisor.busy} onSave={saveGroupNeeds} onCancel={cancelGroupNeeds}/></div>}
               {!humanMode&&conversation.current.preferences.groupNeeds&&conversation.current.step!=="group"&&!editingGroup&&<button type="button" disabled={typing||advisor.busy} onClick={()=>setEditingGroup(true)} className="text-brand-primary text-[1.3rem] font-semibold min-h-[4.4rem]">Sửa bản tóm tắt nhu cầu nhóm</button>}
-              {aiError && <div role="status" className="rounded-[1.2rem] bg-neutral-05 p-[1.4rem] text-[1.3rem] space-y-[1rem]">
-                <p>{aiError}</p>
-                <button type="button" disabled={typing} onClick={() => void sendAI()} className="text-brand-primary font-semibold min-h-[4.4rem]">Thử lại câu hỏi</button>
-                <div className="flex flex-wrap gap-[0.8rem]">{["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour"].map(label => <button key={label} type="button" disabled={typing} onClick={() => handleChip(label)} className="border border-brand-primary text-brand-primary rounded-full px-[1.2rem] min-h-[4.4rem]">{label}</button>)}</div>
-              </div>}
               {advisor.error && <div role="alert" className="text-[1.3rem] bg-neutral-05 rounded-[1rem] p-[1rem]"><p>{advisor.error}</p><button type="button" disabled={advisor.busy} onClick={() => void sendToAdvisor()} className="text-brand-primary min-h-[4.4rem] font-semibold">Thử gửi lại</button></div>}
               {(typing || advisor.busy) && <div className="flex items-start"><TypingDots /></div>}
               <div ref={messagesEndRef} />
@@ -422,7 +371,7 @@ export default function ChatbotWidget() {
             <div className="ace-chat-footer">
               <div className="ace-chat-footer-tools">
                 <details className="ace-chat-contact"><summary>Liên hệ tùy chọn</summary><label>Email hoặc số điện thoại<input aria-label="Email hoặc số điện thoại cho tư vấn viên" value={contact} maxLength={200} onChange={e=>setContact(e.target.value)} placeholder="Để tư vấn viên liên hệ lại"/></label><p>Khi nhờ hỗ trợ, nhu cầu và trao đổi gần đây sẽ được chuyển cùng câu hỏi.</p></details>
-                <button type="button" disabled={typing||advisor.busy} onClick={()=>humanMode?setHumanMode(false):void sendToAdvisor()}>{humanMode?"Quay lại Ace":"Nhờ tư vấn viên hỗ trợ"}</button>
+                <button type="button" disabled={typing||advisor.busy} onClick={()=>humanMode?handleChip("Tiếp tục kịch bản","Quay lại Ace"):void sendToAdvisor()}>{humanMode?"Quay lại Ace":"Nhờ tư vấn viên hỗ trợ"}</button>
               </div>
               <div className="ace-chat-composer">
                 <input ref={inputRef} type="text" value={inputVal}

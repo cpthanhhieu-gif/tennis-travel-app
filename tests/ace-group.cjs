@@ -1,7 +1,7 @@
 const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("node:vm"),ts=require("typescript");
 function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>deps[n],Intl,Date});return module.exports;}
 const data=load("lib/mock-data.ts"),group=load("lib/ace-group.ts",{"./mock-data":data});
-const ace=load("lib/ace-conversation.ts",{"./mock-data":data,"./ace-group":group});
+const ace=load("lib/ace-conversation.ts",{"./ace-script":load("lib/ace-script.ts",{"./mock-data":data}),"./mock-data":data,"./ace-group":group});
 const session=load("lib/ace-session.ts",{"./mock-data":data,"./ace-conversation":ace,"./ace-group":group,"./demo-scope":{}});
 const learn={total:8,companions:0,mainGoal:"balanced",cohorts:[{count:8,level:"beginner",goal:"learn"}],dietary:[]};
 const compete={...learn,cohorts:[{count:8,level:"intermediate",goal:"compete"}]};

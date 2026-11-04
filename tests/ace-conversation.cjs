@@ -8,7 +8,7 @@ function load(file, deps = {}) {
   return module.exports;
 }
 const data = load("lib/mock-data.ts");
-const ace = load("lib/ace-conversation.ts", {"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
+const ace = load("lib/ace-conversation.ts", {"./ace-script":load("lib/ace-script.ts",{"./mock-data":data}),"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
 function run(inputs, state = ace.initialAceState()) {
   let response;
   for (const input of inputs) { response = ace.aceRespond(state, input); state = response.state; }

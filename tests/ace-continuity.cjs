@@ -2,7 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs"); const vm = require("node:vm"); const ts = require("typescript");
 const values = new Map(); const storage = { getItem: k => values.get(k) ?? null, setItem: (k,v) => values.set(k,v) };
 function load(file, deps = {}) { const module = { exports: {} }; vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText, { module, exports: module.exports, require: name => deps[name], Date, Intl, localStorage: storage, window: { dispatchEvent: () => {} }, CustomEvent: class {} }); return module.exports; }
-const data = load("lib/mock-data.ts"); const conversation = load("lib/ace-conversation.ts", {"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
+const data = load("lib/mock-data.ts"); const conversation = load("lib/ace-conversation.ts", {"./ace-script":load("lib/ace-script.ts",{"./mock-data":data}),"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
 const sessions = load("lib/ace-session.ts", {"./ace-group":load("lib/ace-group.ts",{"./mock-data":data}), "./ace-conversation": conversation, "./mock-data": data, "./demo-scope": { browserStorageKey: key => `test:${key}` } });
 const timeline = load("lib/ace-timeline.ts");
 const pricing = load("lib/couple-pricing.ts");

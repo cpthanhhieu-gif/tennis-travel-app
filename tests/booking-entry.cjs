@@ -2,7 +2,7 @@ const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("nod
 function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>deps[n],Intl,Date,URLSearchParams});return module.exports;}
 const data=load("lib/mock-data.ts"),pricing=load("lib/couple-pricing.ts"),entry=load("lib/booking-entry.ts");
 const init=load("lib/booking-initialization.ts",{"./mock-data":data,"./couple-pricing":pricing,"./booking-entry":entry});
-const conversation=load("lib/ace-conversation.ts", {"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
+const conversation=load("lib/ace-conversation.ts", {"./ace-script":load("lib/ace-script.ts",{"./mock-data":data}),"./mock-data":data,"./ace-group":load("lib/ace-group.ts",{"./mock-data":data})});
 const patcher=load("lib/ace-booking.ts",{"./mock-data":data,"./couple-pricing":pricing,"./ace-conversation":conversation});
 const defaults={tourId:"dl-sbu1",packageId:"sbu1",destination:"dalat",departureCode:"",departureDate:"",numPeople:2,numCompanions:0,ntrpLevel:0,ntrpLabel:"",name:"",phone:"",email:"",notes:"",totalPrice:0};
 const params=new URLSearchParams("package=sbu1&from=ace&consultation=one");

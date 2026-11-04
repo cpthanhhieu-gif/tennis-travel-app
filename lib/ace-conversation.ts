@@ -1,3 +1,4 @@
+import {parseAceBudget} from "./ace-script";
 import { groupNeedsSummary, groupRecommendation, type GroupNeeds } from "./ace-group";
 import { getNtrpLevel, ntrpQuiz, tourPackages } from "./mock-data";
 
@@ -41,6 +42,15 @@ export function aceRecommendation(p: AcePreferences): AceReply {
 export function aceRespond(state: AceState, input: string): { state: AceState; reply: AceReply } {
   const p = { ...state.preferences, quizAnswers: [...state.preferences.quizAnswers] };
   const answer = (step: AceState["step"], reply: AceReply) => ({ state: { step, preferences: p }, reply });
+  if(input==="Tiếp tục kịch bản"){
+    if(state.step==="quiz"){const q=ntrpQuiz[p.quizAnswers.length];if(q)return answer("quiz",{text:q.question,chips:q.options.map(o=>o.label)});}
+    if(state.step==="party")return answer("party",{text:"Bạn dự định đi cùng ai?",chips:parties});
+    if(state.step==="goal")return answer("goal",{text:"Mục tiêu chính của chuyến đi là gì?",chips:goals});
+    if(state.step==="budget")return answer("budget",{text:"Ngân sách dự kiến mỗi người là bao nhiêu?",chips:[...tourPackages.map(item=>`Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`),"Linh hoạt theo trải nghiệm"]});
+    if(state.step==="diet")return answer("diet",{text:"Bạn có yêu cầu ăn uống nào không?",chips:diets});
+    if(state.step==="group")return answer("group",{text:"Bạn tiếp tục điền thông tin nhóm bên dưới nhé."});
+    return answer("idle",p.groupNeeds?aceRecommendation(p):{text:"Bạn muốn tiếp tục khám phá điều gì?",chips:aceStarts});
+  }
   if(input==="Sửa nhu cầu nhóm")return answer("group",{text:"Sửa bản tóm tắt bên dưới. Ace sẽ tính lại gợi ý theo thông tin bạn xác nhận."});
   if(state.step==="group")return answer("group",{text:"Bạn hoàn tất thông tin nhóm trong phần bên dưới nhé; không cần khai báo tên từng người."});
   if (input === aceStarts[0]) { delete p.packageId; return answer("party", { text: "Bạn dự định đi cùng ai?", chips: parties }); }
@@ -55,7 +65,8 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
   if (state.step === "goal" && goals.includes(input)) { p.goal = (["learn", "compete", "relax"] as const)[goals.indexOf(input)]; return answer("budget", { text: "Ngân sách dự kiến mỗi người là bao nhiêu?", chips: [...tourPackages.map(item => `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`), "Linh hoạt theo trải nghiệm"] }); }
   if (state.step === "budget") {
     const budgetPackage = tourPackages.find(item => input === `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`);
-    if (budgetPackage || input === "Linh hoạt theo trải nghiệm") { p.budget = budgetPackage?.priceRange.min; return answer("diet", { text: "Bạn có yêu cầu ăn uống nào không?", chips: diets }); }
+    const typedBudget=parseAceBudget(input);
+    if (budgetPackage || typedBudget!==undefined || input === "Linh hoạt theo trải nghiệm") { p.budget = budgetPackage?.priceRange.min??typedBudget; return answer("diet", { text: "Bạn có yêu cầu ăn uống nào không?", chips: diets }); }
   }
   if (state.step === "quiz") {
     const question = ntrpQuiz[p.quizAnswers.length];

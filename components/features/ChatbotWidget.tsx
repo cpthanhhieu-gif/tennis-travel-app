@@ -15,6 +15,7 @@ interface Message {
 
 /* ─── Flows ──────────────────────────────────────────────────── */
 const FLOWS: Record<string, Message[]> = {
+  experience: [{ id: 95, role: "bot", text: "Cùng Travel Ace, bạn có thể kết hợp tennis với khám phá điểm đến.\n\n**Học & chơi:** luyện kỹ thuật cùng huấn luyện viên.\n**Thi đấu:** giao lưu và kết nối cộng đồng tennis.\n**Nghỉ dưỡng:** tận hưởng kỳ nghỉ kết hợp ra sân.\n\nBạn muốn bắt đầu từ đâu?", chips: ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Menu FEI cho tôi 🍜"] }],
   ntrp: [{ id: 10, role: "bot", text: "Để xác định trình độ NTRP, cho tôi hỏi nhanh:\n\n**Bạn chơi tennis được bao lâu rồi?**", chips: ["Dưới 1 năm", "1–3 năm", "3–5 năm", "5+ năm"] }],
   ntrp_step2: [{ id: 20, role: "bot", text: "Bạn có thể duy trì rally bao nhiêu cú liên tục?", chips: ["3–5 cú", "6–10 cú", "10–20 cú", "20+ cú"] }],
   ntrp_result_low: [{ id: 30, role: "bot", text: "✅ **NTRP 1.5–2.5 — Beginner/Novice**\n\nRecommend **Leisure & Learning (SBU 1)**:\n• Đà Lạt 2N1D\n• Huấn luyện từ cơ bản cùng HLV\n• Giá **6.900.000 đ/người**", chips: ["Xem gói SBU 1 →", "Hỏi thêm về FEI 🍜"] }],
@@ -34,10 +35,11 @@ const FLOWS: Record<string, Message[]> = {
 const QUICK_PROMPTS = [
   { label: "Tôi thuộc NTRP nào? 🎾", flowKey: "ntrp" },
   { label: "Gợi ý gói tour 🏖️",      flowKey: "tour_step1" },
-  { label: "Menu FEI cho tôi 🍜",    flowKey: "fei_step1" },
+  { label: "Trải nghiệm trong tour", flowKey: "experience" },
 ];
 
 const CHIP_FLOW: Record<string, string> = {
+  "Trải nghiệm trong tour": "experience",
   "Tôi thuộc NTRP nào? 🎾": "ntrp", "Gợi ý gói tour 🏖️": "tour_step1", "Menu FEI cho tôi 🍜": "fei_step1",
   "Dưới 1 năm": "ntrp_step2", "1–3 năm": "ntrp_step2", "3–5 năm": "ntrp_step2", "5+ năm": "ntrp_step2",
   "3–5 cú": "ntrp_result_low", "6–10 cú": "ntrp_result_mid", "10–20 cú": "ntrp_result_high", "20+ cú": "ntrp_result_high",
@@ -92,6 +94,12 @@ export default function ChatbotWidget() {
   const msgId           = useRef(1000);
   const welcomeFiredRef = useRef(false);
 
+  useEffect(() => {
+    const open = () => setPhase("opening");
+    window.addEventListener("ace:open", open);
+    return () => window.removeEventListener("ace:open", open);
+  }, []);
+
   const isOpen = phase === "open" || phase === "opening";
 
   /* opening → open sau 1 frame (để CSS transition animate slide-up) */
@@ -110,8 +118,8 @@ export default function ChatbotWidget() {
       setTyping(false);
       setMessages([{
         id: msgId.current++, role: "bot",
-        text: "Xin chào! Tôi là **Ace** 🎾 — trợ lý AI của Vietravel Tennis Travel.\n\nTôi có thể giúp bạn:",
-        chips: ["Tôi thuộc NTRP nào? 🎾", "Gợi ý gói tour 🏖️", "Menu FEI cho tôi 🍜"],
+        text: "Xin chào! Tôi là **Ace** 🎾 — trợ lý AI của Vietravel Tennis Travel.\n\nCùng tôi chọn chuyến tennis, khám phá trình độ và tìm hiểu trải nghiệm trong tour. Bạn muốn bắt đầu từ đâu?",
+        chips: ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour"],
       }]);
     }, 800);
   }, [phase]);

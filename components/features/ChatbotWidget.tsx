@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { tourPackages, tours, formatVND } from "@/lib/mock-data";
 import { packageBenefits, tripItinerary } from "@/lib/trip-itinerary";
+import { aceRespond, initialAceState, preferenceSummary, type AcePreferences } from "@/lib/ace-conversation";
 import { Send, Bot, ChevronDown, RefreshCw } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -15,41 +16,14 @@ interface Message {
   text: string;
   chips?: string[];
   packageIds?: string[];
+  preferences?: AcePreferences;
 }
-
-/* ─── Flows ──────────────────────────────────────────────────── */
-const FLOWS: Record<string, Message[]> = {
-  ntrp: [{ id: 10, role: "bot", text: "Để xác định trình độ NTRP, cho tôi hỏi nhanh:\n\n**Bạn chơi tennis được bao lâu rồi?**", chips: ["Dưới 1 năm", "1–3 năm", "3–5 năm", "5+ năm"] }],
-  ntrp_step2: [{ id: 20, role: "bot", text: "Bạn có thể duy trì rally bao nhiêu cú liên tục?", chips: ["3–5 cú", "6–10 cú", "10–20 cú", "20+ cú"] }],
-  tour_step1: [{ id: 40, role: "bot", text: "Bạn đi tour theo kiểu nào?", chips: ["Một mình / cặp đôi", "Nhóm 5–10 người", "CLB 10–20 người"] }],
-  tour_step2_group: [{ id: 51, role: "bot", text: "Nhóm của bạn chủ yếu muốn trải nghiệm gì?", chips: ["Thi đấu & ranking", "Nghỉ dưỡng & networking", "Học kỹ thuật cùng nhau"] }],
-};
-
-const recommendations: Record<string, string> = {
-  ntrp_result_low: "sbu1", ntrp_result_mid: "sbu2", ntrp_result_high: "sbu3",
-  tour_result_leisure: "sbu1", tour_result_tournament: "sbu2", tour_result_premium: "sbu3",
-};
-for (const [key, packageId] of Object.entries(recommendations)) {
-  FLOWS[key] = [{ id: 0, role: "bot", text: "Bạn có thể tham khảo gói sau và kiểm tra lịch, trình độ phù hợp trước khi tiếp tục:", packageIds: [packageId], chips: ["Xem tất cả gói tour"] }];
-}
-FLOWS.tour_step2_solo = [{ id: 0, role: "bot", text: "Bạn muốn khám phá gói nào?", chips: tourPackages.map(p => p.name) }];
-FLOWS.experience = [{ id: 0, role: "bot", text: "Các trải nghiệm hiện có trong Travel Ace:", packageIds: tourPackages.map(p => p.id) }];
-FLOWS.fei_step1 = [{ id: 0, role: "bot", text: "Chọn gói để xem ẩm thực và các hoạt động trong lịch trình của ứng dụng.", chips: tourPackages.map(p => p.name) }];
 
 const QUICK_PROMPTS = [
   { label: "Tôi thuộc NTRP nào? 🎾", flowKey: "ntrp" },
-  { label: "Gợi ý gói tour 🏖️",      flowKey: "tour_step1" },
+  { label: "Gợi ý gói tour 🏖️", flowKey: "tour" },
   { label: "Trải nghiệm trong tour", flowKey: "experience" },
 ];
-
-const CHIP_FLOW: Record<string, string> = {
-  "Trải nghiệm trong tour": "experience",
-  "Tôi thuộc NTRP nào? 🎾": "ntrp", "Gợi ý gói tour 🏖️": "tour_step1", "Menu FEI cho tôi 🍜": "fei_step1",
-  "Dưới 1 năm": "ntrp_step2", "1–3 năm": "ntrp_step2", "3–5 năm": "ntrp_step2", "5+ năm": "ntrp_step2",
-  "3–5 cú": "ntrp_result_low", "6–10 cú": "ntrp_result_mid", "10–20 cú": "ntrp_result_high", "20+ cú": "ntrp_result_high",
-  "Một mình / cặp đôi": "tour_step2_solo", "Nhóm 5–10 người": "tour_step2_group", "CLB 10–20 người": "tour_step2_group",
-  "Thi đấu & ranking": "tour_result_tournament", "Nghỉ dưỡng & networking": "tour_result_premium", "Học kỹ thuật cùng nhau": "tour_result_leisure",
-};
 
 /* ─── Bold markdown ───────────────────────────────────────────── */
 function BotText({ text }: { text: string }) {
@@ -65,7 +39,7 @@ function BotText({ text }: { text: string }) {
   );
 }
 
-function ProductCard({ packageId, onNavigate }: { packageId: string; onNavigate: () => void }) {
+function ProductCard({ packageId, onNavigate, preferences }: { packageId: string; onNavigate: () => void; preferences?: AcePreferences }) {
   const p = tourPackages.find(item => item.id === packageId)!;
   const tour = tours.find(item => item.packageId === packageId)!;
   const [departureCode, setDepartureCode] = useState(tour.departureSchedules[0]?.code ?? "");
@@ -79,6 +53,8 @@ function ProductCard({ packageId, onNavigate }: { packageId: string; onNavigate:
     <p className="text-[1.4rem] font-bold text-brand-primary">Từ {formatVND(p.priceRange.min)} / người</p>
     <p className="text-[1.2rem] text-neutral-60">{tour.ntrpLabel}</p>
     <p className="text-[1.3rem]">{packageBenefits[p.id as keyof typeof packageBenefits]}</p>
+    {preferences?.diet && <p className="text-[1.2rem] bg-brand-tint rounded-[0.8rem] p-[1rem]">Ăn uống: {preferences.diet}. {preferences.diet !== "Không có yêu cầu đặc biệt" && "Cần xác nhận điều chỉnh thực đơn với đơn vị tổ chức; lịch trình bên dưới là chương trình gốc."}</p>}
+    {preferences && <details className="text-[1.2rem]"><summary className="cursor-pointer">Nhu cầu đã ghi nhận</summary><p className="whitespace-pre-line mt-[0.6rem]">{preferenceSummary(preferences)}</p></details>}
     <ul className="text-[1.2rem] text-neutral-60 list-disc pl-[1.6rem]">{p.highlights.map(h => <li key={h}>{h}</li>)}</ul>
     {tour.departureSchedules.length > 0 ? <label className="block text-[1.3rem] font-semibold">Lịch khởi hành
       <select aria-label={`Lịch khởi hành ${p.name}`} value={departureCode} onChange={e => setDepartureCode(e.target.value)} className="block w-full min-h-[4.4rem] border border-neutral-10 rounded-[0.8rem] px-[0.8rem] mt-[0.6rem] bg-white">
@@ -122,6 +98,7 @@ export default function ChatbotWidget() {
   const inputRef        = useRef<HTMLInputElement>(null);
   const msgId           = useRef(1000);
   const welcomeFiredRef = useRef(false);
+  const conversation = useRef(initialAceState());
 
   useEffect(() => {
     const open = () => setPhase("opening");
@@ -142,15 +119,11 @@ export default function ChatbotWidget() {
   useEffect(() => {
     if (phase !== "open" || welcomeFiredRef.current) return;
     welcomeFiredRef.current = true;
-    setTyping(true);
-    window.setTimeout(() => {
-      setTyping(false);
-      setMessages([{
+    setMessages([{
         id: msgId.current++, role: "bot",
         text: "Xin chào! Tôi là **Ace** 🎾 — trợ lý AI của Vietravel Tennis Travel.\n\nCùng tôi chọn chuyến tennis, khám phá trình độ và tìm hiểu trải nghiệm trong tour. Bạn muốn bắt đầu từ đâu?",
         chips: ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour"],
       }]);
-    }, 800);
   }, [phase]);
 
   /* Auto-scroll */
@@ -173,64 +146,26 @@ export default function ChatbotWidget() {
   };
 
   const handleReset = () => {
-    welcomeFiredRef.current = false;
+    conversation.current = initialAceState();
     setMessages([]);
     setTyping(false);
     setInputVal("");
   };
 
-  const pushBotFlow = (flowKey: string, delay = 650) => {
-    const flow = FLOWS[flowKey];
-    if (!flow) return;
-    setTyping(true);
-    window.setTimeout(() => {
-      setTyping(false);
-      setMessages((prev) => [...prev, ...flow.map(message => ({ ...message, id: msgId.current++ }))]);
-    }, delay);
+  const handleChip = (text: string) => {
+    const response = aceRespond(conversation.current, text);
+    conversation.current = response.state;
+    setMessages(prev => [...prev,
+      { id: msgId.current++, role: "user", text },
+      { id: msgId.current++, role: "bot", ...response.reply },
+    ]);
   };
-
-  const handleChip = (chip: string) => {
-    setMessages((prev) => [...prev, { id: msgId.current++, role: "user", text: chip }]);
-    const selected = tourPackages.find(p => p.name === chip);
-    if (selected || chip === "Xem tất cả gói tour") {
-      setMessages(prev => [...prev, { id: msgId.current++, role: "bot", text: selected ? `Thông tin ${selected.name}:` : "Các gói tour hiện có:", packageIds: selected ? [selected.id] : tourPackages.map(p => p.id) }]);
-      return;
-    }
-    const next = CHIP_FLOW[chip];
-    if (next) {
-      pushBotFlow(next);
-    } else {
-      setTyping(true);
-      window.setTimeout(() => {
-        setTyping(false);
-        setMessages((prev) => [...prev, {
-          id: msgId.current++, role: "bot",
-          text: "Bạn muốn tìm hiểu gói nào?",
-          chips: tourPackages.map(p => p.name),
-        }]);
-      }, 700);
-    }
-  };
-
-  const handleQuickPrompt = (flowKey: string, label: string) => {
-    setMessages((prev) => [...prev, { id: msgId.current++, role: "user", text: label }]);
-    pushBotFlow(flowKey);
-  };
-
+  const handleQuickPrompt = (_flowKey: string, label: string) => handleChip(label);
   const handleSend = () => {
     const text = inputVal.trim();
     if (!text) return;
     setInputVal("");
-    setMessages((prev) => [...prev, { id: msgId.current++, role: "user", text }]);
-    setTyping(true);
-    window.setTimeout(() => {
-      setTyping(false);
-      setMessages((prev) => [...prev, {
-        id: msgId.current++, role: "bot",
-        text: "Chọn gói để xem thông tin, lịch trình và tiếp tục đặt chuyến.",
-        packageIds: tourPackages.map(p => p.id),
-      }]);
-    }, 900);
+    handleChip(text);
   };
 
   /* ─── Derived values ─── */
@@ -344,8 +279,8 @@ export default function ChatbotWidget() {
                       ? <p className="text-[1.3rem] text-white leading-relaxed">{msg.text}</p>
                       : <BotText text={msg.text} />}
                   </div>
-                  {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} />)}
-                  {msg.role === "bot" && msg.chips && (
+                  {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} preferences={msg.preferences} />)}
+                  {msg.role === "bot" && msg.chips && msg.id === messages[messages.length - 1]?.id && (
                     <div className="flex flex-wrap gap-[0.6rem] max-w-[90%]">
                       {msg.chips.map((chip) => (
                         <button key={chip} onClick={() => handleChip(chip)}

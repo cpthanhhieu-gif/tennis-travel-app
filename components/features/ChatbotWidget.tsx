@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import "./ace-chat.css";
+import ProductCard from "./AceProductCard";
 import AceJourneyPanel from "./AceJourneyPanel";
 import {aceJourneyContext,appendJourneyNotice} from "@/lib/ace-journey";
 import {useLocalAccount} from "@/lib/use-local-account";
 import {respondToAceText,continueAceConversation} from "@/lib/ace-natural";
 import {aceNaturalDemoPrompts} from "@/lib/ace-language-data";
 import {advisorFollowups} from "@/lib/ace-script";
-import {assessAcePackage} from "@/lib/ace-recommendation";
 import AceNeedsSummary from "./AceNeedsSummary";
 import {applyAceQuickEdit,type AceQuickEdit} from "@/lib/ace-quick-edit";
 import GroupNeedsEditor from "./GroupNeedsEditor";
@@ -19,9 +19,8 @@ import { readAceSession, saveAceSession, type AceMessage, type AceSelection } fr
 import { mergeAdvisorMessages } from "@/lib/ace-timeline";
 import Link from "next/link";
 import { usePathname,useSearchParams } from "next/navigation";
-import { tourPackages, tours, formatVND } from "@/lib/mock-data";
-import { packageBenefits, tripItinerary } from "@/lib/trip-itinerary";
-import { aceRespond, initialAceState, preferenceSummary, type AcePreferences } from "@/lib/ace-conversation";
+import { tours } from "@/lib/mock-data";
+import { aceRespond, initialAceState, preferenceSummary } from "@/lib/ace-conversation";
 import { Send, ChevronDown, RefreshCw, Maximize2, Minimize2, Sparkles } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -47,40 +46,6 @@ function BotText({ text }: { text: string }) {
   );
 }
 
-function ProductCard({ packageId, onNavigate, preferences, selection, onChoose, entryId }: { entryId: string; packageId: string; onNavigate: () => void; preferences?: AcePreferences; selection?: AceSelection; onChoose: (selection: AceSelection) => void }) {
-  const p = tourPackages.find(item => item.id === packageId)!;
-  const tour = tours.find(item => item.packageId === packageId)!;
-  const [departureCode, setDepartureCode] = useState(selection?.packageId === packageId ? selection.departureCode : tour.departureSchedules[0]?.code ?? "");
-  useEffect(() => { if (selection?.packageId === packageId) setDepartureCode(selection.departureCode); }, [selection, packageId]);
-  const remember = () => onChoose({ packageId, departureCode });
-  const departure = tour.departureSchedules.find(item => item.code === departureCode);
-  const days = departure ? tripItinerary({ tourId: tour.id, departureCode }) : [];
-  const assessment=preferences?assessAcePackage(preferences,p.id,departure?.code):undefined;
-  const action = p.id === "sbu2" ? "Yêu cầu báo giá đoàn" : p.id === "sbu3" ? "Gửi yêu cầu chuyến đi" : "Chọn lịch & tiếp tục";
-  return <article className="w-full max-w-[42rem] rounded-[1.4rem] border border-neutral-10 bg-white p-[1.4rem] space-y-[1rem]">
-    <p className="text-[1.2rem] text-neutral-50">{tour.destinationName} · {tour.duration}</p>
-    <h3 className="text-[1.5rem] font-bold text-neutral-90">{p.name}</h3>
-    <p className="text-[1.3rem] text-neutral-60">{p.tagline}</p>
-    <p className="text-[1.4rem] font-bold text-brand-primary">{departure?"Giá lịch đang chọn":"Từ"} {formatVND(departure?.price??p.priceRange.min)} / người chơi</p>
-    {assessment&&!assessment.affordable&&<p className="text-[1.2rem] text-amber-800">Lịch đang chọn vượt ngân sách đã ghi nhận. Xem chi tiết đối chiếu bên dưới.</p>}
-    <p className="text-[1.2rem] text-neutral-60">{tour.ntrpLabel}</p>
-    <p className="text-[1.3rem]">{packageBenefits[p.id as keyof typeof packageBenefits]}</p>
-    {preferences?.diet && <p className="text-[1.2rem] bg-brand-tint rounded-[0.8rem] p-[1rem]">Ăn uống: {preferences.diet}. {preferences.diet !== "Không có yêu cầu đặc biệt" && "Cần xác nhận điều chỉnh thực đơn với đơn vị tổ chức; lịch trình bên dưới là chương trình gốc."}</p>}
-    {preferences && <details className="text-[1.2rem]"><summary className="cursor-pointer">Nhu cầu đã ghi nhận</summary><p className="whitespace-pre-line mt-[0.6rem]">{preferenceSummary(preferences)}</p></details>}
-    {assessment&&<details className="text-[1.2rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center font-semibold">Đối chiếu nhu cầu với lịch đang chọn</summary>{assessment.estimatedTotal!==undefined&&<p>Tổng giá cơ bản tham khảo: {formatVND(assessment.estimatedTotal)}; chưa gồm phụ thu/dịch vụ bổ sung.</p>}<p className="font-semibold">Điểm phù hợp</p><ul className="list-disc pl-[1.6rem]">{assessment.met.map((item,i)=><li key={i}>{item}</li>)}</ul><p className="font-semibold">Chưa đáp ứng / cần xác nhận</p><ul className="list-disc pl-[1.6rem]">{assessment.gaps.map((item,i)=><li key={i}>{item}</li>)}</ul></details>}
-    <ul className="text-[1.2rem] text-neutral-60 list-disc pl-[1.6rem]">{p.highlights.map(h => <li key={h}>{h}</li>)}</ul>
-    {tour.departureSchedules.length > 0 ? <label className="block text-[1.3rem] font-semibold">Lịch khởi hành
-      <select aria-label={`Lịch khởi hành ${p.name}`} value={departureCode} onChange={e => { setDepartureCode(e.target.value); onChoose({ packageId, departureCode: e.target.value }); }} className="block w-full min-h-[4.4rem] border border-neutral-10 rounded-[0.8rem] px-[0.8rem] mt-[0.6rem] bg-white">
-        {tour.departureSchedules.map(d => <option key={d.code} value={d.code}>{d.dateLabel} · {formatVND(d.price)} / người</option>)}
-      </select>
-    </label> : <p className="text-[1.3rem]">Chưa có lịch khởi hành. Xem chi tiết gói để tìm hiểu thêm.</p>}
-    {days.length > 0 && <details className="text-[1.3rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center font-semibold">Xem lịch trình theo ngày</summary><div className="space-y-[1rem]">{days.map(day => <section key={day.day}><h4 className="font-bold">Ngày {day.day} · {day.title}</h4><ul className="space-y-[0.6rem] mt-[0.6rem] text-neutral-60">{day.activities.map(a => <li key={a.id}>{a.time} · {a.title}{a.optional ? " (tùy chọn)" : ""}</li>)}</ul></section>)}</div></details>}
-    <div className="flex flex-wrap gap-[0.8rem] text-[1.3rem] font-semibold">
-      <Link onClick={() => { remember(); onNavigate(); }} href={`/tours/${p.id}?from=ace&consultation=${encodeURIComponent(entryId)}`} className="min-h-[4.4rem] inline-flex items-center border border-brand-primary text-brand-primary rounded-full px-[1.2rem]">Xem chi tiết tour</Link>
-      {assessment&&!assessment.eligible ? <p>{assessment.gaps.find(item=>/khách|quy mô|lịch/.test(item))??"Cần xác nhận điều kiện trước khi đăng ký."}</p> : departure && <Link onClick={() => { remember(); onNavigate(); }} href={`/booking?package=${p.id}&departure=${encodeURIComponent(departure.code)}&from=ace&consultation=${encodeURIComponent(entryId)}`} className="min-h-[4.4rem] inline-flex items-center bg-brand-primary text-white rounded-full px-[1.2rem]">{action}</Link>}
-    </div>
-  </article>;
-}
 
 /* ─── Typing dots ─────────────────────────────────────────────── */
 function TypingDots() {

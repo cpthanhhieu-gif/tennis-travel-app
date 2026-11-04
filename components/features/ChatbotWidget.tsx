@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import "./ace-chat.css";
 import GroupNeedsEditor from "./GroupNeedsEditor";
 import {applyGroupNeeds,groupRecommendation,type GroupNeeds} from "@/lib/ace-group";
 import { useAdvisorConversation } from "./use-advisor-conversation";
@@ -12,7 +13,7 @@ import { usePathname } from "next/navigation";
 import { tourPackages, tours, formatVND } from "@/lib/mock-data";
 import { packageBenefits, tripItinerary } from "@/lib/trip-itinerary";
 import { aceRespond, initialAceState, preferenceSummary, type AcePreferences } from "@/lib/ace-conversation";
-import { Send, Bot, ChevronDown, RefreshCw } from "lucide-react";
+import { Send, ChevronDown, RefreshCw, Maximize2, Minimize2, Sparkles } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 type Message = AceMessage;
@@ -95,6 +96,8 @@ export default function ChatbotWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typing, setTyping]     = useState(false);
   const [inputVal, setInputVal] = useState("");
+  const [expanded,setExpanded]=useState(false);
+  const dialogRef=useRef<HTMLDivElement>(null);
   const messagesEndRef  = useRef<HTMLDivElement>(null);
   const inputRef        = useRef<HTMLInputElement>(null);
   const msgId           = useRef(1000);
@@ -177,7 +180,7 @@ export default function ChatbotWidget() {
     welcomeFiredRef.current = true;
     setMessages([{
         id: msgId.current++, role: "bot",
-        text: "Xin chào! Tôi là **Ace** 🎾 — trợ lý AI của Vietravel Tennis Travel.\n\nCùng tôi chọn chuyến tennis, khám phá trình độ và tìm hiểu trải nghiệm trong tour. Bạn muốn bắt đầu từ đâu?",
+        text: "Xin chào! Tôi là **Ace**, trợ lý du lịch tennis của bạn. Bạn muốn tìm chuyến đi phù hợp hay khám phá trình độ tennis?",
         chips: ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour"],
       }]);
   }, [phase, hydrated]);
@@ -190,8 +193,22 @@ export default function ChatbotWidget() {
 
   /* Focus input khi mở */
   useEffect(() => {
-    if (phase === "open") window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 350);
+    if (phase === "open" && window.matchMedia("(min-width: 640px)").matches) window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 350);
   }, [phase]);
+
+  useEffect(()=>{
+    if(phase!=="open")return;
+    const viewport=window.visualViewport;
+    const resize=()=>{dialogRef.current?.style.setProperty("--ace-vh",`${viewport?.height??window.innerHeight}px`);dialogRef.current?.style.setProperty("--ace-top",`${viewport?.offsetTop??0}px`);};
+    resize();viewport?.addEventListener("resize",resize);viewport?.addEventListener("scroll",resize);
+    const key=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){setPhase("closing");window.setTimeout(()=>setPhase("closed"),310);}
+      if(event.key==="Tab"&&dialogRef.current){const elements=Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],summary')).filter(el=>el.getClientRects().length);const first=elements[0],last=elements.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
+    };
+    document.addEventListener("keydown",key);
+    const lock=window.matchMedia("(max-width: 639px)").matches||expanded;const previous=document.body.style.overflow;if(lock)document.body.style.overflow="hidden";
+    return()=>{viewport?.removeEventListener("resize",resize);viewport?.removeEventListener("scroll",resize);document.removeEventListener("keydown",key);if(lock)document.body.style.overflow=previous;};
+  },[phase,expanded]);
 
   /* ─── Handlers ─── */
   const handleOpen = () => setPhase("opening");
@@ -330,63 +347,28 @@ export default function ChatbotWidget() {
       {/* Backdrop + Dialog — chỉ trong DOM khi cần */}
       {inDOM && (
         <>
-          <div
-            onClick={handleClose}
-            style={{ position: "fixed", inset: 0, zIndex: 56 }}
-            className="bg-black/40 backdrop-blur-[2px]"
-          />
-          <div
-            role="dialog" aria-modal="true" aria-label="Chat tư vấn AI — Ace"
-            className="flex flex-col bg-white rounded-t-[1.2rem] shadow-none transition-transform duration-300 ease-out"
-            style={{
-              position: "fixed", left: 0, right: 0, bottom: 0,
-              zIndex: 60, height: "74%",
-              transform: slideUp ? "translateY(0)" : "translateY(100%)",
-              pointerEvents: slideUp ? "auto" : "none",
-            }}
-          >
-            {/* Drag handle */}
-            <div className="shrink-0 flex justify-center pt-[1.2rem] pb-[0.4rem]">
-              <div className="w-[4rem] h-[0.4rem] bg-neutral-10 rounded-full" />
-            </div>
-
-            {/* Header */}
-            <div className="shrink-0 flex items-center gap-[1.2rem] px-[2rem] pb-[1.4rem] border-b border-neutral-05">
-              <div className="relative shrink-0">
-                <div className="w-[4.4rem] h-[4.4rem] rounded-full bg-brand-primary flex items-center justify-center">
-                  <Bot size={22} className="text-white" />
-                </div>
-                <span className="absolute -bottom-[0.2rem] -right-[0.2rem] w-[1.4rem] h-[1.4rem] rounded-full bg-green-500 border-2 border-white" />
+          <div onClick={handleClose} className={`ace-chat-backdrop ${expanded?"is-expanded":""}`} />
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Chat tư vấn AI — Ace"
+            className={`ace-chat ${slideUp?"is-open":""} ${expanded?"is-expanded":""}`}>
+            <header className="ace-chat-header">
+              <Image src="/vietravel-chatbot-icon.png" alt="" width={40} height={40} className="ace-chat-avatar"/>
+              <div className="ace-chat-identity"><strong>Ace</strong><span><i/>{humanMode?"Tư vấn viên đồng hành":"Trợ lý du lịch tennis của bạn"}</span></div>
+              <div className="ace-chat-header-actions">
+                <button type="button" onClick={handleReset} aria-label="Bắt đầu lại cuộc trò chuyện" title="Bắt đầu lại"><RefreshCw size={15}/></button>
+                <button type="button" className="ace-chat-expand" onClick={()=>setExpanded(v=>!v)} aria-label={expanded?"Thu nhỏ cửa sổ chat":"Mở rộng cửa sổ chat"} title={expanded?"Thu nhỏ":"Mở rộng"}>{expanded?<Minimize2 size={16}/>:<Maximize2 size={16}/>}</button>
+                <button type="button" onClick={handleClose} aria-label="Đóng chat" title="Thu gọn"><ChevronDown size={20}/></button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-[1.5rem] text-neutral-90 leading-tight">Ace — Trợ lý AI</p>
-                <p className="text-green-600 text-[1.2rem] font-medium">{humanMode ? "● Đang trao đổi với tư vấn viên" : "● Tư vấn cùng Ace"}</p>
-              </div>
-              <div className="flex items-center gap-[0.6rem]">
-                <button onClick={handleReset}
-                  className="flex items-center gap-[0.5rem] text-neutral-40 hover:text-neutral-60 text-[1.2rem] font-medium px-[0.8rem] py-[0.4rem] rounded-full hover:bg-neutral-05 transition-colors"
-                  aria-label="Bắt đầu lại cuộc trò chuyện">
-                  <RefreshCw size={13} />Bắt đầu lại
-                </button>
-                <button onClick={handleClose}
-                  className="w-[4.4rem] h-[4.4rem] rounded-full bg-neutral-05 hover:bg-neutral-10 flex items-center justify-center transition-colors"
-                  aria-label="Đóng chat">
-                  <ChevronDown size={18} className="text-neutral-50" />
-                </button>
-              </div>
-            </div>
+              <div className="ace-chat-clouds" aria-hidden="true"/>
+            </header>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-[1.6rem] py-[1.6rem] space-y-[1.2rem]"
+            <div className="ace-chat-messages"
               style={{ scrollbarWidth: "none" }}>
 
+              <div className="ace-chat-welcome"><Sparkles size={18} aria-hidden="true"/><strong>Mỗi chuyến đi đáng nhớ<br/>bắt đầu từ một lời chào.</strong><p>Chia sẻ kế hoạch ra sân cùng Ace nhé.</p></div>
+              <div className="ace-chat-day"><span>{messages[0]?.at&&new Date(messages[0].at).toDateString()!==new Date().toDateString()?new Date(messages[0].at).toLocaleDateString("vi-VN"):"Hôm nay"}</span></div>
               {messages.length === 0 && !typing && (
                 <div className="flex flex-col items-center pt-[2rem] pb-[1rem]">
-                  <div className="w-[5.6rem] h-[5.6rem] rounded-full bg-brand-tint flex items-center justify-center mb-[1.2rem]">
-                    <Bot size={28} className="text-brand-primary" />
-                  </div>
-                  <p className="text-neutral-90 font-bold text-[1.5rem] mb-[0.4rem]">Xin chào! Tôi là Ace 🎾</p>
-                  <p className="text-neutral-40 text-[1.3rem] text-center mb-[2.4rem]">Trợ lý AI của Vietravel Tennis Travel</p>
                   <p className="text-neutral-50 text-[1.2rem] font-semibold mb-[1rem] self-start">Bắt đầu với:</p>
                   <div className="flex flex-col gap-[0.8rem] w-full">
                     {QUICK_PROMPTS.map(({ label, flowKey }) => (
@@ -403,20 +385,19 @@ export default function ChatbotWidget() {
               {messages.map((msg) => (
                 <div key={msg.id}
                   className={`flex flex-col gap-[0.8rem] ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                  <div className={`max-w-[85%] px-[1.4rem] py-[1rem] rounded-[1.4rem] ${
-                    msg.role === "user" ? "bg-brand-primary rounded-tr-[0.3rem]" : "bg-neutral-05 rounded-tl-[0.3rem]"
-                  }`}>
+                  <div className={`ace-chat-bubble ${msg.role === "user" ? "is-user" : "is-assistant"}`}>
                     <p className={`text-[1rem] font-semibold mb-[0.4rem] ${msg.role === "user" ? "text-white/80" : "text-neutral-50"}`}>{msg.role === "user" ? "Bạn" : msg.role === "advisor" ? "Tư vấn viên" : "Ace"}</p>
                     {msg.role === "user"
                       ? <p className="text-[1.3rem] text-white leading-relaxed">{msg.text}</p>
                       : <BotText text={msg.text} />}
+                    {msg.at&&<time className="ace-chat-time" dateTime={msg.at}>{new Date(msg.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})}</time>}
                   </div>
                   {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} preferences={msg.preferences} selection={selection} onChoose={chooseSelection} entryId={sessionId.current} />)}
                   {msg.role === "bot" && !humanMode && msg.chips && msg.id === messages[messages.length - 1]?.id && (
-                    <div className="flex flex-wrap gap-[0.6rem] max-w-[90%]">
+                    <div className="ace-chat-chips">
                       {msg.chips.map((chip) => (
                         <button key={chip} disabled={typing} onClick={() => handleChip(chip)}
-                          className="px-[1.2rem] py-[0.7rem] rounded-full border border-brand-primary text-brand-primary text-[1.2rem] font-semibold bg-white hover:bg-brand-tint transition-colors">
+                          className="ace-chat-chip">
                           {chip}
                         </button>
                       ))}
@@ -438,28 +419,25 @@ export default function ChatbotWidget() {
             </div>
 
             {/* Input */}
-            <div className="shrink-0 px-[1.6rem] pt-[1rem] pb-[2.4rem] border-t border-neutral-05">
-              <div className="text-[1.2rem] mb-[0.8rem]">
-                <div className="flex items-center justify-between gap-[1rem]"><span>{humanMode ? advisor.thread?.status === "replied" ? "Tư vấn viên đã phản hồi" : "Đã chuyển · Chờ tư vấn viên" : "Đang trò chuyện với Ace"}</span><button type="button" disabled={typing || advisor.busy} onClick={() => humanMode ? setHumanMode(false) : void sendToAdvisor()} className="text-brand-primary font-semibold min-h-[4.4rem]">{humanMode ? "Quay lại Ace" : "Nhờ tư vấn viên hỗ trợ"}</button></div>
-                {!humanMode && <details><summary className="cursor-pointer text-neutral-50">Để lại liên hệ (không bắt buộc)</summary><input aria-label="Email hoặc số điện thoại cho tư vấn viên" value={contact} maxLength={200} onChange={e => setContact(e.target.value)} placeholder="Email hoặc số điện thoại" className="w-full border border-neutral-10 rounded-[0.8rem] p-[0.8rem] mt-[0.4rem]"/></details>}
-                <p className="text-neutral-40 text-[1rem]">{humanMode ? "Nhập bên dưới để tiếp tục cùng tư vấn viên." : "Khi nhờ hỗ trợ, nhu cầu và trao đổi gần đây được chuyển cùng câu hỏi."}</p>
+            <div className="ace-chat-footer">
+              <div className="ace-chat-footer-tools">
+                <details className="ace-chat-contact"><summary>Liên hệ tùy chọn</summary><label>Email hoặc số điện thoại<input aria-label="Email hoặc số điện thoại cho tư vấn viên" value={contact} maxLength={200} onChange={e=>setContact(e.target.value)} placeholder="Để tư vấn viên liên hệ lại"/></label><p>Khi nhờ hỗ trợ, nhu cầu và trao đổi gần đây sẽ được chuyển cùng câu hỏi.</p></details>
+                <button type="button" disabled={typing||advisor.busy} onClick={()=>humanMode?setHumanMode(false):void sendToAdvisor()}>{humanMode?"Quay lại Ace":"Nhờ tư vấn viên hỗ trợ"}</button>
               </div>
-              <div className="flex items-center gap-[1rem] bg-[var(--ds-canvas)] rounded-[var(--ds-radius-control)] px-[1.6rem] py-[0.8rem]">
+              <div className="ace-chat-composer">
                 <input ref={inputRef} type="text" value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
                   maxLength={2000}
                   placeholder={humanMode ? "Nhắn cho tư vấn viên..." : "Hỏi Ace về chuyến đi của bạn..."}
-                  className="flex-1 min-w-0 bg-transparent text-[1.6rem] text-neutral-90 placeholder:text-neutral-40 outline-none"
+                  className="ace-chat-input"
                   aria-label="Nhập câu hỏi" />
                 <button onClick={handleSend} disabled={!inputVal.trim() || typing || advisor.busy} aria-label="Gửi"
-                  className={`w-[4.4rem] h-[4.4rem] rounded-full flex items-center justify-center transition-all duration-200 ${
-                    inputVal.trim() ? "bg-brand-primary hover:bg-brand-primary-dark" : "bg-neutral-10"
-                  }`}>
-                  <Send size={15} className={inputVal.trim() ? "text-white" : "text-neutral-40"} />
+                  className="ace-chat-send">
+                  <Send size={17}/>
                 </button>
               </div>
-              <p className="text-neutral-40 text-[1.2rem] text-center mt-[0.8rem]">
+              <p className="ace-chat-credit">
                 Ace · Hỗ trợ khám phá Travel Ace
               </p>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Send, Bot, ChevronDown, RefreshCw } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -207,14 +208,14 @@ export default function ChatbotWidget() {
           transform: isOpen ? "scale(0.75)" : "scale(1)",
         }}
       >
-        <span className="absolute rounded-full bg-brand-primary/20 animate-ping"
-          style={{ inset: "-0.4rem", animationDuration: "2s" }} />
-        <span className="relative w-[5.2rem] h-[5.2rem] rounded-full bg-brand-primary flex items-center justify-center shadow-none">
-          <Bot size={22} className="text-white" />
-          <span className="absolute -top-[0.3rem] -right-[0.3rem] w-[2rem] h-[2rem] rounded-full bg-green-500 border-2 border-white flex items-center justify-center text-white text-[1.2rem] font-extrabold">
-            AI
-          </span>
-        </span>
+        <Image
+          src="/vietravel-chatbot.gif"
+          alt="Chatbot Vietravel"
+          width={88}
+          height={88}
+          unoptimized
+          className="w-[8.8rem] h-[8.8rem] object-contain"
+        />
       </button>
 
       {/* Backdrop + Dialog — chỉ trong DOM khi cần */}

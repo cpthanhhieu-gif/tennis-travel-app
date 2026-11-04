@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { tourPackages, tours, formatVND } from "@/lib/mock-data";
+import { packageBenefits, tripItinerary } from "@/lib/trip-itinerary";
 import { Send, Bot, ChevronDown, RefreshCw } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────── */
@@ -11,26 +14,27 @@ interface Message {
   role: Role;
   text: string;
   chips?: string[];
+  packageIds?: string[];
 }
 
 /* ─── Flows ──────────────────────────────────────────────────── */
 const FLOWS: Record<string, Message[]> = {
-  experience: [{ id: 95, role: "bot", text: "Cùng Travel Ace, bạn có thể kết hợp tennis với khám phá điểm đến.\n\n**Học & chơi:** luyện kỹ thuật cùng huấn luyện viên.\n**Thi đấu:** giao lưu và kết nối cộng đồng tennis.\n**Nghỉ dưỡng:** tận hưởng kỳ nghỉ kết hợp ra sân.\n\nBạn muốn bắt đầu từ đâu?", chips: ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Menu FEI cho tôi 🍜"] }],
   ntrp: [{ id: 10, role: "bot", text: "Để xác định trình độ NTRP, cho tôi hỏi nhanh:\n\n**Bạn chơi tennis được bao lâu rồi?**", chips: ["Dưới 1 năm", "1–3 năm", "3–5 năm", "5+ năm"] }],
   ntrp_step2: [{ id: 20, role: "bot", text: "Bạn có thể duy trì rally bao nhiêu cú liên tục?", chips: ["3–5 cú", "6–10 cú", "10–20 cú", "20+ cú"] }],
-  ntrp_result_low: [{ id: 30, role: "bot", text: "✅ **NTRP 1.5–2.5 — Beginner/Novice**\n\nRecommend **Leisure & Learning (SBU 1)**:\n• Đà Lạt 2N1D\n• Huấn luyện từ cơ bản cùng HLV\n• Giá **6.900.000 đ/người**", chips: ["Xem gói SBU 1 →", "Hỏi thêm về FEI 🍜"] }],
-  ntrp_result_mid: [{ id: 31, role: "bot", text: "✅ **NTRP 3.0–3.5 — Intermediate**\n\nRecommend **Tournament Travel (SBU 2)**:\n• Đà Nẵng 3N2D\n• Live score + ảnh chuyên nghiệp\n• Giá **12.900.000 đ/người**", chips: ["Xem gói SBU 2 →", "Hỏi thêm về FEI 🍜"] }],
-  ntrp_result_high: [{ id: 32, role: "bot", text: "✅ **NTRP 4.0–5.0 — Advanced/Expert**\n\nRecommend **Sportcation Premium (SBU 3)**:\n• Phú Quốc 4N3D\n• HLV quốc tế 1-1, phục hồi chuyên sâu\n• Giá **29.900.000 đ/người**", chips: ["Xem gói SBU 3 →", "Hỏi về menu FEI 🍜"] }],
   tour_step1: [{ id: 40, role: "bot", text: "Bạn đi tour theo kiểu nào?", chips: ["Một mình / cặp đôi", "Nhóm 5–10 người", "CLB 10–20 người"] }],
-  tour_step2_solo: [{ id: 50, role: "bot", text: "Budget của bạn khoảng bao nhiêu?", chips: ["6,9 triệu/người", "12,9 triệu/người", "29,9 triệu/người"] }],
   tour_step2_group: [{ id: 51, role: "bot", text: "Nhóm của bạn chủ yếu muốn trải nghiệm gì?", chips: ["Thi đấu & ranking", "Nghỉ dưỡng & networking", "Học kỹ thuật cùng nhau"] }],
-  tour_result_leisure: [{ id: 60, role: "bot", text: "🏖️ **Leisure & Learning — Đà Lạt 2N1D**\n\n• Giá: **6.900.000 đ**\n• Huấn luyện tennis + ẩm thực FEI\n\n*Lịch mở bán 2027*", chips: ["Đặt tour ngay →", "Tư vấn thêm"] }],
-  tour_result_premium: [{ id: 61, role: "bot", text: "🌟 **Sportcation Premium — Phú Quốc 4N3D**\n\n• Giá: **29.900.000 đ**\n• Resort 5 sao đối tác Vietravel\n• HLV quốc tế 1-1, phục hồi chuyên sâu", chips: ["Đặt tour ngay →", "Tư vấn thêm"] }],
-  tour_result_tournament: [{ id: 62, role: "bot", text: "🏆 **Tournament Travel — Đà Nẵng 3N2D**\n\n• Giá: **12.900.000 đ/người**\n• Giải đấu nội bộ + live score\n• Kết nối cộng đồng tennis", chips: ["Báo giá nhóm →", "Xem lịch giải"] }],
-  fei_step1: [{ id: 70, role: "bot", text: "Bạn có dị ứng hoặc yêu cầu đặc biệt về thực phẩm không?", chips: ["Không có", "Không ăn hải sản", "Ăn chay", "Không lactose"] }],
-  fei_step2: [{ id: 80, role: "bot", text: "NTRP của bạn để tôi tính lượng protein & carb phục hồi:", chips: ["Beginner 1.5–2.0", "Intermediate 3.0–3.5", "Advanced 4.0+"] }],
-  fei_result: [{ id: 90, role: "bot", text: "🍜 **Menu FEI cá nhân hoá cho bạn:**\n\n**NPI 88** — Protein 35g/bữa\n**LAI 92** — 100% nguyên liệu trong 50km\n**EII 87** — Cooking class với Chef Thanh\n**RWI 90** — Trà gừng & kháng viêm\n**LPI 88** — Private dining view biển\n\n⭐ **FEI Tổng: 89/100 — Signature**", chips: ["Tuyệt vời! Đặt tour →", "Xem lịch trình đầy đủ"] }],
 };
+
+const recommendations: Record<string, string> = {
+  ntrp_result_low: "sbu1", ntrp_result_mid: "sbu2", ntrp_result_high: "sbu3",
+  tour_result_leisure: "sbu1", tour_result_tournament: "sbu2", tour_result_premium: "sbu3",
+};
+for (const [key, packageId] of Object.entries(recommendations)) {
+  FLOWS[key] = [{ id: 0, role: "bot", text: "Bạn có thể tham khảo gói sau và kiểm tra lịch, trình độ phù hợp trước khi tiếp tục:", packageIds: [packageId], chips: ["Xem tất cả gói tour"] }];
+}
+FLOWS.tour_step2_solo = [{ id: 0, role: "bot", text: "Bạn muốn khám phá gói nào?", chips: tourPackages.map(p => p.name) }];
+FLOWS.experience = [{ id: 0, role: "bot", text: "Các trải nghiệm hiện có trong Travel Ace:", packageIds: tourPackages.map(p => p.id) }];
+FLOWS.fei_step1 = [{ id: 0, role: "bot", text: "Chọn gói để xem ẩm thực và các hoạt động trong lịch trình của ứng dụng.", chips: tourPackages.map(p => p.name) }];
 
 const QUICK_PROMPTS = [
   { label: "Tôi thuộc NTRP nào? 🎾", flowKey: "ntrp" },
@@ -44,10 +48,7 @@ const CHIP_FLOW: Record<string, string> = {
   "Dưới 1 năm": "ntrp_step2", "1–3 năm": "ntrp_step2", "3–5 năm": "ntrp_step2", "5+ năm": "ntrp_step2",
   "3–5 cú": "ntrp_result_low", "6–10 cú": "ntrp_result_mid", "10–20 cú": "ntrp_result_high", "20+ cú": "ntrp_result_high",
   "Một mình / cặp đôi": "tour_step2_solo", "Nhóm 5–10 người": "tour_step2_group", "CLB 10–20 người": "tour_step2_group",
-  "6,9 triệu/người": "tour_result_leisure", "12,9 triệu/người": "tour_result_tournament", "29,9 triệu/người": "tour_result_premium",
   "Thi đấu & ranking": "tour_result_tournament", "Nghỉ dưỡng & networking": "tour_result_premium", "Học kỹ thuật cùng nhau": "tour_result_leisure",
-  "Không có": "fei_step2", "Không ăn hải sản": "fei_step2", "Ăn chay": "fei_step2", "Không lactose": "fei_step2",
-  "Beginner 1.5–2.0": "fei_result", "Intermediate 3.0–3.5": "fei_result", "Advanced 4.0+": "fei_result",
 };
 
 /* ─── Bold markdown ───────────────────────────────────────────── */
@@ -62,6 +63,34 @@ function BotText({ text }: { text: string }) {
       )}
     </p>
   );
+}
+
+function ProductCard({ packageId, onNavigate }: { packageId: string; onNavigate: () => void }) {
+  const p = tourPackages.find(item => item.id === packageId)!;
+  const tour = tours.find(item => item.packageId === packageId)!;
+  const [departureCode, setDepartureCode] = useState(tour.departureSchedules[0]?.code ?? "");
+  const departure = tour.departureSchedules.find(item => item.code === departureCode);
+  const days = departure ? tripItinerary({ tourId: tour.id, departureCode }) : [];
+  const action = p.id === "sbu2" ? "Yêu cầu báo giá đoàn" : p.id === "sbu3" ? "Gửi yêu cầu chuyến đi" : "Chọn lịch & tiếp tục";
+  return <article className="w-full max-w-[42rem] rounded-[1.4rem] border border-neutral-10 bg-white p-[1.4rem] space-y-[1rem]">
+    <p className="text-[1.2rem] text-neutral-50">{tour.destinationName} · {tour.duration}</p>
+    <h3 className="text-[1.5rem] font-bold text-neutral-90">{p.name}</h3>
+    <p className="text-[1.3rem] text-neutral-60">{p.tagline}</p>
+    <p className="text-[1.4rem] font-bold text-brand-primary">Từ {formatVND(p.priceRange.min)} / người</p>
+    <p className="text-[1.2rem] text-neutral-60">{tour.ntrpLabel}</p>
+    <p className="text-[1.3rem]">{packageBenefits[p.id as keyof typeof packageBenefits]}</p>
+    <ul className="text-[1.2rem] text-neutral-60 list-disc pl-[1.6rem]">{p.highlights.map(h => <li key={h}>{h}</li>)}</ul>
+    {tour.departureSchedules.length > 0 ? <label className="block text-[1.3rem] font-semibold">Lịch khởi hành
+      <select aria-label={`Lịch khởi hành ${p.name}`} value={departureCode} onChange={e => setDepartureCode(e.target.value)} className="block w-full min-h-[4.4rem] border border-neutral-10 rounded-[0.8rem] px-[0.8rem] mt-[0.6rem] bg-white">
+        {tour.departureSchedules.map(d => <option key={d.code} value={d.code}>{d.dateLabel} · {formatVND(d.price)} / người</option>)}
+      </select>
+    </label> : <p className="text-[1.3rem]">Chưa có lịch khởi hành. Xem chi tiết gói để tìm hiểu thêm.</p>}
+    {days.length > 0 && <details className="text-[1.3rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center font-semibold">Xem lịch trình theo ngày</summary><div className="space-y-[1rem]">{days.map(day => <section key={day.day}><h4 className="font-bold">Ngày {day.day} · {day.title}</h4><ul className="space-y-[0.6rem] mt-[0.6rem] text-neutral-60">{day.activities.map(a => <li key={a.id}>{a.time} · {a.title}{a.optional ? " (tùy chọn)" : ""}</li>)}</ul></section>)}</div></details>}
+    <div className="flex flex-wrap gap-[0.8rem] text-[1.3rem] font-semibold">
+      <Link onClick={onNavigate} href={`/tours/${p.id}`} className="min-h-[4.4rem] inline-flex items-center border border-brand-primary text-brand-primary rounded-full px-[1.2rem]">Xem chi tiết tour</Link>
+      {departure && <Link onClick={onNavigate} href={`/booking?package=${p.id}&departure=${encodeURIComponent(departure.code)}`} className="min-h-[4.4rem] inline-flex items-center bg-brand-primary text-white rounded-full px-[1.2rem]">{action}</Link>}
+    </div>
+  </article>;
 }
 
 /* ─── Typing dots ─────────────────────────────────────────────── */
@@ -156,12 +185,17 @@ export default function ChatbotWidget() {
     setTyping(true);
     window.setTimeout(() => {
       setTyping(false);
-      setMessages((prev) => [...prev, ...flow]);
+      setMessages((prev) => [...prev, ...flow.map(message => ({ ...message, id: msgId.current++ }))]);
     }, delay);
   };
 
   const handleChip = (chip: string) => {
     setMessages((prev) => [...prev, { id: msgId.current++, role: "user", text: chip }]);
+    const selected = tourPackages.find(p => p.name === chip);
+    if (selected || chip === "Xem tất cả gói tour") {
+      setMessages(prev => [...prev, { id: msgId.current++, role: "bot", text: selected ? `Thông tin ${selected.name}:` : "Các gói tour hiện có:", packageIds: selected ? [selected.id] : tourPackages.map(p => p.id) }]);
+      return;
+    }
     const next = CHIP_FLOW[chip];
     if (next) {
       pushBotFlow(next);
@@ -171,8 +205,8 @@ export default function ChatbotWidget() {
         setTyping(false);
         setMessages((prev) => [...prev, {
           id: msgId.current++, role: "bot",
-          text: "Cảm ơn bạn! Đội ngũ Vietravel sẽ liên hệ trong vòng **15 phút**. 😊",
-          chips: ["Đặt tour ngay →"],
+          text: "Bạn muốn tìm hiểu gói nào?",
+          chips: tourPackages.map(p => p.name),
         }]);
       }, 700);
     }
@@ -193,7 +227,8 @@ export default function ChatbotWidget() {
       setTyping(false);
       setMessages((prev) => [...prev, {
         id: msgId.current++, role: "bot",
-        text: "Cảm ơn câu hỏi! Tôi đang kết nối với tư vấn viên.\n\nBạn có muốn thử gợi ý nhanh không?",
+        text: "Chọn gói để xem thông tin, lịch trình và tiếp tục đặt chuyến.",
+        packageIds: tourPackages.map(p => p.id),
       }]);
     }, 900);
   };
@@ -309,6 +344,7 @@ export default function ChatbotWidget() {
                       ? <p className="text-[1.3rem] text-white leading-relaxed">{msg.text}</p>
                       : <BotText text={msg.text} />}
                   </div>
+                  {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} />)}
                   {msg.role === "bot" && msg.chips && (
                     <div className="flex flex-wrap gap-[0.6rem] max-w-[90%]">
                       {msg.chips.map((chip) => (

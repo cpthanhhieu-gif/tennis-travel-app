@@ -25,7 +25,7 @@ export default function BookingStep2({ onNext }: Props) {
 
   const handleCalculate = async () => {
     if(saving||!allAnswered||!selfConfirmed)return;setSaving(true);setSaveError("");
-    try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"ntrp",answers})});const d=await r.json();if(!r.ok)throw Error(d.error);setSaved(d.ntrpProfile);applyResult(getNtrpLevel(d.ntrpProfile.level));}catch(e){setSaveError(requestErrorMessage(e));}finally{setSaving(false);}
+    try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"ntrp",answers})});const d=await r.json();if(r.status===401||r.status===403){applyResult(getNtrpLevel(Object.values(answers).reduce((sum,n)=>sum+n,0)/ntrpQuiz.length));return;}if(!r.ok)throw Error(d.error);setSaved(d.ntrpProfile);applyResult(getNtrpLevel(d.ntrpProfile.level));}catch(e){setSaveError(requestErrorMessage(e));}finally{setSaving(false);}
   };
 
   if (showResult && ntrpResult) {

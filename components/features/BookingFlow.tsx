@@ -55,7 +55,7 @@ export default function BookingFlow() {
     <div className={`ds-container ds-booking booking-unified ${step===1?"booking-compact":""}`}>
 
       <header className="ds-booking-title"><p className="ds-eyebrow">ĐẶT CHUYẾN ĐI</p><h1>{STEPS[visibleStep - 1]}</h1><p>{isGroup ? "Quy mô đoàn · Liên hệ đại diện · Yêu cầu báo giá" : "Chọn lịch · Đánh giá trình độ · Xem lại thông tin"}</p></header>
-      <DemoScenarioGuide packageId={booking.packageId}/>
+      {booking.entrySource==="scenario"&&<DemoScenarioGuide packageId={booking.packageId}/>}
       <BookingConsultation/>
       {/* Step progress */}
       <div className="mb-[3.2rem]">

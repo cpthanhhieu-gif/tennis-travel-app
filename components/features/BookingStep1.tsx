@@ -1,6 +1,7 @@
 "use client";
 
-import {browserScenario,demoParty} from "@/lib/demo-experience";
+import {initialParty} from "@/lib/booking-entry";
+import {browserScenario} from "@/lib/demo-experience";
 import {coupleTotal,companionRate} from "@/lib/couple-pricing";
 import { useEffect, useState } from "react";
 import GroupRequestFields from "./GroupRequestFields";
@@ -49,25 +50,8 @@ export default function BookingStep1({ onNext }: Props) {
   const [scheduleCode, setScheduleCode] = useState(booking.departureCode || firstSchedule.code);
 
   useEffect(() => {
-    if(booking.aceConsultation)return;
-    if(restoredDraft&&!["departure","players"].some(key=>new URLSearchParams(window.location.search).has(key)))return;
-    const params = new URLSearchParams(window.location.search);
-    const packageId = params.get("package");
-    const destinationId = params.get("destination");
-    const linkedTour = tours.find((tour) =>
-      (packageId ? tour.packageId === packageId : true) &&
-      (destinationId ? tour.destinationId === destinationId : true)
-    );
-    if (!linkedTour || (!packageId && !destinationId)) return;
-    const linkedSchedule = linkedTour.departureSchedules.find(s => s.code === params.get("departure")) ?? linkedTour.departureSchedules[0];
-    if(packageId==="sbu3"&&params.get("couple")==="1"){setPeople(2);setCompanions(1);}
-    const requestedPlayers=Number(params.get("players")),requestedCompanions=Number(params.get("companions"));
-    if(params.has("players")&&Number.isInteger(requestedPlayers)&&requestedPlayers>=1&&Number.isInteger(requestedCompanions)&&requestedCompanions>=0&&requestedPlayers+requestedCompanions<=packageCapacity(linkedTour.packageId)){setPeople(requestedPlayers+requestedCompanions);setCompanions(requestedCompanions);}
-    setPkgFilter(packageId ?? "all");
-    setDestFilter(destinationId ?? "all");
-    updateBooking({tourId:linkedTour.id,packageId:linkedTour.packageId,destination:linkedTour.destinationId,departureCode:linkedSchedule.code,departureDate:linkedSchedule.date,numCompanions:companions,totalPrice:coupleTotal(linkedTour.packageId,linkedSchedule.price,people,companions)});
-    setSelectedTourId(linkedTour.id);
-    setScheduleCode(linkedSchedule.code);
+    const params=new URLSearchParams(window.location.search);
+    setPkgFilter(params.get("package")??"all");setDestFilter(params.get("destination")??"all");
   }, []);
 
   const selectedSchedule =
@@ -77,7 +61,7 @@ export default function BookingStep1({ onNext }: Props) {
 
   const handleSelectTour = (tour: Tour) => {
     if((tour.packageId==="sbu2")!==(selectedTour.packageId==="sbu2")){
-      const party=demoParty(browserScenario(),tour.packageId);setPeople(party.numPeople);setCompanions(party.numCompanions);updateBooking({participants:undefined,groupRequest:undefined,premiumRequest:undefined});
+      const party=booking.entrySource==="scenario"&&!booking.aceConsultation?initialParty("scenario",tour.packageId,browserScenario()):{numPeople:people,numCompanions:companions};setPeople(party.numPeople);setCompanions(party.numCompanions);updateBooking({participants:undefined,groupRequestEdited:false,groupRequest:tour.packageId==="sbu2"?{min:Math.max(8,party.numPeople),max:Math.max(8,party.numPeople),dates:[tour.departureSchedules[0].date,""],budget:tour.departureSchedules[0].price,format:"Đánh đôi",courts:4,gala:true,companions:party.numCompanions}:undefined,premiumRequest:undefined});
     }
 
     updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions)});

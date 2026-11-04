@@ -19,13 +19,16 @@ export function consultationBookingPatch(booking: BookingState, preferences: Ace
     const result = getNtrpLevel(p.quizAnswers.reduce((a, b) => a + b, 0) / p.quizAnswers.length);
     patch.ntrpLevel = result.level; patch.ntrpLabel = result.label;
   }
-  if (allowParty && p.numPeople !== undefined && !booking.participants?.length) {
+  if (allowParty && p.numPeople !== undefined && !booking.participants?.length && !booking.groupRequestEdited) {
     if (booking.packageId === "sbu2" && p.numPeople < 8) throw Error("Gói đoàn cần ít nhất 8 khách. Giữ số khách đang chọn hoặc quay lại chọn gói phù hợp.");
     const companions = p.numCompanions ?? booking.numCompanions;
     if (p.numPeople > packageCapacity(booking.packageId) || companions >= p.numPeople || companions < 0) throw Error("Số khách hoặc người đi cùng chưa phù hợp với gói đang chọn.");
     patch.numPeople = p.numPeople; patch.numCompanions = companions;
     const t = tours.find(t => t.id === booking.tourId); const d = t?.departureSchedules.find(d => d.code === booking.departureCode);
     if (d) patch.totalPrice = coupleTotal(booking.packageId, d.price, p.numPeople, companions);
+  }
+  if (booking.packageId === "sbu2" && booking.groupRequest && !booking.groupRequestEdited) {
+    patch.groupRequest = { ...booking.groupRequest, ...(patch.numPeople ? {min:patch.numPeople,max:patch.numPeople,companions:patch.numCompanions??booking.numCompanions} : {}), ...(p.budget ? {budget:p.budget} : {}) };
   }
   if (booking.packageId === "sbu2" && !booking.groupRequest && p.budget) {
     const n = patch.numPeople ?? booking.numPeople;

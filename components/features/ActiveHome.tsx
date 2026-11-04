@@ -1,6 +1,7 @@
 "use client";
+import DemoExploreEntry from "./DemoExploreEntry";
 import DemoScenarioGuide from "./DemoScenarioGuide";
-import {browserStorageKey} from "@/lib/demo-scope";
+import {browserStorageKey,browserExploring} from "@/lib/demo-scope";
 import {useEffect,useState} from "react";
 import Link from "next/link";import Image from "next/image";
 import {Search,SlidersHorizontal,ArrowUpRight,CalendarDays,UserRound,Trophy,MapPin,X,Compass} from "lucide-react";
@@ -13,7 +14,7 @@ const normalize=(s:string)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").re
 export default function ActiveHome(){
  const [q,setQ]=useState(""),[filter,setFilter]=useState("all"),[destination,setDestination]=useState("all"),[filtersOpen,setFiltersOpen]=useState(false);
  const [restored,setRestored]=useState(false);
- useEffect(()=>{try{const saved=JSON.parse(sessionStorage.getItem(browserStorageKey("tennis-home-filters-v1"))??"null");if(saved){if(typeof saved.q==="string")setQ(saved.q.slice(0,200));if(intents.some(i=>i.id===saved.filter))setFilter(saved.filter);if(saved.destination==="all"||tours.some(t=>t.destinationId===saved.destination))setDestination(saved.destination);}}catch{}if(document.cookie.includes("tt-scenario=")){setFilter("all");setDestination("all");setQ("");}setRestored(true);},[]);
+ useEffect(()=>{try{const saved=JSON.parse(sessionStorage.getItem(browserStorageKey("tennis-home-filters-v1"))??"null");if(saved){if(typeof saved.q==="string")setQ(saved.q.slice(0,200));if(intents.some(i=>i.id===saved.filter))setFilter(saved.filter);if(saved.destination==="all"||tours.some(t=>t.destinationId===saved.destination))setDestination(saved.destination);}}catch{}if(!browserExploring()&&document.cookie.includes("tt-scenario=")){setFilter("all");setDestination("all");setQ("");}setRestored(true);},[]);
  useEffect(()=>{if(restored)try{sessionStorage.setItem(browserStorageKey("tennis-home-filters-v1"),JSON.stringify({q,filter,destination}));}catch{}},[q,filter,destination,restored]);
  const {data,error,refresh}=useLocalAccount();
  const live=data?.orders.find(o=>o.startedAt&&!o.completedAt);
@@ -29,6 +30,7 @@ export default function ActiveHome(){
  <Image src="/vietravel-chatbot-icon.png" alt="" width={56} height={56} className="w-[5.6rem] h-[5.6rem] object-contain shrink-0"/>
  <div className="flex-1 min-w-0"><h2 className="text-[1.6rem] font-bold">Trải nghiệm cùng Ace</h2><p className="text-[1.3rem] text-neutral-60 mt-[0.4rem]">Chọn chuyến tennis, khám phá trình độ và tìm hiểu trải nghiệm trong tour.</p><button type="button" onClick={()=>window.dispatchEvent(new Event("ace:open"))} className="mt-[1rem] inline-flex items-center gap-[0.6rem] text-[1.3rem] font-bold text-brand-primary min-h-[4.4rem]">Trò chuyện cùng Ace <ArrowUpRight size={18}/></button></div>
  </section>
+ <div className="mb-[1.6rem] text-[1.2rem]"><DemoExploreEntry/></div>
  <DemoScenarioGuide/>
  <div className="app-home-layout"><section className="app-discover" aria-label="Tìm trải nghiệm tennis">
  <div className="app-search-row"><div className="app-search-box"><Search size={21} aria-hidden="true"/><label className="sr-only" htmlFor="home-search">Tìm tour hoặc điểm đến</label><input id="home-search" value={q} onChange={e=>setQ(e.target.value)} placeholder="Bạn muốn chơi ở đâu?" autoComplete="off"/>{q&&<button type="button" aria-label="Xóa tìm kiếm" onClick={()=>setQ("")}><X size={18}/></button>}</div><button className="app-filter-button" type="button" aria-haspopup="dialog" onClick={()=>setFiltersOpen(true)} aria-label="Lọc theo điểm đến"><SlidersHorizontal size={20}/><span>Điểm đến{destination!=="all"?" · 1":""}</span></button></div>

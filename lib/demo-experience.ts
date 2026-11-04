@@ -1,6 +1,6 @@
-import {isScenarioId,type ScenarioId} from "./demo-scope";
+import {isScenarioId,browserExploring,type ScenarioId} from "./demo-scope";
 export function browserScenario():ScenarioId|undefined{
- if(typeof document==="undefined")return;
+ if(typeof document==="undefined"||browserExploring())return;
  const value=document.cookie.split("; ").find(c=>c.startsWith("tt-scenario="))?.split("=")[1];
  return isScenarioId(value)?value:undefined;
 }

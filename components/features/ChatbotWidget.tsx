@@ -35,7 +35,7 @@ function BotText({ text }: { text: string }) {
   );
 }
 
-function ProductCard({ packageId, onNavigate, preferences, selection, onChoose }: { packageId: string; onNavigate: () => void; preferences?: AcePreferences; selection?: AceSelection; onChoose: (selection: AceSelection) => void }) {
+function ProductCard({ packageId, onNavigate, preferences, selection, onChoose, entryId }: { entryId: string; packageId: string; onNavigate: () => void; preferences?: AcePreferences; selection?: AceSelection; onChoose: (selection: AceSelection) => void }) {
   const p = tourPackages.find(item => item.id === packageId)!;
   const tour = tours.find(item => item.packageId === packageId)!;
   const [departureCode, setDepartureCode] = useState(selection?.packageId === packageId ? selection.departureCode : tour.departureSchedules[0]?.code ?? "");
@@ -61,8 +61,8 @@ function ProductCard({ packageId, onNavigate, preferences, selection, onChoose }
     </label> : <p className="text-[1.3rem]">Chưa có lịch khởi hành. Xem chi tiết gói để tìm hiểu thêm.</p>}
     {days.length > 0 && <details className="text-[1.3rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center font-semibold">Xem lịch trình theo ngày</summary><div className="space-y-[1rem]">{days.map(day => <section key={day.day}><h4 className="font-bold">Ngày {day.day} · {day.title}</h4><ul className="space-y-[0.6rem] mt-[0.6rem] text-neutral-60">{day.activities.map(a => <li key={a.id}>{a.time} · {a.title}{a.optional ? " (tùy chọn)" : ""}</li>)}</ul></section>)}</div></details>}
     <div className="flex flex-wrap gap-[0.8rem] text-[1.3rem] font-semibold">
-      <Link onClick={() => { remember(); onNavigate(); }} href={`/tours/${p.id}`} className="min-h-[4.4rem] inline-flex items-center border border-brand-primary text-brand-primary rounded-full px-[1.2rem]">Xem chi tiết tour</Link>
-      {departure && <Link onClick={() => { remember(); onNavigate(); }} href={`/booking?package=${p.id}&departure=${encodeURIComponent(departure.code)}&from=ace`} className="min-h-[4.4rem] inline-flex items-center bg-brand-primary text-white rounded-full px-[1.2rem]">{action}</Link>}
+      <Link onClick={() => { remember(); onNavigate(); }} href={`/tours/${p.id}?from=ace&consultation=${encodeURIComponent(entryId)}`} className="min-h-[4.4rem] inline-flex items-center border border-brand-primary text-brand-primary rounded-full px-[1.2rem]">Xem chi tiết tour</Link>
+      {departure && <Link onClick={() => { remember(); onNavigate(); }} href={`/booking?package=${p.id}&departure=${encodeURIComponent(departure.code)}&from=ace&consultation=${encodeURIComponent(entryId)}`} className="min-h-[4.4rem] inline-flex items-center bg-brand-primary text-white rounded-full px-[1.2rem]">{action}</Link>}
     </div>
   </article>;
 }
@@ -120,6 +120,7 @@ export default function ChatbotWidget() {
       welcomeFiredRef.current = saved.messages.length > 0;
       if (saved.open) setPhase("opening");
     }
+    if(new URLSearchParams(window.location.search).get("ace")==="open")setPhase("opening");
     setHydrated(true);
   }, []);
   useEffect(() => {
@@ -396,7 +397,7 @@ export default function ChatbotWidget() {
                       ? <p className="text-[1.3rem] text-white leading-relaxed">{msg.text}</p>
                       : <BotText text={msg.text} />}
                   </div>
-                  {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} preferences={msg.preferences} selection={selection} onChoose={chooseSelection} />)}
+                  {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} preferences={msg.preferences} selection={selection} onChoose={chooseSelection} entryId={sessionId.current} />)}
                   {msg.role === "bot" && !humanMode && msg.chips && msg.id === messages[messages.length - 1]?.id && (
                     <div className="flex flex-wrap gap-[0.6rem] max-w-[90%]">
                       {msg.chips.map((chip) => (

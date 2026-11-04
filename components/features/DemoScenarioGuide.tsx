@@ -7,7 +7,7 @@ import type {ScenarioId} from "@/lib/demo-scope";
 export default function DemoScenarioGuide({packageId}:{packageId?:string}){
  const [scenario,setScenario]=useState<ScenarioId>();
  const [open,setOpen]=useState(false);
- useEffect(()=>{setScenario(browserScenario());},[]);
+ useEffect(()=>{if(new URLSearchParams(window.location.search).get("from")!=="ace")setScenario(browserScenario());},[]);
  if(!scenario||scenario==="returning")return null;
  return <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:"0.8rem",marginBlock:"1.2rem"}} aria-label="Kịch bản demo hiện tại"><span className="ui-badge">Demo: {demoLabels[scenario]}</span><button type="button" className="ds-link" aria-haspopup="dialog" onClick={()=>setOpen(true)}>Hướng dẫn</button><Modal isOpen={open} onClose={()=>setOpen(false)} title="Hướng dẫn trải nghiệm demo"><DemoGuideContent scenario={scenario} packageId={packageId}/><Link className="ds-link" href="/demo">Mở quản lý kịch bản demo</Link></Modal></div>;
 }

@@ -9,6 +9,7 @@ export const dynamic="force-dynamic";
 export async function GET(req:NextRequest){return apiStorage(req,async()=>{
  const room=currentRoom();
  if(cloudMode()&&!await roomExists(room))return NextResponse.json({error:"Chưa tham gia phiên demo"},{status:403});
+ if(req.cookies.get("tt-demo-mode")?.value==="explore")return NextResponse.json({room,mode:"explore",scenario:null,changed:false,syncedAt:new Date().toISOString()},{headers:{"Cache-Control":"no-store"}});
  const shared=await readDocument<{scenario:string|null;revision:string}>("demo-context");
  const scenario=shared?shared.scenario:req.cookies.get("tt-scenario")?.value;
  if(!shared&&!isScenarioId(scenario))return NextResponse.json({room,scenario:null},{headers:{"Cache-Control":"no-store"}});

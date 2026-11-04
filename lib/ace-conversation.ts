@@ -15,6 +15,7 @@ export type AceState = { step: "idle" | "party" | "goal" | "budget" | "quiz" | "
 export type AceReply = { text: string; chips?: string[]; packageIds?: string[]; preferences?: AcePreferences };
 export const initialAceState = (): AceState => ({ step: "idle", preferences: { quizAnswers: [] } });
 export const aceStarts = ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour", "Menu FEI cho tôi 🍜"];
+const parties = ["Đi một mình", "Hai người cùng chơi", "Một người chơi, một người đi cùng", "Nhóm 5–10 người", "CLB 10–20 người"];
 const goals = ["Học kỹ thuật cùng nhau", "Thi đấu & giao lưu", "Nghỉ dưỡng & kết nối"];
 const diets = ["Không có yêu cầu đặc biệt", "Ăn chay", "Không ăn hải sản", "Không lactose", "Yêu cầu ăn uống khác"];
 const goalNames = { learn: "học kỹ thuật", compete: "thi đấu & giao lưu", relax: "nghỉ dưỡng & kết nối" };
@@ -36,13 +37,14 @@ function result(p: AcePreferences): AceReply {
 export function aceRespond(state: AceState, input: string): { state: AceState; reply: AceReply } {
   const p = { ...state.preferences, quizAnswers: [...state.preferences.quizAnswers] };
   const answer = (step: AceState["step"], reply: AceReply) => ({ state: { step, preferences: p }, reply });
-  if (input === aceStarts[0]) { delete p.packageId; return answer("party", { text: "Bạn dự định đi cùng ai?", chips: ["Một mình / cặp đôi", "Nhóm 5–10 người", "CLB 10–20 người"] }); }
+  if (input === aceStarts[0]) { delete p.packageId; return answer("party", { text: "Bạn dự định đi cùng ai?", chips: parties }); }
   if (input === aceStarts[1]) { p.quizAnswers = []; delete p.level; return answer("quiz", { text: ntrpQuiz[0].question, chips: ntrpQuiz[0].options.map(o => o.label) }); }
   if (input === "Xem tất cả gói tour") return answer("idle", { text: "Các gói hiện có. Nhu cầu của bạn vẫn được giữ trong cuộc trò chuyện.", packageIds: tourPackages.map(item => item.id), preferences: { ...p }, chips: ["Điều chỉnh ăn uống", ...aceStarts.slice(0, 2)] });
   if (input === aceStarts[2] || input === aceStarts[3] || input === "Điều chỉnh ăn uống") return answer("diet", { text: "Bạn có yêu cầu ăn uống nào cho các bữa ăn và trải nghiệm trong tour? Bạn có thể chọn hoặc nhập yêu cầu cụ thể.", chips: diets });
   const selected = tourPackages.find(item => item.name === input);
   if (selected) { p.packageId = selected.id; return answer("idle", result(p)); }
-  if (state.step === "party" && ["Một mình / cặp đôi", "Nhóm 5–10 người", "CLB 10–20 người"].includes(input)) { p.party = input; return answer("goal", { text: "Mục tiêu chính của chuyến đi là gì?", chips: goals }); }
+  if (state.step === "party" && [...parties, "Một mình / cặp đôi"].includes(input)) { p.party = input;
+    if(input===parties[0]){p.numPeople=1;p.numCompanions=0;}else if(input===parties[1]){p.numPeople=2;p.numCompanions=0;}else if(input===parties[2]){p.numPeople=2;p.numCompanions=1;}else{delete p.numPeople;delete p.numCompanions;} return answer("goal", { text: "Mục tiêu chính của chuyến đi là gì?", chips: goals }); }
   if (state.step === "goal" && goals.includes(input)) { p.goal = (["learn", "compete", "relax"] as const)[goals.indexOf(input)]; return answer("budget", { text: "Ngân sách dự kiến mỗi người là bao nhiêu?", chips: [...tourPackages.map(item => `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`), "Linh hoạt theo trải nghiệm"] }); }
   if (state.step === "budget") {
     const budgetPackage = tourPackages.find(item => input === `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`);
@@ -65,7 +67,7 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
     p.diet = input.slice(0, 500);
     return answer("idle", result(p));
   }
-  if (state.step === "party") return answer("party", { text: "Chọn hình thức đi phù hợp nhé.", chips: ["Một mình / cặp đôi", "Nhóm 5–10 người", "CLB 10–20 người"] });
+  if (state.step === "party") return answer("party", { text: "Chọn hình thức đi phù hợp nhé.", chips: parties });
   if (state.step === "goal") return answer("goal", { text: "Bạn ưu tiên trải nghiệm nào?", chips: goals });
   if (state.step === "budget") return answer("budget", { text: "Chọn mức ngân sách để Ace so với giá gói hiện có.", chips: [...tourPackages.map(item => `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`), "Linh hoạt theo trải nghiệm"] });
   return answer("idle", { text: "Bạn muốn bắt đầu hành trình nào? Ace sẽ giữ các nhu cầu đã ghi nhận trong cuộc trò chuyện này.", chips: aceStarts });

@@ -52,6 +52,8 @@ export default function BookingStep4({ onConfirm }: Props) {
     if(loading)return;
     setLoading(true);setError("");
     try {
+      const auth=await fetch("/api/local",{cache:"no-store"});const account=auth.ok?await auth.json():null;
+      if(!account?.account){setNeedsLogin(true);return;}
       if(!key.current){key.current=crypto.randomUUID();updateBooking({submissionKey:key.current});}
       const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"book",booking,key:key.current})});
       const data=await r.json();if(r.status===401){setNeedsLogin(true);setError("");return;}if(!r.ok)throw Error(data.error);setRegistrationId(data.order.id);
@@ -103,7 +105,7 @@ export default function BookingStep4({ onConfirm }: Props) {
         </ul>
       </div>
 
-      {needsLogin&&<><p role="status">Phiên đăng nhập đã hết hạn. Thông tin đặt gói của bạn vẫn được giữ.</p><BookingLogin onSuccess={()=>{setNeedsLogin(false);setError("");}}/></>}
+      {needsLogin&&<><p role="status">Đăng nhập để gửi yêu cầu. Gói, số khách và nhu cầu đã nhập vẫn được giữ.</p><BookingLogin onSuccess={()=>{setNeedsLogin(false);setError("");}}/></>}
       {error && <p role="alert" className="mb-[1.6rem]">{error}</p>}
       <div className="booking-step-action"><p>{pkg.id==="sbu2"?"Nhận báo giá trong 1 ngày làm việc.":pkg.id==="sbu3"?"Nhận phương án trong tối đa 24 giờ.":"Tiếp tục thanh toán cọc 30% để hoàn tất đăng ký."}</p><Button
         variant="primary"

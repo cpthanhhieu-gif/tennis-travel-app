@@ -4,8 +4,12 @@ import {type GroupRequest,type GroupQuote,validGroupRequest} from "@/lib/group-r
 import type {PremiumRequest} from "@/lib/premium-request";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
-import {browserScenario,demoParty} from "./demo-experience";
-import {browserStorageKey} from "./demo-scope";
+import {browserScenario} from "./demo-experience";
+import {readAceSession} from "./ace-session";
+import {consultationSignature} from "./ace-booking";
+import {initializeBooking,bookingDraftName} from "./booking-initialization";
+import type {BookingSource} from "./booking-entry";
+import {browserStorageKey,browserExploring} from "./demo-scope";
 import {coupleTotal} from "./couple-pricing";
 import { getNtrpLevel, tours } from "@/lib/mock-data";
 
@@ -14,6 +18,9 @@ export interface BookingState {
   participants?:BookingParticipant[];
   contactParticipates?:boolean;
   submissionKey?: string;
+  entrySource?: BookingSource;
+  originScenario?: string;
+  groupRequestEdited?: boolean;
   referralToken?: string;
   tourId: string;          // ví dụ "dn-sbu1"
   packageId: string;
@@ -86,24 +93,22 @@ export function BookingProvider({ children }: { children: ReactNode }) {
 
   const [step,setStep]=useState(1),[hydrated,setHydrated]=useState(false),[restoredDraft,setRestoredDraft]=useState(false);
   const draftKey=useRef("");
+  const [storageVersion,setStorageVersion]=useState(0);
   useEffect(()=>{
     const params=new URLSearchParams(window.location.search);
-    draftKey.current=browserStorageKey(`tennis-booking-draft-v1:${params.get("package")??"all"}:${params.get("destination")??"all"}:${params.get("ref")??"direct"}`);
-    setBooking(prev=>({...prev,referralToken:params.get("ref")??""}));
-    try{const raw=sessionStorage.getItem(draftKey.current);
-    if(!raw){const scenario=browserScenario();if(scenario){const packageId=params.get("package")??(scenario==="club"?"sbu2":scenario==="couple"?"sbu3":"sbu1");const t=tours.find(t=>t.packageId===packageId)??tours[0];const d=t.departureSchedules[0];const party=demoParty(scenario,t.packageId);setBooking(prev=>({...prev,...party,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,totalPrice:coupleTotal(t.packageId,d.price,party.numPeople,party.numCompanions)}));}}
-    if(raw){const saved=JSON.parse(raw);const t=tours.find(t=>t.id===saved.booking?.tourId);const schedule=t?.departureSchedules.find(d=>d.code===saved.booking?.departureCode);
-      if(saved.version===1&&t&&schedule&&Number.isInteger(saved.booking.numPeople)&&saved.booking.numPeople>=1&&saved.booking.numPeople<=20){
-        setBooking({...defaultBooking,...saved.booking,notes:typeof saved.booking.notes==="string"?saved.booking.notes.slice(0,2000):"",tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:schedule.code,departureDate:schedule.date,numCompanions:Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0,totalPrice:coupleTotal(t.packageId,schedule.price,saved.booking.numPeople,Number.isInteger(saved.booking.numCompanions)&&saved.booking.numCompanions>=0&&saved.booking.numCompanions<saved.booking.numPeople?saved.booking.numCompanions:0)});
-        if(saved.quiz?.answers&&typeof saved.quiz.answers==="object")setNtrpQuizState({...defaultNtrpQuizState,...saved.quiz});
-        if(Number.isInteger(saved.step)&&saved.step>=1&&saved.step<=4)setStep(t.packageId==="sbu2"&&saved.step===2?3:saved.step);
-        setRestoredDraft(true);
-      }
-    }const explicitDeparture=params.get("departure");
-    if(explicitDeparture){const t=tours.find(t=>t.packageId===params.get("package"));const d=t?.departureSchedules.find(d=>d.code===explicitDeparture);if(t&&d){setBooking(prev=>({...prev,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,totalPrice:coupleTotal(t.packageId,d.price,prev.numPeople,prev.numCompanions)}));setStep(1);}}
-    }catch{/* A malformed or unavailable draft does not block booking. */}setHydrated(true);
+    draftKey.current=browserStorageKey(bookingDraftName(params));
+    let raw:string|null=null;try{
+      raw=sessionStorage.getItem(draftKey.current);
+      if(!raw){const legacy=sessionStorage.getItem(browserStorageKey(`tennis-booking-draft-v1:${params.get("package")??"all"}:${params.get("destination")??"all"}:${params.get("ref")??"direct"}`));if(params.get("from")!=="ace")raw=legacy;else{const prior=JSON.parse(legacy??"null"),session=readAceSession();if(session&&prior?.booking?.aceConsultation?.signature===consultationSignature(session.state.preferences))raw=legacy;}}
+    }catch{}
+    const initialized=initializeBooking(params,browserExploring(),browserScenario(),defaultBooking,raw);
+    setBooking(initialized.booking);setStep(initialized.step);setRestoredDraft(initialized.restored);
+    if(initialized.quiz)setNtrpQuizState({...defaultNtrpQuizState,...initialized.quiz});
+    setHydrated(true);
+    const rekey=()=>setStorageVersion(v=>v+1);window.addEventListener("demo:mode",rekey);
+    return()=>window.removeEventListener("demo:mode",rekey);
   },[]);
-  useEffect(()=>{if(!hydrated)return;try{sessionStorage.setItem(draftKey.current,JSON.stringify({version:1,booking,quiz:ntrpQuizState,step}));}catch{/* Booking remains usable if storage is unavailable. */}},[booking,ntrpQuizState,step,hydrated]);
+  useEffect(()=>{if(!hydrated)return;try{draftKey.current=browserStorageKey(bookingDraftName(new URLSearchParams(window.location.search)));sessionStorage.setItem(draftKey.current,JSON.stringify({version:1,booking,quiz:ntrpQuizState,step}));}catch{}},[booking,ntrpQuizState,step,hydrated,storageVersion]);
   const updateBooking=useCallback((updates:Partial<BookingState>)=>{
     setBooking(prev=>{const changed=Object.entries(updates).some(([k,v])=>prev[k as keyof BookingState]!==v);if(!changed)return prev;const realChange=Object.keys(updates).some(k=>k!=="submissionKey"&&prev[k as keyof BookingState]!==updates[k as keyof BookingState]);return {...prev,...updates,...(realChange?{submissionKey:""}:{})};});
   },[]);

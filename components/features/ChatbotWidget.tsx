@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import "./ace-chat.css";
-import {respondToAceText} from "@/lib/ace-natural";
+import AceJourneyPanel from "./AceJourneyPanel";
+import {aceJourneyContext,appendJourneyNotice} from "@/lib/ace-journey";
+import {useLocalAccount} from "@/lib/use-local-account";
+import {respondToAceText,continueAceConversation} from "@/lib/ace-natural";
 import {aceNaturalDemoPrompts} from "@/lib/ace-language-data";
 import {advisorFollowups} from "@/lib/ace-script";
 import {assessAcePackage} from "@/lib/ace-recommendation";
@@ -15,7 +18,7 @@ import { useAdvisorConversation } from "./use-advisor-conversation";
 import { readAceSession, saveAceSession, type AceMessage, type AceSelection } from "@/lib/ace-session";
 import { mergeAdvisorMessages } from "@/lib/ace-timeline";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname,useSearchParams } from "next/navigation";
 import { tourPackages, tours, formatVND } from "@/lib/mock-data";
 import { packageBenefits, tripItinerary } from "@/lib/trip-itinerary";
 import { aceRespond, initialAceState, preferenceSummary, type AcePreferences } from "@/lib/ace-conversation";
@@ -94,6 +97,11 @@ function TypingDots() {
 /* ─── Main ────────────────────────────────────────────────────── */
 export default function ChatbotWidget() {
   const pathname = usePathname();
+  const searchParams=useSearchParams();
+  const journeyAccount=useLocalAccount();
+  const [journeySelection,setJourneySelection]=useState("");
+  const [exploringNewTrip,setExploringNewTrip]=useState(false);
+  const journey=aceJourneyContext(journeyAccount.data,journeySelection||searchParams.get("booking"));
   /*
    * phase controls cả DOM presence lẫn animation:
    *   "closed"  → không render dialog (không có trong DOM, không có shadow)
@@ -179,16 +187,23 @@ export default function ChatbotWidget() {
     return () => window.cancelAnimationFrame(id);
   }, [phase]);
 
-  /* Welcome message — chỉ chạy 1 lần khi lần đầu phase = open */
+  /* Status hints are persisted as message IDs: reopening never repeats the same reminder. */
   useEffect(() => {
-    if (!hydrated || phase !== "open" || welcomeFiredRef.current) return;
-    welcomeFiredRef.current = true;
-    setMessages([{
-        id: msgId.current++, role: "bot",
-        text: "Xin chào! Tôi là **Ace**, trợ lý du lịch tennis của bạn. Bạn muốn tìm chuyến đi phù hợp hay khám phá trình độ tennis?",
-        chips: ["Gợi ý gói tour 🏖️", "Tôi thuộc NTRP nào? 🎾", "Trải nghiệm trong tour"],
-      }]);
-  }, [phase, hydrated]);
+    if(!hydrated||phase!=="open"||journeyAccount.data===null||humanMode)return;
+    if(journey&&!exploringNewTrip){
+      welcomeFiredRef.current=true;
+      setMessages(prev=>appendJourneyNotice(prev,journey,new Date().toISOString()));
+      return;
+    }
+    if(welcomeFiredRef.current)return;
+    welcomeFiredRef.current=true;
+    if(messages.length>0)return;
+    if(preferenceSummary(conversation.current.preferences)){
+      const resumed=conversation.current.step==="quiz"||conversation.current.step==="group"?aceRespond(conversation.current,"Tiếp tục kịch bản"):continueAceConversation(conversation.current,"Ace vẫn giữ nhu cầu bạn đã chia sẻ. Mình tiếp tục từ thông tin đang có nhé.");
+      conversation.current=resumed.state;
+      setMessages(prev=>[...prev,{id:msgId.current++,role:"bot",at:new Date().toISOString(),...resumed.reply}]);
+    }else setMessages(prev=>[...prev,{id:msgId.current++,role:"bot",at:new Date().toISOString(),text:"Chào bạn! Bạn muốn tìm chuyến tennis phù hợp hay khám phá trình độ của mình? Ace sẽ giữ thông tin bạn chia sẻ để tiếp tục lần sau.",chips:["Gợi ý gói tour 🏖️","Tôi thuộc NTRP nào? 🎾","Trải nghiệm trong tour"]}]);
+  },[hydrated,phase,journey?.key,journeyAccount.data===null,humanMode,exploringNewTrip,messages.length===0]);
 
   /* Auto-scroll */
   useEffect(() => {
@@ -229,6 +244,7 @@ export default function ChatbotWidget() {
     setEditingGroup(false);
     setSelection(undefined); setHumanMode(false); setContact(""); setSupportRetry(null);
     conversation.current = initialAceState();
+    welcomeFiredRef.current=false;setExploringNewTrip(false);
     setMessages([]);
     setInputVal("");
   };
@@ -237,6 +253,7 @@ export default function ChatbotWidget() {
     if (advisor.busy) return;
     setHumanMode(false);
     setEditingGroup(false);
+    if(text==="Gợi ý gói tour 🏖️")setExploringNewTrip(true);
     const response = aceRespond(conversation.current, text);
     conversation.current = response.state;
     setMessages(prev => [...prev,
@@ -282,6 +299,7 @@ export default function ChatbotWidget() {
     setInputVal("");
     const response=respondToAceText(conversation.current,text);
     if(response){
+      if(response.state!==conversation.current)setExploringNewTrip(true);
       setHumanMode(false);setEditingGroup(false);
       if(response.state!==conversation.current)setSelection(undefined);
       conversation.current=response.state;
@@ -339,15 +357,15 @@ export default function ChatbotWidget() {
 
             </header>
 
-            <AceNeedsSummary key={sessionId.current} preferences={conversation.current.preferences} busy={typing||advisor.busy||editingGroup||conversation.current.step==="group"} onSave={saveQuickEdit} onEditGroup={()=>{setHumanMode(false);setEditingGroup(true);}}/>
+            {(!journey||exploringNewTrip)&&<AceNeedsSummary key={sessionId.current} preferences={conversation.current.preferences} busy={typing||advisor.busy||editingGroup||conversation.current.step==="group"} onSave={saveQuickEdit} onEditGroup={()=>{setHumanMode(false);setEditingGroup(true);}}/>}
 
             {/* Messages */}
             <div className="ace-chat-messages"
               style={{ scrollbarWidth: "none" }}>
 
-              <div className="ace-chat-welcome"><Sparkles size={18} aria-hidden="true"/><strong>Mỗi chuyến đi đáng nhớ<br/>bắt đầu từ một lời chào.</strong><p>Chia sẻ kế hoạch ra sân cùng Ace nhé.</p></div>
+              {!journey&&<div className="ace-chat-welcome"><Sparkles size={18} aria-hidden="true"/><strong>Mỗi chuyến đi đáng nhớ<br/>bắt đầu từ một lời chào.</strong><p>Chia sẻ kế hoạch ra sân cùng Ace nhé.</p></div>}
               <div className="ace-chat-day"><span>{messages[0]?.at&&new Date(messages[0].at).toDateString()!==new Date().toDateString()?new Date(messages[0].at).toLocaleDateString("vi-VN"):"Hôm nay"}</span></div>
-              {messages.length === 0 && !typing && (
+              {messages.length === 0 && !typing && !journey && (
                 <div className="flex flex-col items-center pt-[2rem] pb-[1rem]">
                   <p className="text-neutral-50 text-[1.2rem] font-semibold mb-[1rem] self-start">Bắt đầu với:</p>
                   <div className="flex flex-col gap-[0.8rem] w-full">
@@ -362,7 +380,7 @@ export default function ChatbotWidget() {
                 </div>
               )}
 
-              {messages.length<=1&&!humanMode&&<details className="text-[1.2rem] mb-[1rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center">Thử kể kế hoạch bằng lời của bạn</summary><div className="flex flex-col gap-[0.8rem]">{aceNaturalDemoPrompts.map(text=><button key={text} disabled={typing||advisor.busy} className="ace-chat-chip text-left" onClick={()=>setInputVal(text)}>{text}</button>)}</div><p>Chọn câu mẫu để điền vào ô chat; bạn có thể sửa trước khi gửi.</p></details>}
+              {messages.length<=1&&!humanMode&&!journey&&<details className="text-[1.2rem] mb-[1rem]"><summary className="cursor-pointer min-h-[4.4rem] flex items-center">Thử kể kế hoạch bằng lời của bạn</summary><div className="flex flex-col gap-[0.8rem]">{aceNaturalDemoPrompts.map(text=><button key={text} disabled={typing||advisor.busy} className="ace-chat-chip text-left" onClick={()=>setInputVal(text)}>{text}</button>)}</div><p>Chọn câu mẫu để điền vào ô chat; bạn có thể sửa trước khi gửi.</p></details>}
 
               {messages.map((msg) => (
                 <div key={msg.id}
@@ -396,6 +414,9 @@ export default function ChatbotWidget() {
             </div>
 
             {/* Input */}
+            {journey&&journeyAccount.data&&!exploringNewTrip&&<AceJourneyPanel context={journey} data={journeyAccount.data} onSelect={id=>{setJourneySelection(id);setExploringNewTrip(false);}} onNavigate={handleClose} onExplore={()=>{setExploringNewTrip(true);handleChip("Gợi ý gói tour 🏖️","Tìm chuyến mới");}}/>}
+            {journey&&exploringNewTrip&&<button type="button" className="ds-link min-h-[3.6rem]" onClick={()=>setExploringNewTrip(false)}>Quay lại chuyến đang có</button>}
+            {!journeyAccount.data&&<p role="status" className="px-[1.5rem] text-[1.2rem]">{journeyAccount.error?"Chưa kiểm tra được hành trình. Nội dung trò chuyện vẫn được giữ.":"Đang kiểm tra hành trình của bạn…"}{journeyAccount.error&&<button type="button" className="ds-link" onClick={journeyAccount.refresh}>Thử lại</button>}</p>}
             <div className="ace-chat-footer">
               <div className="ace-chat-footer-tools">
                 <details className="ace-chat-contact"><summary>Liên hệ tùy chọn</summary><label>Email hoặc số điện thoại<input aria-label="Email hoặc số điện thoại cho tư vấn viên" value={contact} maxLength={200} onChange={e=>setContact(e.target.value)} placeholder="Để tư vấn viên liên hệ lại"/></label><p>Khi nhờ hỗ trợ, nhu cầu và trao đổi gần đây sẽ được chuyển cùng câu hỏi.</p></details>

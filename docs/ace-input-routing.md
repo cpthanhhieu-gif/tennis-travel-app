@@ -9,3 +9,5 @@
 - Header dùng nền trắng, chữ tối và nút viền theo kiểu dashboard; bỏ shape/cloud xanh.
 
 Kiểm tra: `node tests/ace-script.cjs` và các bộ kiểm tra Ace, group, continuity, support, booking, AI endpoint, exploration; build ứng dụng.
+
+Sau thông báo chuyển tư vấn viên và sau câu trả lời của nhân viên, Ace hiển thị tối đa 3 tag tiếp tục theo tiến độ hiện tại. Tag có thể tiếp tục câu hỏi đang dở, sửa nhu cầu nhóm hoặc mở lựa chọn tour; bấm tag đưa khách về luồng Ace và giữ nhu cầu đã có.

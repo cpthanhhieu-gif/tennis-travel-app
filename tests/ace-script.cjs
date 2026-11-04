@@ -2,6 +2,7 @@ const assert=require("node:assert/strict"),fs=require("node:fs"),vm=require("nod
 function load(file,deps={}){const module={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{module,exports:module.exports,require:n=>deps[n],Intl});return module.exports;}
 const data=load("lib/mock-data.ts"),router=load("lib/ace-script.ts",{"./mock-data":data});const group=load("lib/ace-group.ts",{"./mock-data":data});const ace=load("lib/ace-conversation.ts",{"./mock-data":data,"./ace-script":router,"./ace-group":group});
 const state=()=>ace.initialAceState();
+assert.equal(router.matchAceScript(state(),"tôi muốn gợi ý tour"),ace.aceStarts[0]);
 assert.equal(router.matchAceScript(state(),"tôi muốn tour khác"),"Xem tất cả gói tour");
 assert.equal(router.matchAceScript(state(),"toi thuoc ntrp nao"),ace.aceStarts[1]);
 assert.equal(router.matchAceScript(state(),"Tôi muốn hủy tour đã đặt"),undefined);
@@ -18,4 +19,9 @@ assert.equal(quiz.preferences.quizAnswers.length,0);
 const ongoing={step:"quiz",preferences:{quizAnswers:[2.5],diet:"Ăn chay"}};
 const resumed=ace.aceRespond(ongoing,"Tiếp tục kịch bản");assert.equal(resumed.state.step,"quiz");assert.equal(resumed.state.preferences.quizAnswers.length,1);assert.equal(resumed.reply.text,data.ntrpQuiz[1].question);assert.equal(resumed.state.preferences.diet,"Ăn chay");
 
+const followups=router.advisorFollowups(ongoing);assert.equal(followups.length,3);assert.equal(followups[0],"Tiếp tục đánh giá NTRP");
+for(const chip of followups)assert.notEqual(router.matchAceScript(ongoing,chip),undefined);
+assert.equal(ace.aceRespond(ongoing,router.matchAceScript(ongoing,followups[0])).state.preferences.quizAnswers.length,1);
+const grouping={step:"group",preferences:{quizAnswers:[]}};
+assert.equal(ace.aceRespond(grouping,"Xem tất cả gói tour").state.step,"idle");
 console.log("Passed: scripted options/aliases, contextual quiz/diet/budget inputs, decimal amounts, out-of-script questions and unchanged flow state.");

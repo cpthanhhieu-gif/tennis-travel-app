@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import "./ace-chat.css";
-import {matchAceScript} from "@/lib/ace-script";
+import {matchAceScript,advisorFollowups} from "@/lib/ace-script";
 import GroupNeedsEditor from "./GroupNeedsEditor";
 import {applyGroupNeeds,groupRecommendation,type GroupNeeds} from "@/lib/ace-group";
 import { useAdvisorConversation } from "./use-advisor-conversation";
@@ -228,6 +228,7 @@ export default function ChatbotWidget() {
   const handleChip = (text: string, displayText = text) => {
     if (advisor.busy) return;
     setHumanMode(false);
+    setEditingGroup(false);
     const response = aceRespond(conversation.current, text);
     conversation.current = response.state;
     setMessages(prev => [...prev,
@@ -270,6 +271,8 @@ export default function ChatbotWidget() {
   };
 
   /* ─── Derived values ─── */
+  const latestMessage=messages.at(-1);
+  const continuationChips=latestMessage&&(latestMessage.role==="advisor"||String(latestMessage.id).startsWith("handoff:"))?advisorFollowups(conversation.current):undefined;
   const inDOM     = phase !== "closed";
   const slideUp   = phase === "open";   // translateY(0) khi open, translateY(100%) các phase khác
 
@@ -347,10 +350,10 @@ export default function ChatbotWidget() {
                     {msg.at&&<time className="ace-chat-time" dateTime={msg.at}>{new Date(msg.at).toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"})}</time>}
                   </div>
                   {msg.role === "bot" && msg.packageIds?.map(packageId => <ProductCard key={packageId} packageId={packageId} onNavigate={handleClose} preferences={msg.preferences} selection={selection} onChoose={chooseSelection} entryId={sessionId.current} />)}
-                  {msg.role === "bot" && !humanMode && msg.chips && msg.id === messages[messages.length - 1]?.id && (
+                  {((msg.role === "bot" && !humanMode && msg.chips)||continuationChips) && msg.id === latestMessage?.id && (
                     <div className="ace-chat-chips">
-                      {msg.chips.map((chip) => (
-                        <button key={chip} disabled={typing} onClick={() => handleChip(chip)}
+                      {(continuationChips??msg.chips??[]).map((chip) => (
+                        <button key={chip} disabled={typing||advisor.busy} onClick={() => handleChip(matchAceScript(conversation.current,chip)??chip,chip)}
                           className="ace-chat-chip">
                           {chip}
                         </button>

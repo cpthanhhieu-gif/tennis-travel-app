@@ -2,7 +2,7 @@ import { ntrpQuiz, tourPackages } from "./mock-data";
 import type { AceState } from "./ace-conversation";
 const normalize=(s:string)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[đĐ]/g,"d").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const starts=["Gợi ý gói tour 🏖️","Tôi thuộc NTRP nào? 🎾","Trải nghiệm trong tour","Menu FEI cho tôi 🍜","Xem tất cả gói tour","Sửa nhu cầu nhóm","Điều chỉnh ăn uống","Tiếp tục kịch bản"];
-const aliases:Record<string,string>={"goi y tour":starts[0],"tim tour":starts[0],"tu van tour":starts[0],"trinh do tennis":starts[1],"toi thuoc ntrp nao":starts[1],"kiem tra ntrp":starts[1],"xem tour khac":starts[4],"toi muon tour khac":starts[4],"toi muon doi tour":starts[4],"doi tour":starts[4],"xem goi khac":starts[4],"sua nhu cau nhom":starts[5]};
+const aliases:Record<string,string>={"toi muon goi y tour":starts[0],"minh muon goi y tour":starts[0],"goi y tour":starts[0],"tim tour":starts[0],"tu van tour":starts[0],"trinh do tennis":starts[1],"toi thuoc ntrp nao":starts[1],"kiem tra ntrp":starts[1],"xem tour khac":starts[4],"toi muon tour khac":starts[4],"toi muon doi tour":starts[4],"doi tour":starts[4],"xem goi khac":starts[4],"sua nhu cau nhom":starts[5],"tiep tuc danh gia ntrp":starts[7],"tiep tuc nhu cau nhom":starts[7],"tiep tuc chon chuyen":starts[7],"tiep tuc chon an uong":starts[7]};
 export function parseAceBudget(text:string):number|undefined{
  const raw=text.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[đĐ]/g,"d").toLowerCase().trim().replace(/^(?:toi co|ngan sach|toi da)\s*/,"").replace(/\s/g,"");
  const match=raw.match(/^(\d+(?:[.,]\d+)*)(trieu(?:dong)?|tr|dong|d)?(?:\/nguoi(?:choi)?)?$/);if(!match)return;
@@ -37,4 +37,9 @@ export function matchAceScript(state:AceState,text:string):string|undefined{
  const exact=options.find(s=>normalize(s)===input);if(exact)return exact;
  const partial=input.length>=6?options.filter(s=>normalize(s).includes(input)):[];
  return partial.length===1?partial[0]:undefined;
+}
+
+export function advisorFollowups(state:AceState):string[]{
+ const resume=state.step==="quiz"?"Tiếp tục đánh giá NTRP":state.step==="group"?"Tiếp tục nhu cầu nhóm":state.step==="diet"?"Tiếp tục chọn ăn uống":state.step!=="idle"?"Tiếp tục chọn chuyến":null;
+ return [...new Set([...(resume?[resume]:[]),...(state.preferences.groupNeeds&&state.step!=="group"?["Sửa nhu cầu nhóm"]:[]),"Gợi ý gói tour 🏖️","Xem tất cả gói tour"])].slice(0,3);
 }

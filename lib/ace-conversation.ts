@@ -52,7 +52,6 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
     return answer("idle",p.groupNeeds?aceRecommendation(p):{text:"Bạn muốn tiếp tục khám phá điều gì?",chips:aceStarts});
   }
   if(input==="Sửa nhu cầu nhóm")return answer("group",{text:"Sửa bản tóm tắt bên dưới. Ace sẽ tính lại gợi ý theo thông tin bạn xác nhận."});
-  if(state.step==="group")return answer("group",{text:"Bạn hoàn tất thông tin nhóm trong phần bên dưới nhé; không cần khai báo tên từng người."});
   if (input === aceStarts[0]) { delete p.packageId; return answer("party", { text: "Bạn dự định đi cùng ai?", chips: parties }); }
   if (input === aceStarts[1]) { p.quizAnswers = []; delete p.level; return answer("quiz", { text: ntrpQuiz[0].question, chips: ntrpQuiz[0].options.map(o => o.label) }); }
   if (input === "Xem tất cả gói tour") return answer("idle", { text: "Các gói hiện có. Nhu cầu của bạn vẫn được giữ trong cuộc trò chuyện.", packageIds: tourPackages.map(item => item.id), preferences: { ...p }, chips: ["Điều chỉnh ăn uống", ...aceStarts.slice(0, 2)] });
@@ -60,6 +59,7 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
   if (input === aceStarts[2] || input === aceStarts[3] || input === "Điều chỉnh ăn uống") return answer("diet", { text: "Bạn có yêu cầu ăn uống nào cho các bữa ăn và trải nghiệm trong tour? Bạn có thể chọn hoặc nhập yêu cầu cụ thể.", chips: diets });
   const selected = tourPackages.find(item => item.name === input);
   if (selected) { p.packageId = selected.id; return answer("idle", aceRecommendation(p)); }
+  if(state.step==="group")return answer("group",{text:"Bạn hoàn tất thông tin nhóm trong phần bên dưới nhé; không cần khai báo tên từng người."});
   if (state.step === "party" && [...parties, "Một mình / cặp đôi"].includes(input)) { p.party = input;
     if(input===parties[0]){p.numPeople=1;p.numCompanions=0;}else if(input===parties[1]){p.numPeople=2;p.numCompanions=0;}else if(input===parties[2]){p.numPeople=2;p.numCompanions=1;}else{delete p.numPeople;delete p.numCompanions;} if(input==="Nhóm 5–10 người"||input==="CLB 10–20 người")return answer("group",{text:"Mình sẽ hỏi lần lượt quy mô, các nhóm người chơi và ăn uống. Không cần tên từng người. Bạn điền tổng số khách trước nhé."});if(p.groupNeeds)delete p.diet;delete p.groupNeeds; return answer("goal", { text: "Mục tiêu chính của chuyến đi là gì?", chips: goals }); }
   if (state.step === "goal" && goals.includes(input)) { p.goal = (["learn", "compete", "relax"] as const)[goals.indexOf(input)]; return answer("budget", { text: "Ngân sách dự kiến mỗi người là bao nhiêu?", chips: [...tourPackages.map(item => `Tối đa ${item.priceRange.min.toLocaleString("vi-VN")} đ/người`), "Linh hoạt theo trải nghiệm"] }); }

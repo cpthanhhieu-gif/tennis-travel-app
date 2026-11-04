@@ -33,3 +33,5 @@ assert.equal(booking.consultationBookingPatch({...draft,participants:[{name:"A"}
 assert.throws(()=>booking.consultationBookingPatch(draft,{...p,numPeople:30},true));
 assert.throws(()=>booking.consultationBookingPatch({...draft,notes:"x".repeat(1990)},p,false));
 console.log("Passed: scoped chat restoration, corrupt storage, selection validation, merged advisor timeline, retry deduplication, booking confirmation, draft preservation, notes and pricing.");
+
+assert.equal(booking.consultationBookingPatch({...draft,ntrpDeferred:true},p,false).ntrpLevel,undefined);

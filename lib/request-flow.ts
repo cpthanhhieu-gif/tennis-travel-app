@@ -18,6 +18,7 @@ export function nextRequestAction(o:RequestState,packageId?:string,departureDate
  if(o.issue?.type==="unavailable")return {title:"Chọn lịch hoặc gói khác",body:o.issue.reason};
  if(requestBlocked(o))return {title:"Bổ sung thông tin yêu cầu",body:o.issue!.reason};
  if(o.completedAt)return {title:"Xem đánh giá và thẻ thành tích",body:"Hành trình đã hoàn thành. Bạn có thể xem lại thông tin bên dưới."};
+ if(o.paid<o.total&&o.balancePayment==="awaiting_confirmation")return {title:"Chờ xác nhận phần còn lại",body:"Bạn đã báo chuyển tiền. Điều hành đang đối chiếu khoản nhận được; số tiền chỉ cập nhật sau khi xác nhận."};
  if(o.startedAt)return {title:o.paid<o.total?"Hoàn tất thanh toán còn lại":"Mở Tour Live",body:"Xem lịch và các hoạt động của chuyến đang đi."};
  if(o.paid>=o.deposit)return {title:o.paid<o.total?balanceReminder(o,departureDate):"Xem lịch trình và chuẩn bị",body:o.balancePayment==="failed"?"Thanh toán còn lại thất bại. Thử lại bên dưới; khoản cọc đã ghi nhận được giữ nguyên.":o.balancePayment==="cancelled"?"Đã hủy thanh toán còn lại. Có thể tiếp tục khi sẵn sàng.":"Chuyến đã được xác nhận. Checklist chuẩn bị được giữ theo booking."};
  if(o.payment==="awaiting_confirmation")return {title:"Chờ xác nhận nhận cọc",body:"Bạn đã báo chuyển cọc. Điều hành đang đối chiếu tiền; đăng ký chỉ hoàn tất sau khi xác nhận đã nhận cọc. Bạn chưa cần thao tác thêm."};

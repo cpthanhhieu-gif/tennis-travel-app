@@ -29,6 +29,10 @@ export function preferenceSummary(p: AcePreferences): string {
 export function aceRecommendation(p: AcePreferences): AceReply {
   if(p.groupNeeds)return groupRecommendation(p.groupNeeds,p);
   const packageId = p.packageId ?? (p.goal === "compete" ? "sbu2" : p.goal === "relax" ? "sbu3" : "sbu1");
+  if(packageId==="sbu2"&&p.numPeople!==undefined&&p.numPeople<8)return {
+    text:`**Tournament dành cho đoàn từ 8 khách.**\n${preferenceSummary(p)}\n\nBạn đang đi ${p.numPeople} người nên Ace chưa dẫn sang đăng ký đoàn. Bạn có thể xem Leisure hoặc Premium; hai gói này chưa bảo đảm có giải thi đấu tương đương Tournament. Nếu muốn tham gia cùng đoàn, hãy nhờ tư vấn viên kiểm tra.`,
+    packageIds:["sbu1","sbu3"],chips:["Gợi ý gói tour 🏖️","Tôi thuộc NTRP nào? 🎾"],preferences:{...p}
+  };
   const selected = tourPackages.find(item => item.id === packageId)!;
   const overBudget = p.budget && selected.priceRange.min > p.budget;
   const beginnerCompetition = p.goal === "compete" && p.level && p.level < 3;
@@ -76,6 +80,7 @@ export function aceRespond(state: AceState, input: string): { state: AceState; r
       if (p.quizAnswers.length < ntrpQuiz.length) { const next = ntrpQuiz[p.quizAnswers.length]; return answer("quiz", { text: next.question, chips: next.options.map(item => item.label) }); }
       p.level = getNtrpLevel(p.quizAnswers.reduce((a, b) => a + b, 0) / p.quizAnswers.length).level;
       if (!p.goal) p.goal = option.value >= 3.5 ? "compete" : "learn";
+      if(p.goal==="compete"&&p.level>=3&&p.numPeople===undefined&&!p.groupNeeds)return answer("party",{text:`NTRP tự đánh giá của bạn: ${p.level}. Để chọn hình thức đăng ký phù hợp, bạn dự định đi cùng ai?`,chips:parties});
       return answer("idle", aceRecommendation(p));
     }
     return answer("quiz", { text: "Chọn câu trả lời gần nhất để tiếp tục tự đánh giá nhé.", chips: question.options.map(item => item.label) });

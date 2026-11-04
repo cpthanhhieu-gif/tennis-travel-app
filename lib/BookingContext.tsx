@@ -29,6 +29,7 @@ export interface BookingState {
   departureCode: string;   // mã chuyến Vietravel, ví dụ FESGN567-010-130626XE-H
   numPeople: number;
   numCompanions: number;
+  ntrpDeferred?: boolean;
   ntrpLevel: number;
   ntrpLabel: string;
   name: string;

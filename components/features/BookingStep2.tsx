@@ -13,6 +13,7 @@ export default function BookingStep2({ onNext }: Props) {
   const { booking, updateBooking, ntrpQuizState, updateNtrpQuizState } = useBooking();
   const { answers, showResult, ntrpResult } = ntrpQuizState;
 
+  const [role,setRole]=useLocalState<""|"self">(showResult?"self":"");
   const [currentQ, setCurrentQ] = useLocalState(0); // index 0–4
   const advancing=false;
 
@@ -28,6 +29,10 @@ export default function BookingStep2({ onNext }: Props) {
     try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"ntrp",answers})});const d=await r.json();if(r.status===401||r.status===403){applyResult(getNtrpLevel(Object.values(answers).reduce((sum,n)=>sum+n,0)/ntrpQuiz.length));return;}if(!r.ok)throw Error(d.error);setSaved(d.ntrpProfile);applyResult(getNtrpLevel(d.ntrpProfile.level));}catch(e){setSaveError(requestErrorMessage(e));}finally{setSaving(false);}
   };
 
+  const deferAssessment = ()=>{updateBooking({ntrpDeferred:true,ntrpLevel:0,ntrpLabel:"",contactParticipates:false});updateNtrpQuizState({answers:{},showResult:false,ntrpResult:null});onNext();};
+
+  if(booking.ntrpDeferred||!role)return <section className="ds-quality"><h2>Ai đang thực hiện đặt chuyến?</h2><p>NTRP do chính người chơi khai. Người đi cùng hoặc người đặt giúp có thể tiếp tục và bổ sung kết quả của người chơi sau, trước khi HLV phân nhóm.</p>{booking.ntrpDeferred&&<p role="status">Đã chọn bổ sung NTRP sau. Không dùng kết quả của người đặt cho người chơi.</p>}<div className="booking-result-actions"><Button onClick={()=>{updateBooking({ntrpDeferred:false});setRole("self");}}>Tôi là người chơi — tự đánh giá</Button><Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung NTRP sau</Button></div></section>;
+
   if (showResult && ntrpResult) {
     return (
       <div className="ntrp-result">
@@ -40,6 +45,7 @@ export default function BookingStep2({ onNext }: Props) {
         <section className="ntrp-recommendation"><h3>Tư vấn nhóm tập</h3><p>HLV sẽ xác nhận trình độ và xếp nhóm trước buổi tập đầu tiên.</p><label className="group-advice-choice"><input type="checkbox" checked={booking.groupAdviceRequested===true} onChange={e=>updateBooking({groupAdviceRequested:e.target.checked})}/><span>Tôi muốn được tư vấn thêm về nhóm tập<small>Vietravel sẽ liên hệ theo thông tin bạn cung cấp ở bước tiếp theo.</small></span></label></section>
         <p>Kết quả không tự đổi gói hoặc xác nhận sẵn nhóm chơi. Nếu muốn đổi trải nghiệm, quay lại bước chọn gói.</p>
         <div className="booking-result-actions">
+          <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung NTRP sau</Button>
           <Button variant="primary" size="lg" onClick={onNext}>Tiếp tục — Nhập thông tin</Button>
           <Button variant="secondary" size="lg" onClick={()=>{setCurrentQ(0);updateNtrpQuizState({showResult:false,answers:{}});}}>Đánh giá lại</Button>
         </div>
@@ -67,6 +73,7 @@ export default function BookingStep2({ onNext }: Props) {
         Người chơi đang khai hồ sơ thực hiện đánh giá; người đi cùng không cần NTRP. Kết quả này không áp dụng chung cho những người chơi khác. HLV xác nhận riêng trước khi phân nhóm.
       </p>
 
+      <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung NTRP sau</Button>
       <label className="group-advice-choice"><input type="checkbox" checked={selfConfirmed} onChange={e=>setSelfConfirmed(e.target.checked)}/>Tôi là người chơi đang khai NTRP cho chính mình, không khai thay người khác.</label>
       {saved&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">NTRP đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button disabled={!selfConfirmed} onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
       {saveError&&<p role="alert">{saveError}</p>}

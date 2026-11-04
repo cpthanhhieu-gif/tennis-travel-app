@@ -15,7 +15,7 @@ export function consultationBookingPatch(booking: BookingState, preferences: Ace
   if (notes.length > 2000) throw Error("Ghi chú hiện tại và phần tư vấn vượt 2.000 ký tự. Bạn rút gọn ghi chú trước khi áp dụng nhé.");
   patch.notes = notes;
   patch.aceConsultation = { signature, summary };
-  if (!booking.ntrpLevel && p.quizAnswers.length === ntrpQuiz.length && ntrpQuiz.every((q, i) => q.options.some(o => o.value === p.quizAnswers[i]))) {
+  if (!booking.ntrpDeferred && !booking.ntrpLevel && p.quizAnswers.length === ntrpQuiz.length && ntrpQuiz.every((q, i) => q.options.some(o => o.value === p.quizAnswers[i]))) {
     const result = getNtrpLevel(p.quizAnswers.reduce((a, b) => a + b, 0) / p.quizAnswers.length);
     patch.ntrpLevel = result.level; patch.ntrpLabel = result.label;
   }

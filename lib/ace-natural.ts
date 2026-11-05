@@ -41,7 +41,7 @@ export function continueAceConversation(state:AceState,ack:string):Response{
  if(!p.goal)return {state:{...state,step:"goal"},reply:{text:`${ack}\nBạn ưu tiên mục tiêu nào?`,chips:["Học kỹ thuật cùng nhau","Thi đấu & giao lưu","Nghỉ dưỡng & kết nối"]}};
  if(!p.budget&&!p.budgetFlexible)return {state:{...state,step:"budget"},reply:{text:`${ack}\nNgân sách tối đa mỗi người khoảng bao nhiêu? Bạn có thể nhập “7 triệu mỗi người”.`,chips:["Linh hoạt theo trải nghiệm"]}};
  if(!p.diet)return {state:{...state,step:"diet"},reply:{text:`${ack}\nBạn hoặc người đi cùng có yêu cầu ăn uống nào không?`,chips:["Không có yêu cầu đặc biệt","Ăn chay","Không ăn hải sản"]}};
- const reply=aceRecommendation(p);return {state:{...state,step:"idle"},reply:{...reply,text:`${ack}\n\n${reply.text}`}};
+ const reply=aceRecommendation(p);return {state:{...state,step:"idle"},reply};
 }
 function clarifyParty(state:AceState,reading:Extract<PartyReading,{kind:"ask"}>):Response{
  const pending={reason:reading.reason,attempts:Math.min(2,(state.partyClarification?.attempts??0)+1),...(reading.candidate?{candidate:reading.candidate}:{})};

@@ -13,3 +13,20 @@
 /* Compact, text-led editing keeps the conversation visible on mobile. */
 .ace-needs-title{display:block;font-size:1.3rem;color:#183451;margin-bottom:.2rem}.ace-needs-fields{display:grid;gap:0}.ace-needs-party-goal{display:flex;flex-wrap:wrap;column-gap:.5rem}.ace-needs-summary .ace-needs-inline-edit{display:inline-flex;align-items:center;gap:.4rem;max-width:100%;min-height:2.8rem;margin:0;padding:.2rem 0;border:0;border-radius:.4rem;background:transparent;color:#294666;text-align:left;font-size:1.1rem;line-height:1.5;white-space:normal}.ace-needs-inline-edit span{min-width:0;overflow-wrap:anywhere}.ace-needs-inline-edit svg{flex-shrink:0;color:#1749c6}.ace-needs-summary .ace-needs-inline-edit:hover{color:#1749c6;background:#f4f7ff}.ace-needs-summary .ace-needs-inline-edit:focus-visible{outline:2px solid #1749c6;outline-offset:2px}.ace-needs-summary:has(form){max-height:48%}
 .ace-product-card{width:100%;min-width:0;max-width:42rem;padding:1.2rem;border:1px solid #e0e7f2;border-radius:1.2rem;background:#fff;display:grid;gap:.7rem;color:#294666;font-size:1.2rem;line-height:1.5;overflow-wrap:anywhere}.ace-product-card>p,.ace-product-card h3,.ace-product-card h4{margin:0}.ace-product-meta{font-size:1.1rem;color:#7a899d}.ace-product-card h3{font-size:1.5rem;line-height:1.4;color:#18283b}.ace-product-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem;font-size:1.5rem;font-weight:800;color:#1749c6}.ace-product-price small{font-size:1.1rem;font-weight:500}.ace-product-benefits{font-size:1.15rem}.ace-product-alert{font-size:1.15rem;color:#a13d18;background:#fff5ec;padding:.6rem .8rem;border-radius:.6rem}.ace-product-caution{font-size:1.1rem;color:#6f561d}.ace-product-date{display:grid;gap:.3rem;font-size:1.1rem;font-weight:600;min-width:0}.ace-product-date select{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;min-height:4rem;border:1px solid #dce5f5;border-radius:.8rem;background:#fff;color:#294666;padding:.6rem .8rem;font-size:1.4rem}.ace-product-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:.7rem;align-items:center}.ace-product-actions a{display:flex;align-items:center;justify-content:center;min-width:0;min-height:4rem;text-align:center;padding:.6rem .7rem;border-radius:.8rem;font-size:1.2rem;font-weight:600;text-decoration:none}.ace-product-detail-link{color:#1749c6;border:1px solid #dce5f5}.ace-product-primary{background:#1643c9;color:#fff}.ace-product-actions a:focus-visible,.ace-product-more summary:focus-visible{outline:2px solid #1749c6;outline-offset:2px}.ace-product-more{border-top:1px solid #edf1f8;padding-top:.4rem;font-size:1.15rem}.ace-product-more summary{cursor:pointer;color:#1749c6;min-height:3.4rem;line-height:1.5;padding:.6rem 0}.ace-product-more h4{font-size:1.2rem;font-weight:700;padding-top:.8rem}.ace-product-more ul{margin:.4rem 0;padding-left:1.5rem;list-style:disc}.ace-product-more p{margin:.5rem 0}@media(max-width:639px){.ace-needs-summary{padding:.7rem 1.4rem}.ace-product-date select{font-size:1.6rem}.ace-product-card{max-width:100%;padding:1.1rem;gap:.6rem}.ace-chat-messages{padding-inline:1.2rem}}
+
+/* Keep every panel inside the available viewport, including the iOS keyboard. */
+.ace-chat>*{min-height:0;min-width:0}
+.ace-needs-summary{box-sizing:border-box;flex:0 1 auto;overflow:auto;overscroll-behavior:contain}
+.ace-needs-party-goal{display:grid;gap:0}
+.ace-chat-bubble{overflow-wrap:anywhere}
+@media(max-width:639px){
+ .ace-needs-summary{max-height:26%}
+ .ace-chat:has(.ace-needs-summary form) .ace-needs-summary{flex:1;max-height:none}
+ .ace-chat:has(.ace-needs-summary form) .ace-chat-messages,
+ .ace-chat:has(.ace-needs-summary form) .ace-chat-footer,
+ .ace-chat:has(.ace-needs-summary form) .ace-journey-panel{display:none}
+ .ace-chat:has(.ace-needs-summary form) .ace-needs-fields{display:none}
+ .ace-needs-summary form{padding-bottom:1rem}
+ .ace-needs-summary input,.ace-needs-summary textarea{scroll-margin-block:2rem}
+ .ace-chat-footer-tools{flex-wrap:wrap;gap:.3rem}
+}

@@ -21,7 +21,7 @@ import Link from "next/link";
 import { usePathname,useSearchParams } from "next/navigation";
 import { tours } from "@/lib/mock-data";
 import { aceRespond, initialAceState, preferenceSummary } from "@/lib/ace-conversation";
-import { Send, ChevronDown, RefreshCw, Maximize2, Minimize2, Sparkles } from "lucide-react";
+import { Headset, Send, ChevronDown, RefreshCw, Maximize2, Minimize2, Sparkles } from "lucide-react";
 
 /* ─── Types ──────────────────────────────────────────────────── */
 type Message = AceMessage;
@@ -196,6 +196,8 @@ export default function ChatbotWidget() {
   },[phase,expanded]);
 
   /* ─── Handlers ─── */
+  const [supportOpen,setSupportOpen]=useState(false);
+
   const handleOpen = () => setPhase("opening");
 
   const handleClose = () => {
@@ -316,12 +318,18 @@ export default function ChatbotWidget() {
               <Image src="/vietravel-chatbot-icon.png" alt="" width={40} height={40} className="ace-chat-avatar"/>
               <div className="ace-chat-identity"><strong>Ace</strong><span><i/>{humanMode?"Tư vấn viên đồng hành":"Trợ lý du lịch tennis của bạn"}</span></div>
               <div className="ace-chat-header-actions">
+                <button type="button" onClick={()=>setSupportOpen(v=>!v)} aria-label="Liên hệ và hỗ trợ" title="Liên hệ và hỗ trợ" aria-expanded={supportOpen} aria-controls="ace-support-panel"><Headset size={17}/></button>
                 <button type="button" onClick={handleReset} aria-label="Bắt đầu lại cuộc trò chuyện" title="Bắt đầu lại"><RefreshCw size={15}/></button>
                 <button type="button" className="ace-chat-expand" onClick={()=>setExpanded(v=>!v)} aria-label={expanded?"Thu nhỏ cửa sổ chat":"Mở rộng cửa sổ chat"} title={expanded?"Thu nhỏ":"Mở rộng"}>{expanded?<Minimize2 size={16}/>:<Maximize2 size={16}/>}</button>
                 <button type="button" onClick={handleClose} aria-label="Đóng chat" title="Thu gọn"><ChevronDown size={20}/></button>
               </div>
 
             </header>
+              {supportOpen&&<div id="ace-support-panel" className="ace-chat-footer-tools ace-chat-support-panel">
+                <details className="ace-chat-contact"><summary>Liên hệ tùy chọn</summary><label>Email hoặc số điện thoại<input aria-label="Email hoặc số điện thoại cho tư vấn viên" value={contact} maxLength={200} onChange={e=>setContact(e.target.value)} placeholder="Để tư vấn viên liên hệ lại"/></label><p>Khi nhờ hỗ trợ, nhu cầu và trao đổi gần đây sẽ được chuyển cùng câu hỏi.</p></details>
+                <button type="button" disabled={typing||advisor.busy} onClick={()=>humanMode?handleChip("Tiếp tục kịch bản","Quay lại Ace"):void sendToAdvisor()}>{humanMode?"Quay lại Ace":"Nhờ tư vấn viên hỗ trợ"}</button>
+              </div>}
+
 
             {(!journey||exploringNewTrip)&&<AceNeedsSummary key={sessionId.current} preferences={conversation.current.preferences} busy={typing||advisor.busy||editingGroup||conversation.current.step==="group"} onSave={saveQuickEdit} onEditGroup={()=>{setHumanMode(false);setEditingGroup(true);}}/>}
 
@@ -384,10 +392,6 @@ export default function ChatbotWidget() {
             {journey&&exploringNewTrip&&<button type="button" className="ds-link min-h-[3.6rem]" onClick={()=>setExploringNewTrip(false)}>Quay lại chuyến đang có</button>}
             {!journeyAccount.data&&<p role="status" className="px-[1.5rem] text-[1.2rem]">{journeyAccount.error?"Chưa kiểm tra được hành trình. Nội dung trò chuyện vẫn được giữ.":"Đang kiểm tra hành trình của bạn…"}{journeyAccount.error&&<button type="button" className="ds-link" onClick={journeyAccount.refresh}>Thử lại</button>}</p>}
             <div className="ace-chat-footer">
-              <div className="ace-chat-footer-tools">
-                <details className="ace-chat-contact"><summary>Liên hệ tùy chọn</summary><label>Email hoặc số điện thoại<input aria-label="Email hoặc số điện thoại cho tư vấn viên" value={contact} maxLength={200} onChange={e=>setContact(e.target.value)} placeholder="Để tư vấn viên liên hệ lại"/></label><p>Khi nhờ hỗ trợ, nhu cầu và trao đổi gần đây sẽ được chuyển cùng câu hỏi.</p></details>
-                <button type="button" disabled={typing||advisor.busy} onClick={()=>humanMode?handleChip("Tiếp tục kịch bản","Quay lại Ace"):void sendToAdvisor()}>{humanMode?"Quay lại Ace":"Nhờ tư vấn viên hỗ trợ"}</button>
-              </div>
               <div className="ace-chat-composer">
                 <input ref={inputRef} type="text" value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}

@@ -130,7 +130,7 @@ export default function BookingStep1({ onNext }: Props) {
       </section>}
       {people > maxPeople && <p role="alert">Gói này tối đa {maxPeople} khách. Vui lòng điều chỉnh số người trước khi tiếp tục.</p>}
       <div className="booking-continue">{groupError&&selectedTour.packageId==="sbu2"&&!validGroupRequest(booking.groupRequest)&&<p role="alert" className="booking-field-error">Chưa thể tiếp tục. Vui lòng bổ sung hoặc sửa các ô được đánh dấu phía trên.</p>}<div><span>{selectedTour.packageId==="sbu2"?`Quy mô dự kiến · ${booking.groupRequest?.min??12}–${booking.groupRequest?.max??16} khách`:`Tổng dự kiến · ${people} khách`}</span><strong>{selectedTour.packageId==="sbu2"?"Chờ báo giá đoàn":`${coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions).toLocaleString("vi-VN")} ₫`}</strong></div><Button variant="primary" size="lg" className="w-full" disabled={people > maxPeople} onClick={handleNext}>
-        {selectedTour.packageId === "sbu2" ? "Tiếp tục — Liên hệ đại diện" : "Tiếp tục — Đánh giá NTRP"}
+        {selectedTour.packageId === "sbu2" ? "Tiếp tục — Liên hệ đại diện" : "Tiếp tục — Đánh giá trình độ tennis"}
       </Button></div>
     </div>
   );

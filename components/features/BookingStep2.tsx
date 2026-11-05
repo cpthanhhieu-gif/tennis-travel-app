@@ -33,16 +33,15 @@ export default function BookingStep2({ onNext }: Props) {
   if (showResult && ntrpResult) {
     return (
       <div className="ntrp-result">
-        <header className="ntrp-result-heading"><span className="ds-eyebrow">HỒ SƠ TENNIS</span><h2>Kết quả NTRP của người chơi</h2><p>Kết quả tự đánh giá để HLV xác nhận trình độ và tư vấn nhóm chơi.</p></header>
+        <header className="ntrp-result-heading"><span className="ds-eyebrow">HỒ SƠ TENNIS</span><h2>Kết quả trình độ tennis</h2><p>Kết quả tự đánh giá để HLV xác nhận trình độ và tư vấn nhóm chơi.</p></header>
         <section className="ntrp-score-panel" aria-label="Kết quả tự đánh giá">
           <div className="ntrp-score"><span>NTRP</span><strong>{ntrpResult.level.toFixed(1)}</strong></div>
           <div><h3>{ntrpResult.label}</h3><p>{ntrpResult.description}</p><small>Trình độ sẽ được xác nhận riêng theo chuyến.</small></div>
         </section>
-        <p className="ntrp-profile-note">Kết quả dành cho người chơi đang khai hồ sơ. Người đi cùng không chơi tennis không cần đánh giá NTRP.</p>
+        <p className="ntrp-profile-note">Kết quả dành cho người chơi đang khai hồ sơ. Người đi cùng không chơi tennis không cần đánh giá trình độ tennis.</p>
         <section className="ntrp-recommendation"><h3>Tư vấn nhóm tập</h3><p>HLV sẽ xác nhận trình độ và xếp nhóm trước buổi tập đầu tiên.</p><label className="group-advice-choice"><input type="checkbox" checked={booking.groupAdviceRequested===true} onChange={e=>updateBooking({groupAdviceRequested:e.target.checked})}/><span>Tôi muốn được tư vấn thêm về nhóm tập<small>Vietravel sẽ liên hệ theo thông tin bạn cung cấp ở bước tiếp theo.</small></span></label></section>
         <p>Kết quả không tự đổi gói hoặc xác nhận sẵn nhóm chơi. Nếu muốn đổi trải nghiệm, quay lại bước chọn gói.</p>
         <div className="booking-result-actions">
-          <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung NTRP sau</Button>
           <Button variant="primary" size="lg" onClick={onNext}>Tiếp tục — Nhập thông tin</Button>
           <Button variant="secondary" size="lg" onClick={()=>{setCurrentQ(0);updateNtrpQuizState({showResult:false,answers:{}});}}>Đánh giá lại</Button>
         </div>
@@ -64,15 +63,15 @@ export default function BookingStep2({ onNext }: Props) {
   return (
     <div>
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.4rem]">
-        Đánh giá NTRP của người chơi
+        Đánh giá trình độ tennis của người chơi
       </h2>
       <p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">
-        Người chơi đang khai hồ sơ thực hiện đánh giá; người đi cùng không cần NTRP. Kết quả này không áp dụng chung cho những người chơi khác. HLV xác nhận riêng trước khi phân nhóm.
+        Trả lời 5 câu để tham khảo trình độ tennis theo thang NTRP. Người chơi tự thực hiện đánh giá; người đi cùng không cần NTRP. Kết quả này không áp dụng chung cho những người chơi khác. HLV xác nhận riêng trước khi phân nhóm.
       </p>
 
-      <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung NTRP sau</Button>
-      <label className="group-advice-choice"><input type="checkbox" checked={selfConfirmed} onChange={e=>setSelfConfirmed(e.target.checked)}/>Tôi là người chơi đang khai NTRP cho chính mình, không khai thay người khác.</label>
-      {saved&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">NTRP đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button disabled={!selfConfirmed} onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
+      <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung trình độ sau</Button>
+      <label className="group-advice-choice"><input type="checkbox" checked={selfConfirmed} onChange={e=>setSelfConfirmed(e.target.checked)}/>Tôi tự đánh giá trình độ của mình, không khai thay người khác.</label>
+      {saved&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">Trình độ đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button disabled={!selfConfirmed} onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
       {saveError&&<p role="alert">{saveError}</p>}
       {/* Progress dots */}
       <div className="flex items-center gap-[0.8rem] mb-[2.8rem]">
@@ -165,7 +164,7 @@ export default function BookingStep2({ onNext }: Props) {
             disabled={!allAnswered||saving||!selfConfirmed}
           >
             {allAnswered
-              ? "Xem kết quả NTRP"
+              ? "Xem kết quả trình độ"
               : `Còn ${ntrpQuiz.length - answeredCount} câu chưa trả lời`}
           </Button>
         )}

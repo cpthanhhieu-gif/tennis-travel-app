@@ -24,7 +24,7 @@ export default function BookingFlow() {
   const { booking,step,setStep,clearDraft } = useBooking();
   useEffect(()=>{window.scrollTo({top:0,behavior:"instant"});},[step]);
   const isGroup = booking.packageId === "sbu2";
-  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : ["Chọn gói tour", "Đánh giá NTRP", "Thông tin", booking.packageId==="sbu3"?"Xem lại yêu cầu":"Xác nhận & đặt cọc"];
+  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : ["Chọn gói tour", "Đánh giá trình độ tennis", "Thông tin", booking.packageId==="sbu3"?"Xem lại yêu cầu":"Xác nhận & đặt cọc"];
   const visibleStep = isGroup && step > 1 ? step - 1 : step;
   const previousStep = isGroup && step === 3 ? 1 : step - 1;
   const router = useRouter();

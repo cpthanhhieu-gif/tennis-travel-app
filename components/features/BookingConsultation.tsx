@@ -5,7 +5,7 @@ import { readAceSession, saveAceSession, normalizeAcePreferences, type AceSessio
 import { preferenceSummary } from "@/lib/ace-conversation";
 import { consultationBookingPatch, consultationSignature } from "@/lib/ace-booking";
 import { getNtrpLevel, ntrpQuiz, tours } from "@/lib/mock-data";
-export default function BookingConsultation() {
+export default function BookingConsultation({onConfirmed}:{onConfirmed?:()=>void}) {
   const { booking, updateBooking, updateNtrpQuizState, ntrpQuizState, restoredDraft } = useBooking();
   const [session, setSession] = useState<AceSession | null>(null);
   const [count, setCount] = useState(""); const [companions, setCompanions] = useState("");
@@ -29,10 +29,11 @@ export default function BookingConsultation() {
       if (patch.ntrpLevel && preferences.quizAnswers.length === ntrpQuiz.length) updateNtrpQuizState({ answers: Object.fromEntries(ntrpQuiz.map((q, i) => [q.id, preferences.quizAnswers[i]])), ntrpResult: getNtrpLevel(patch.ntrpLevel), showResult: true, originalPackageId: booking.packageId, packageDecision: null });
       const next = { ...session!, state: { ...session!.state, preferences } };
       saveAceSession(next);
+      onConfirmed?.();
     } catch (e) { setError(e instanceof Error ? e.message : "Chưa áp dụng được thông tin."); }
   }
   return <section className="rounded-[1.2rem] border border-brand-primary/20 bg-brand-tint p-[1.6rem] mb-[2rem] text-[1.3rem]" aria-label="Thông tin từ cuộc tư vấn"><h2 className="font-bold text-[1.6rem]">Thông tin từ cuộc tư vấn</h2><p className="whitespace-pre-line my-[1rem]">{preferenceSummary(p)}</p>{selected && <p>Đang quan tâm: {selected.name}{departure ? ` · ${departure.dateLabel}` : ""}</p>}
-    {applied ? <p role="status" className="font-semibold mt-[1rem]">Đã áp dụng. Bạn vẫn có thể sửa thông tin ở các bước đặt chuyến.</p> : <><p className="mt-[1rem]">Kiểm tra trước khi áp dụng. Nhu cầu được bổ sung vào ghi chú; thông tin liên hệ, lịch đã chọn và các trường đã nhập được giữ nguyên.</p>
+    {applied ? <><button type="button" onClick={onConfirmed} className="bg-brand-primary text-white rounded-full px-[1.6rem] min-h-[4.4rem] mt-[1rem]">Xác nhận & tiếp tục đặt chuyến</button><p role="status" className="font-semibold mt-[1rem]">Đã áp dụng. Bạn vẫn có thể sửa thông tin ở các bước đặt chuyến.</p></> : <><p className="mt-[1rem]">Kiểm tra trước khi áp dụng. Nhu cầu được bổ sung vào ghi chú; thông tin liên hệ, lịch đã chọn và các trường đã nhập được giữ nguyên.</p>
       <label className="flex items-center gap-[0.8rem] my-[1rem]"><input type="checkbox" checked={allowParty} disabled={!!booking.participants?.length||booking.groupRequestEdited} onChange={e => setAllowParty(e.target.checked)}/>Áp dụng số khách từ tư vấn {restoredDraft ? "(booking đang có bản nháp)" : ""}</label>
       {booking.participants?.length||booking.groupRequestEdited ? <p>Đã có danh sách hoặc quy mô đoàn bạn nhập; chỉnh số khách tại bước chọn gói.</p> : allowParty && <div className="flex flex-wrap gap-[1rem]"><label>Số khách chính xác<input aria-label="Số khách từ tư vấn" type="number" min={1} max={20} value={count} onChange={e => setCount(e.target.value)} className="block border rounded p-[0.8rem] bg-white"/></label><label>Người đi cùng không chơi<input aria-label="Người đi cùng từ tư vấn" type="number" min={0} max={19} value={companions} onChange={e => setCompanions(e.target.value)} placeholder={`Giữ ${booking.numCompanions} người`} className="block border rounded p-[0.8rem] bg-white"/></label></div>}
       {!p.numPeople && <p className="text-[1.2rem] my-[0.6rem]">Khoảng quy mô nhóm chưa được coi là số khách chính xác. Bạn có thể bổ sung ở đây hoặc giữ số khách đang chọn.</p>}

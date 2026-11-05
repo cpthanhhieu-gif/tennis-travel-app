@@ -18,6 +18,7 @@ import { tours } from "@/lib/mock-data";
 
 
 export default function BookingFlow() {
+  const [consultationConfirmed,setConsultationConfirmed]=useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const { booking,step,setStep,clearDraft } = useBooking();
@@ -51,6 +52,7 @@ export default function BookingFlow() {
     router.push("/pre-tour");
   };
 
+  if(booking.entrySource==="ace"&&!consultationConfirmed)return <div className="ds-container ds-booking"><BookingConsultation onConfirmed={()=>setConsultationConfirmed(true)}/></div>;
   return (
     <div className={`ds-container ds-booking booking-unified ${step===1?"booking-compact":""}`}>
 

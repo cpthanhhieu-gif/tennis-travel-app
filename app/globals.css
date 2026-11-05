@@ -675,3 +675,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .travel-account-menu nav{position:absolute;right:0;top:calc(100% + .8rem);z-index:90;width:23rem;padding:.6rem;background:#fff;border:1px solid #dce5ef;border-radius:1.2rem;box-shadow:0 8px 28px #18283b22}
 .travel-account-menu nav a{display:block;padding:1.2rem;font-size:1.3rem;color:#1749c6;border-radius:.6rem}
 .travel-account-menu nav a:hover{background:#edf4ff}
+
+/* Hide the filter scrollbar while preserving horizontal swiping. */
+.app-intent-chips{scrollbar-width:none;-ms-overflow-style:none}
+.app-intent-chips::-webkit-scrollbar{display:none;width:0;height:0}

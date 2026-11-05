@@ -13,7 +13,6 @@ export default function BookingStep2({ onNext }: Props) {
   const { booking, updateBooking, ntrpQuizState, updateNtrpQuizState } = useBooking();
   const { answers, showResult, ntrpResult } = ntrpQuizState;
 
-  const [role,setRole]=useLocalState<""|"self">(showResult?"self":"");
   const [currentQ, setCurrentQ] = useLocalState(0); // index 0–4
   const advancing=false;
 
@@ -21,7 +20,7 @@ export default function BookingStep2({ onNext }: Props) {
   const [saving,setSaving]=useLocalState(false),[saveError,setSaveError]=useLocalState("");
   const [selfConfirmed,setSelfConfirmed]=useLocalState(false);
   useEffect(()=>{fetch("/api/local").then(r=>r.ok?r.json():null).then(d=>setSaved(d?.ntrpProfile??null)).catch(()=>{});},[setSaved]);
-  const applyResult=(result:ReturnType<typeof getNtrpLevel>)=>{updateNtrpQuizState({ntrpResult:result,showResult:true,packageDecision:null,originalPackageId:booking.packageId});updateBooking({ntrpLevel:result.level,ntrpLabel:result.label});};
+  const applyResult=(result:ReturnType<typeof getNtrpLevel>)=>{updateNtrpQuizState({ntrpResult:result,showResult:true,packageDecision:null,originalPackageId:booking.packageId});updateBooking({ntrpLevel:result.level,ntrpLabel:result.label,ntrpDeferred:false});};
   const allAnswered = ntrpQuiz.every((q) => answers[q.id] !== undefined);
 
   const handleCalculate = async () => {
@@ -30,8 +29,6 @@ export default function BookingStep2({ onNext }: Props) {
   };
 
   const deferAssessment = ()=>{updateBooking({ntrpDeferred:true,ntrpLevel:0,ntrpLabel:"",contactParticipates:false});updateNtrpQuizState({answers:{},showResult:false,ntrpResult:null});onNext();};
-
-  if(booking.ntrpDeferred||!role)return <section className="ds-quality"><h2>Ai đang thực hiện đặt chuyến?</h2><p>NTRP do chính người chơi khai. Người đi cùng hoặc người đặt giúp có thể tiếp tục và bổ sung kết quả của người chơi sau, trước khi HLV phân nhóm.</p>{booking.ntrpDeferred&&<p role="status">Đã chọn bổ sung NTRP sau. Không dùng kết quả của người đặt cho người chơi.</p>}<div className="booking-result-actions"><Button onClick={()=>{updateBooking({ntrpDeferred:false});setRole("self");}}>Tôi là người chơi — tự đánh giá</Button><Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung NTRP sau</Button></div></section>;
 
   if (showResult && ntrpResult) {
     return (

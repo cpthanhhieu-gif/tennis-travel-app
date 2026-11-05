@@ -1,5 +1,4 @@
 "use client";
-import DemoExploreEntry from "./DemoExploreEntry";
 import DemoScenarioGuide from "./DemoScenarioGuide";
 import {browserStorageKey,browserExploring} from "@/lib/demo-scope";
 import {useEffect,useState} from "react";
@@ -26,11 +25,6 @@ export default function ActiveHome(){
  return <div className="ds-container app-home">
  <header className="app-home-header"><div><p className="ui-kicker">TENNIS TRAVEL</p><h1>Khám phá</h1><p>Chọn trải nghiệm cho lần ra sân tiếp theo.</p></div></header>
  {active&&tour&&<Link className="app-mobile-resume" href={live||upcoming?`/in-tour?booking=${active.id}`:"/pre-tour"}><CalendarDays size={22}/><span><strong>{live?"Tiếp tục chuyến đi":upcoming?"Lịch & chuẩn bị":"Theo dõi yêu cầu"} · {tour.destinationName}</strong><small>{journeyPhase(active)} · {departure?.dateLabel??"Chờ xác nhận ngày"}</small></span><ArrowUpRight size={20}/></Link>}
- <section className="flex items-center gap-[1.2rem] rounded-[var(--ds-radius-card)] border border-[var(--ds-border)] bg-brand-tint p-[1.6rem] mb-[1.6rem]" aria-label="Trải nghiệm cùng Ace">
- <Image src="/vietravel-chatbot-icon.png" alt="" width={56} height={56} className="w-[5.6rem] h-[5.6rem] object-contain shrink-0"/>
- <div className="flex-1 min-w-0"><h2 className="text-[1.6rem] font-bold">Trải nghiệm cùng Ace</h2><p className="text-[1.3rem] text-neutral-60 mt-[0.4rem]">Chọn chuyến tennis, khám phá trình độ và tìm hiểu trải nghiệm trong tour.</p><button type="button" onClick={()=>window.dispatchEvent(new Event("ace:open"))} className="mt-[1rem] inline-flex items-center gap-[0.6rem] text-[1.3rem] font-bold text-brand-primary min-h-[4.4rem]">Trò chuyện cùng Ace <ArrowUpRight size={18}/></button></div>
- </section>
- <div className="mb-[1.6rem] text-[1.2rem]"><DemoExploreEntry/></div>
  <DemoScenarioGuide/>
  <div className="app-home-layout"><section className="app-discover" aria-label="Tìm trải nghiệm tennis">
  <div className="app-search-row"><div className="app-search-box"><Search size={21} aria-hidden="true"/><label className="sr-only" htmlFor="home-search">Tìm tour hoặc điểm đến</label><input id="home-search" value={q} onChange={e=>setQ(e.target.value)} placeholder="Bạn muốn chơi ở đâu?" autoComplete="off"/>{q&&<button type="button" aria-label="Xóa tìm kiếm" onClick={()=>setQ("")}><X size={18}/></button>}</div><button className="app-filter-button" type="button" aria-haspopup="dialog" onClick={()=>setFiltersOpen(true)} aria-label="Lọc theo điểm đến"><SlidersHorizontal size={20}/><span>Điểm đến{destination!=="all"?" · 1":""}</span></button></div>

@@ -872,12 +872,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .app-tour-hero-actions>div{display:flex;gap:10px}
 .app-tour-hero-actions a,.app-tour-hero-actions button{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:rgba(20,25,32,.64);color:#fff;backdrop-filter:blur(8px)}
 .app-tour-gallery-button{position:absolute;z-index:2;right:16px;bottom:16px;display:flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;border:0;border-radius:999px;background:rgba(20,25,32,.68);color:white;font-size:13px;font-weight:700;backdrop-filter:blur(8px)}
-.app-tour-intro{padding:22px 0 18px}
-.app-tour-intro h1{margin:0 0 5px;font-size:28px;font-weight:800;line-height:1.25}
-.app-tour-intro>p{margin:0 0 12px;color:var(--ds-muted);font-size:15px}
-.app-tour-facts{display:grid;gap:9px;margin:12px 0}
-.app-tour-facts span{display:flex;align-items:center;gap:9px;font-size:14px;line-height:1.4}
-.app-tour-facts svg{flex:0 0 auto;color:var(--ds-muted)}
+.app-tour-detail>.ds-detail-grid{padding-top:24px}
 .app-tour-mobile-booking{display:none}
 .app-tour-gallery{position:fixed;z-index:150;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.94)}
 .app-tour-gallery>img{object-fit:contain;padding:48px 12px}
@@ -888,12 +883,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
  .app-tour-detail{padding:0 0 calc(90px + env(safe-area-inset-bottom,0px))}
  .app-tour-photo{height:270px;border-radius:0}
  .app-tour-hero-actions{top:12px;left:14px;right:14px}
- .app-tour-intro{padding:18px 16px 16px}
- .app-tour-intro h1{font-size:24px}
- .app-tour-intro>p{font-size:14px}
- .app-tour-facts{gap:8px}
- .app-tour-detail>.app-tour-intro>.ds-tag{display:inline-block;margin-top:4px}
- .app-tour-detail>.ds-detail-grid{display:block;margin:0;padding:0 16px}
+ .app-tour-detail>.ds-detail-grid{display:block;margin:0;padding:20px 16px 0}
  .app-tour-detail .ds-detail-grid>div{width:100%;min-width:0}
  .app-tour-detail .ui-tabset{border-radius:16px}
  .app-tour-detail [role=tabpanel]{padding:0 14px 16px}
@@ -951,7 +941,6 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .booking-departure-times button{min-height:42px;padding:8px 12px;border:1px solid var(--ds-border);border-radius:999px;background:var(--ds-surface);font-size:14px}
 .booking-departure-times button.is-selected{border-color:var(--ds-primary);background:var(--ds-primary);color:#fff;font-weight:700}
 .booking-departure-times .booking-field-error{margin:10px 0 0;color:var(--ds-danger);font-size:13px}
-.app-tour-mobile-booking{position:relative}
 .app-tour-mobile-booking .app-tour-loyalty{color:var(--ds-primary);font-size:10px;font-weight:700}
 .app-tour-booking-error{position:absolute;right:12px;bottom:calc(100% + 4px);left:12px;margin:0;padding:8px 12px;border:1px solid #f3b6b0;border-radius:10px;background:#fff7f6;color:var(--ds-danger);font-size:12px;box-shadow:0 3px 12px rgba(0,0,0,.08)}
 @media(max-width:767px){.tour-calendar-grid{gap:3px}.tour-calendar-grid>button,.tour-calendar-grid>.is-unavailable{min-height:52px;border-radius:10px}.tour-calendar-grid>span:not(.tour-calendar-weekday){min-height:48px}.tour-calendar-action{align-items:flex-start}.tour-time-picker{padding:12px}}

@@ -8,7 +8,14 @@ import Modal from "@/components/ui/Modal";
 import {tourPackages,tours,formatVND} from "@/lib/mock-data";
 import {useLocalAccount} from "@/lib/use-local-account";
 import {journeyPhase} from "@/lib/journey";
+import type {AncillaryService} from "@/lib/ancillary-catalog";
+import {ancillaryImage} from "@/lib/ancillary-presentation";
 const intents=[{id:"all",label:"Tất cả"},{id:"sbu1",label:"Học & chơi"},{id:"sbu2",label:"Thi đấu"},{id:"sbu3",label:"Nghỉ dưỡng"}];
+const serviceSpotlight=[
+ {id:"ace-check-screening",description:"Sàng lọc thể lực trước chuyến đi; có thể thêm vào nhiều gói.",href:"#tour-packages",cta:"Chọn tour phù hợp"},
+ {id:"ambassador-one-to-one",description:"Thêm giờ tập cá nhân cùng HLV đại sứ trong tour Premium.",href:"/tours/sbu3",cta:"Xem tour Phú Quốc"},
+ {id:"phu-quoc-room-sea-view",description:"Nâng hạng phòng theo nhu cầu lưu trú của chuyến Phú Quốc.",href:"/tours/sbu3",cta:"Xem tour Phú Quốc"},
+];
 const normalize=(s:string)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[đĐ]/g,"d").toLowerCase().trim();
 export default function ActiveHome(){
  const [q,setQ]=useState(""),[filter,setFilter]=useState("all"),[destination,setDestination]=useState("all"),[filtersOpen,setFiltersOpen]=useState(false);
@@ -21,6 +28,7 @@ export default function ActiveHome(){
  const pending=data?.orders.find(o=>!o.completedAt&&!o.startedAt&&o.issue?.type!=="unavailable");
  const active=live??upcoming??pending,tour=tours.find(t=>t.id===active?.tourId),departure=tour?.departureSchedules.find(d=>d.code===active?.departureCode);
  const results=tourPackages.filter(p=>{const t=tours.find(t=>t.packageId===p.id);return (filter==="all"||p.id===filter)&&(destination==="all"||t?.destinationId===destination)&&normalize(`${p.name} ${p.tagline} ${t?.destinationName}`).includes(normalize(q));});
+ const featuredServices=serviceSpotlight.flatMap(spotlight=>{const service=data?.serviceCatalog?.find(item=>item.id===spotlight.id&&item.status!=="inactive");return service?[{...spotlight,service}]:[];});
  const reset=()=>{setQ("");setFilter("all");setDestination("all");};
  return <div className="ds-container app-home">
  <header className="app-home-header"><div><p className="ui-kicker">TENNIS TRAVEL</p><h1>Khám phá</h1><p>Chọn trải nghiệm cho lần ra sân tiếp theo.</p></div></header>
@@ -29,8 +37,9 @@ export default function ActiveHome(){
  <div className="app-home-layout"><section className="app-discover" aria-label="Tìm trải nghiệm tennis">
  <div className="app-search-row"><div className="app-search-box"><Search size={21} aria-hidden="true"/><label className="sr-only" htmlFor="home-search">Tìm tour hoặc điểm đến</label><input id="home-search" value={q} onChange={e=>setQ(e.target.value)} placeholder="Bạn muốn chơi ở đâu?" autoComplete="off"/>{q&&<button type="button" aria-label="Xóa tìm kiếm" onClick={()=>setQ("")}><X size={18}/></button>}</div><button className="app-filter-button" type="button" aria-haspopup="dialog" onClick={()=>setFiltersOpen(true)} aria-label="Lọc theo điểm đến"><SlidersHorizontal size={20}/><span>Điểm đến{destination!=="all"?" · 1":""}</span></button></div>
  <div className="app-intent-chips" role="group" aria-label="Loại trải nghiệm">{intents.map(i=><button key={i.id} type="button" aria-pressed={filter===i.id} onClick={()=>setFilter(i.id)}>{i.label}</button>)}</div>
- <div className="app-results-heading"><h2>{destination==="all"?"Trải nghiệm dành cho bạn":tours.find(t=>t.destinationId===destination)?.destinationName}</h2><span role="status" aria-live="polite">{results.length} gói</span></div>
+ <div id="tour-packages" className="app-results-heading"><h2>{destination==="all"?"Trải nghiệm dành cho bạn":tours.find(t=>t.destinationId===destination)?.destinationName}</h2><span role="status" aria-live="polite">{results.length} gói</span></div>
  <div className="app-tour-list">{results.map(p=>{const t=tours.find(t=>t.packageId===p.id)!;return <article className="app-tour-card" key={p.id}><Link href={`/tours/${p.id}`} className="app-tour-image" tabIndex={-1} aria-hidden="true"><Image src={p.image} alt="" fill sizes="(max-width:767px) 112px, 360px"/></Link><div className="app-tour-content"><div className="app-tour-meta"><MapPin size={14} aria-hidden="true"/><span>{t.destinationName} · {t.duration}</span></div><h3><Link href={`/tours/${p.id}`}>{p.name}</Link></h3><p>{p.tagline}</p><small>{p.id==="sbu1"?"Khách lẻ · Lịch cố định":p.id==="sbu2"?"Đoàn / CLB · Yêu cầu báo giá":"Khách lẻ · Xác nhận theo yêu cầu"}</small><span className="app-tour-note">{p.id==="sbu1"?"2 buổi sân · Clinic · Cooking class":p.id==="sbu2"?"4 buổi sân · Giải nội bộ · City tour":"3 buổi sân · Ace Cup · 5 bữa FEI"}</span><div className="app-tour-bottom"><div><small>Từ / người chơi</small><strong>{formatVND(p.priceRange.min)}</strong></div><Link className="app-open-tour" href={`/tours/${p.id}`} aria-label={`Xem chi tiết ${p.name}`}><ArrowUpRight size={21}/></Link></div></div></article>;})}</div>
+ {featuredServices.length>0&&<section className="app-service-discover" aria-labelledby="discover-services-title"><header><div><span className="ui-kicker">DỊCH VỤ TÙY CHỌN</span><h2 id="discover-services-title">Chọn thêm theo tour</h2><p>Xem trước dịch vụ; chọn tour phù hợp rồi thêm vào đơn.</p></div><span className="app-service-count">{featuredServices.length} gợi ý</span></header><div className="app-service-rail">{featuredServices.map(({service,description,href,cta})=><article className="app-service-card" key={service.id}><Image src={ancillaryImage(service.id)} alt="" width={74} height={74} sizes="74px"/><div className="app-service-card-content"><span className="app-service-scope">{service.packageIds.length===tourPackages.length?"Áp dụng mọi gói":"Tour Premium · Phú Quốc"}</span><h3>{service.name}</h3><p>{description}</p><strong>{formatVND(service.unitPrice)} <small>/ {service.unit==="hour"?"giờ":service.unit==="room"?"phòng · 3 đêm":"người"}</small></strong>{service.status==="provisional"&&<span className="app-service-estimate">Giá dự toán</span>}<Link href={href} onClick={href==="#tour-packages"?reset:undefined}>{cta}<ArrowUpRight size={16} aria-hidden="true"/></Link></div></article>)}</div></section>}
  {!results.length&&<div className="app-search-empty"><Compass size={32}/><h3>Chưa tìm thấy trải nghiệm phù hợp</h3><p>Thử tên điểm đến khác hoặc bỏ bớt bộ lọc.</p><button className="ds-link" onClick={reset}>Xóa tìm kiếm & bộ lọc</button></div>}
  <p className="app-catalog-note"><CalendarDays size={16} aria-hidden="true"/>Xem lịch khởi hành, quyền lợi và điều kiện trong từng gói.</p>
  </section><aside className="app-home-personal" aria-label="Của bạn"><div className="app-results-heading"><h2>Của bạn</h2>{data?.account&&<Link href="/pre-tour">Tất cả hành trình</Link>}</div>

@@ -6,6 +6,7 @@ import {requestErrorMessage} from "@/lib/request-error";
 import { useEffect, useRef, useState } from "react";
 import { BookingLogin } from "./BookingAccess";
 import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 import { useBooking } from "@/lib/BookingContext";
 import { tourPackages, tours, formatVND } from "@/lib/mock-data";
 // destinations import removed — Step4 now reads from tours[]
@@ -118,7 +119,6 @@ export default function BookingStep4({ onConfirm }: Props) {
         </ul>
       </div>
 
-      {needsLogin&&<><p role="status">Đăng nhập để gửi yêu cầu. Gói, số khách và nhu cầu đã nhập vẫn được giữ.</p><BookingLogin onSuccess={()=>{setNeedsLogin(false);setError("");}}/></>}
       {error && <p role="alert" className="mb-[1.6rem]">{error}</p>}
       <div className="booking-step-action"><p>{pkg.id==="sbu2"?"Nhận báo giá trong 1 ngày làm việc.":pkg.id==="sbu3"?"Nhận phương án trong tối đa 24 giờ.":"Tiếp tục thanh toán cọc 30% để hoàn tất đăng ký."}</p><Button
         variant="primary"
@@ -130,6 +130,9 @@ export default function BookingStep4({ onConfirm }: Props) {
       >
         {loading ? "Đang xử lý..." : pkg.id === "sbu2" ? "Gửi yêu cầu báo giá" : pkg.id === "sbu3" ? "Gửi yêu cầu phương án" : "Tiếp tục đặt cọc"}
       </Button></div>
+      <Modal isOpen={needsLogin} onClose={()=>setNeedsLogin(false)} title="Đăng nhập để tiếp tục" bottomSheet>
+        <BookingLogin compact onSuccess={()=>{setNeedsLogin(false);setError("");void handleConfirm();}}/>
+      </Modal>
     </div>
   );
 }

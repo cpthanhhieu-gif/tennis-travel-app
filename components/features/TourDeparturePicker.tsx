@@ -13,6 +13,7 @@ export default function TourDeparturePicker({packageId,schedules,referral="",ace
  const [companions,setCompanions]=useState(0);
  const selected=schedules.find(schedule=>schedule.code===departureCode)??first;
  const max=packageCapacity(packageId),minimumPlayers=packageId==="sbu2"?8:1;
+ const totalGuests=players+companions;
  const total=selected.price*players+companionRate(packageId)*companions;
  const bookingHref=`/booking?package=${packageId}&departure=${encodeURIComponent(selected.code)}&players=${players}&companions=${companions}${referral}${aceSource}`;
  useEffect(()=>{onBookingChange?.(bookingHref,packageId==="sbu2"?"Chờ báo giá":formatVND(total));},[bookingHref,onBookingChange,packageId,total]);

@@ -290,9 +290,8 @@ export default function ChatbotWidget() {
         onClick={handleOpen}
         disabled={!hydrated}
         aria-label="Mở chat tư vấn AI"
-        className="transition-all duration-300"
+        className="ace-chat-launcher transition-all duration-300"
         style={{
-          position: "fixed", bottom: "9.6rem", right: "1.6rem", zIndex: 55,
           opacity: isOpen ? 0 : 1,
           pointerEvents: isOpen ? "none" : "auto",
           transform: isOpen ? "scale(0.75)" : "scale(1)",
@@ -304,7 +303,7 @@ export default function ChatbotWidget() {
           width={88}
           height={88}
           unoptimized
-          className="w-[18rem] h-[18rem] sm:w-[8.8rem] sm:h-[8.8rem] object-contain"
+          className="ace-chat-launcher-image"
         />
       </button>
 

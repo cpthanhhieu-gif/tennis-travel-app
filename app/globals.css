@@ -883,7 +883,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
  .app-tour-detail{padding:0 0 calc(90px + env(safe-area-inset-bottom,0px))}
  .app-tour-photo{height:270px;border-radius:0}
  .app-tour-hero-actions{top:12px;left:14px;right:14px}
- .app-tour-detail>.ds-detail-grid{display:block;margin:0;padding:20px 16px 0}
+ .app-tour-detail>.ds-detail-grid{display:block;margin:0;padding:0}
  .app-tour-detail .ds-detail-grid>div{width:100%;min-width:0}
  .app-tour-detail .ui-tabset{border-radius:16px}
  .app-tour-detail [role=tabpanel]{padding:0 14px 16px}
@@ -896,6 +896,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 @media(max-width:767px){
  :root .app-surface .app-tour-detail{padding-left:0!important;padding-right:0!important}
  .app-tour-detail .ds-detail-grid>.ds-summary{display:none!important}
+ .app-tour-detail .ui-tabs{margin-bottom:0}
  .app-tour-detail .tour-date-rail{margin:0 -14px;padding:4px 14px 12px}
  .app-tour-detail .tour-picker-footer{position:static;left:auto;right:auto;bottom:auto;margin-top:18px;padding:12px 0 0;background:transparent;box-shadow:none}
  .app-tour-detail .tour-picker-footer .ds-cta{min-width:110px}

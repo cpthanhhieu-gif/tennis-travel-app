@@ -121,7 +121,7 @@ export default function BookingFlow() {
 
       <div className="ds-booking-grid">
       {/* Step content */}
-      <div className="mb-[3.2rem]">
+      <div className={`mb-[3.2rem] ${step===4?"booking-step-four-content":""}`}>
         <div hidden={step !== 1}><BookingStep1 key={booking.aceConsultation?.signature ?? "initial"} onNext={handleNext} /></div>
         {step === 2 && <BookingStep2 onNext={handleNext} />}
         {step === 3 && <BookingStep3 onNext={handleNext} />}

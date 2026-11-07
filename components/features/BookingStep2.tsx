@@ -18,13 +18,15 @@ export default function BookingStep2({ onNext }: Props) {
 
   const [saved,setSaved]=useLocalState<{level:number;label:string;assessedAt:string}|null>(null);
   const [saving,setSaving]=useLocalState(false),[saveError,setSaveError]=useLocalState("");
-  const [selfConfirmed,setSelfConfirmed]=useLocalState(false);
+  const [assessingOther,setAssessingOther]=useLocalState(false);
   useEffect(()=>{fetch("/api/local").then(r=>r.ok?r.json():null).then(d=>setSaved(d?.ntrpProfile??null)).catch(()=>{});},[setSaved]);
   const applyResult=(result:ReturnType<typeof getNtrpLevel>)=>{updateNtrpQuizState({ntrpResult:result,showResult:true,packageDecision:null,originalPackageId:booking.packageId});updateBooking({ntrpLevel:result.level,ntrpLabel:result.label,ntrpDeferred:false});};
   const allAnswered = ntrpQuiz.every((q) => answers[q.id] !== undefined);
 
   const handleCalculate = async () => {
-    if(saving||!allAnswered||!selfConfirmed)return;setSaving(true);setSaveError("");
+    if(saving||!allAnswered)return;
+    if(assessingOther){applyResult(getNtrpLevel(Object.values(answers).reduce((sum,n)=>sum+n,0)/ntrpQuiz.length));return;}
+    setSaving(true);setSaveError("");
     try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"ntrp",answers})});const d=await r.json();if(r.status===401||r.status===403){applyResult(getNtrpLevel(Object.values(answers).reduce((sum,n)=>sum+n,0)/ntrpQuiz.length));return;}if(!r.ok)throw Error(d.error);setSaved(d.ntrpProfile);applyResult(getNtrpLevel(d.ntrpProfile.level));}catch(e){setSaveError(requestErrorMessage(e));}finally{setSaving(false);}
   };
 
@@ -61,11 +63,11 @@ export default function BookingStep2({ onNext }: Props) {
   return (
     <div>
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.4rem]">
-        Đánh giá trình độ tennis của người chơi
+        Đánh giá trình độ tennis
       </h2>
       <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung trình độ sau</Button>
-      <label className="group-advice-choice"><input type="checkbox" checked={selfConfirmed} onChange={e=>setSelfConfirmed(e.target.checked)}/>Tôi tự đánh giá trình độ của mình, không khai thay người khác.</label>
-      {saved&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">Trình độ đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button disabled={!selfConfirmed} onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
+      <label className="group-advice-choice"><input type="checkbox" checked={assessingOther} onChange={e=>setAssessingOther(e.target.checked)}/>Đánh giá giúp cho người khác</label>
+      {saved&&!assessingOther&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">Trình độ đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
       {saveError&&<p role="alert">{saveError}</p>}
       {/* Progress dots */}
       <div className="flex items-center gap-[0.8rem] mb-[2.8rem]">
@@ -155,7 +157,7 @@ export default function BookingStep2({ onNext }: Props) {
             size="md"
             className="flex-1"
             onClick={handleCalculate}
-            disabled={!allAnswered||saving||!selfConfirmed}
+            disabled={!allAnswered||saving}
           >
             {allAnswered
               ? "Xem kết quả trình độ"

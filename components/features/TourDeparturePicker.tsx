@@ -38,14 +38,13 @@ export default function TourDeparturePicker({packageId,schedules,referral="",ace
  const changeCompanions=(delta:number)=>setCompanions(current=>Math.min(max-players,Math.max(0,current+delta)));
  const shiftMonth=(delta:number)=>{const next=new Date(year,month-1+delta,1);setCalendarMonth(`${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,"0")}`);};
  return <section className="ds-section tour-departure-picker" aria-labelledby="departure-picker-title">
-  <header className="tour-picker-heading"><div><span className="ds-eyebrow">CHỌN LỊCH & SỐ KHÁCH</span><h2 id="departure-picker-title">Lịch khởi hành</h2></div>{packageId!=="sbu1"&&<span className="tour-picker-confirm">{packageId==="sbu2"?"Báo giá trong 1 ngày làm việc":"Xác nhận trong 24 giờ"}</span>}<button className="tour-calendar-trigger" type="button" onClick={()=>setCalendarOpen(true)}>Xem tất cả lịch</button></header>
+  <header className="tour-picker-heading"><div className="tour-picker-heading-main"><span className="ds-eyebrow">CHỌN LỊCH & SỐ KHÁCH</span><div className="tour-picker-title-row"><h2 id="departure-picker-title">Lịch khởi hành</h2><button className="tour-calendar-trigger" type="button" onClick={()=>setCalendarOpen(true)}>Xem tất cả lịch</button></div></div>{packageId!=="sbu1"&&<span className="tour-picker-confirm">{packageId==="sbu2"?"Báo giá trong 1 ngày làm việc":"Xác nhận trong 24 giờ"}</span>}</header>
   <div className="tour-date-rail" aria-label="Ngày khởi hành, cuộn ngang">{schedules.map(schedule=>{
    const [, ,day]=schedule.date.split("-"),active=schedule.code===departureCode;
    return <button type="button" key={schedule.code} className={`tour-date-card${active?" is-selected":""}`} aria-pressed={active} onClick={()=>selectSchedule(schedule)}>
     <span>{monthLabel(schedule.date)}</span><strong>{Number(day)}</strong><small>{schedule.dateLabel.slice(-4)} · {schedule.dayOfWeek}</small>{active&&<em>Đã chọn</em>}
    </button>;
   })}</div>
-  <div className="tour-calendar-action"><span>{selected?`Ngày đã chọn: ${selected.dateLabel}`:"Chưa chọn ngày khởi hành"}</span></div>
   {selected&&<section className="tour-time-picker" aria-labelledby="tour-time-title"><h3 id="tour-time-title">Chọn khung giờ</h3><div>{departureTimeSlots.map(slot=><button type="button" key={slot} aria-pressed={departureTime===slot} className={departureTime===slot?"is-selected":""} onClick={()=>{setDepartureTime(slot);setValidationMessage("");}}>{slot}</button>)}</div>{validationMessage&&<p role="alert">{validationMessage}</p>}</section>}
   {!selected&&validationMessage&&<p className="tour-picker-validation" role="alert">{validationMessage}</p>}
   <p className="tour-picker-scroll">Vuốt ngang để xem các ngày khác <span aria-hidden="true">→</span></p>

@@ -1,7 +1,7 @@
 "use client";
 
 import {useMemo,useState} from "react";
-import {BedDouble,Dumbbell,HeartPulse,Map,Plus,Minus,Ticket} from "lucide-react";
+import {Plus,Minus} from "lucide-react";
 import Image from "next/image";
 import type {AncillarySelection,AncillaryService} from "@/lib/ancillary-catalog";
 import {formatVND} from "@/lib/mock-data";
@@ -15,12 +15,6 @@ function categoryFor(item:AncillaryService):Category{
  if(item.id.includes("ace-check")||item.id.includes("spa"))return "wellness";
  if(item.id.includes("ambassador")||item.id.includes("ace-lab")||item.id.includes("pickleball"))return "tennis";
  return "experiences";
-}
-function iconFor(category:Category){
- if(category==="rooms")return BedDouble;
- if(category==="tennis")return Dumbbell;
- if(category==="wellness")return HeartPulse;
- return category==="experiences"?Ticket:Map;
 }
 function unitLabel(unit:AncillaryService["unit"]){return ({room:"phòng/tour",hour:"giờ",visit:"lần", "player-session":"người/buổi"})[unit];}
 
@@ -45,9 +39,8 @@ export default function BookingAncillaryPicker({packageId,guests,selections,onCh
   <header className="ancillary-panel-heading"><div><span className="ds-eyebrow">TÙY CHỌN THÊM THEO TOUR</span><h3>Thêm trải nghiệm cho chuyến đi</h3></div><span className="ancillary-count">{selections.reduce((sum,item)=>sum+item.quantity,0)} mục</span></header>
   <nav className="ancillary-tabs" aria-label="Nhóm dịch vụ">{visibleTabs.map(item=><button type="button" key={item.id} aria-pressed={tab===item.id} onClick={()=>setTab(item.id)}>{item.label}</button>)}</nav>
   <div className="ancillary-track" aria-label="Danh sách dịch vụ cuộn ngang">{filtered.map(service=>{
-   const category=categoryFor(service),Icon=iconFor(category),qty=quantity(service.id),inactive=service.status==="inactive",max=guests*service.maxPerGuest;
+   const qty=quantity(service.id),inactive=service.status==="inactive",max=guests*service.maxPerGuest;
    return <article className={`ancillary-card${qty?" is-selected":""}${inactive?" is-unavailable":""}`} key={service.id}>
-    <div className="ancillary-card-top"><span className="ancillary-card-icon"><Icon size={19} aria-hidden="true"/></span><span className={`ancillary-status ${inactive?"is-muted":service.status==="provisional"?"is-estimate":""}`}>{inactive?"Chưa mở":service.status==="provisional"?"Giá dự toán":"Theo hồ sơ"}</span></div>
     <div className="ancillary-card-main"><Image className="ancillary-card-image" src={ancillaryImage(service.id)} alt="" width={76} height={76} sizes="76px"/><div><h4>{service.name}</h4><p className="ancillary-price">{formatVND(service.unitPrice)} <small>/ {unitLabel(service.unit)}</small></p></div></div>
     <button type="button" className="ancillary-details-trigger" aria-haspopup="dialog" onClick={()=>setDetailService(service)}>Giá và điều kiện</button>
     {inactive?<button type="button" disabled className="ancillary-unavailable-button">Chưa thể thêm</button>:<div className="ancillary-stepper" role="group" aria-label={`Số lượng ${service.name}`}>

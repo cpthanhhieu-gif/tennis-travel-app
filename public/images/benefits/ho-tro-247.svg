@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+ <defs>
+  <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#54B9FF"/><stop offset="1" stop-color="#1764E8"/></linearGradient>
+  <linearGradient id="side" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#E8EDFF"/><stop offset="1" stop-color="#ADB9F5"/></linearGradient>
+  <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8AE6B6"/><stop offset="1" stop-color="#18C98B"/></linearGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+ </defs>
+ <ellipse cx="510" cy="790" rx="315" ry="55" fill="#7489db" opacity=".2" filter="url(#shadow)"/>
+ <g transform="rotate(-8 512 650)"><rect x="202" y="583" width="620" height="190" rx="52" fill="#2168E9"/><rect x="202" y="548" width="620" height="172" rx="50" fill="url(#side)"/><rect x="202" y="512" width="620" height="172" rx="50" fill="#F5F7FF"/><rect x="202" y="475" width="620" height="176" rx="50" fill="url(#blue)"/><path d="M252 491h236v153H252q-35 0-35-36V526q0-35 35-35" fill="#66B4FF" opacity=".52"/><path d="M488 491h285q35 0 35 35v82H488z" fill="#1469D6" opacity=".4"/><path d="M488 567h320v42q0 35-35 35H488z" fill="#8DCBFF" opacity=".36"/></g>
+ <!-- headset and live support bubble -->
+ <g transform="rotate(-8 510 365)">
+  <path d="M314 382v-52q0-190 196-190t196 190v52" fill="none" stroke="#087B61" stroke-width="82" stroke-linecap="round" transform="translate(0 18)"/>
+  <path d="M314 382v-52q0-190 196-190t196 190v52" fill="none" stroke="url(#green)" stroke-width="82" stroke-linecap="round"/>
+  <path d="M314 327v98q0 40 40 40h34V300h-34q-40 0-40 27zm392 0v98q0 40-40 40h-34V300h34q40 0 40 27z" fill="#B8F0D0"/>
+  <path d="M388 320v132m244-132v132" stroke="#18B988" stroke-width="18" stroke-linecap="round" opacity=".75"/>
+  <path d="M644 426q32 0 32 32t-32 32h-62l-50 43v-43h-12" fill="#20C98C"/>
+  <path d="M557 471h67" stroke="#E8FFF3" stroke-width="12" stroke-linecap="round"/>
+ </g>
+ <!-- round clock token -->
+ <g transform="rotate(13 760 260)"><circle cx="760" cy="260" r="91" fill="#E8EDFF"/><circle cx="760" cy="260" r="72" fill="url(#blue)"/><circle cx="760" cy="260" r="53" fill="#F8FBFF"/><path d="M760 222v42l31 19" fill="none" stroke="#1764E8" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><circle cx="760" cy="260" r="8" fill="#18C98B"/></g>
+</svg>

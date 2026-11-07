@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+ <defs>
+  <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#54B9FF"/><stop offset="1" stop-color="#1764E8"/></linearGradient>
+  <linearGradient id="side" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#E8EDFF"/><stop offset="1" stop-color="#ADB9F5"/></linearGradient>
+  <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8AE6B6"/><stop offset="1" stop-color="#18C98B"/></linearGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+ </defs>
+ <ellipse cx="510" cy="790" rx="315" ry="55" fill="#7489db" opacity=".2" filter="url(#shadow)"/>
+ <g transform="rotate(-8 512 650)"><rect x="202" y="583" width="620" height="190" rx="52" fill="#2168E9"/><rect x="202" y="548" width="620" height="172" rx="50" fill="url(#side)"/><rect x="202" y="512" width="620" height="172" rx="50" fill="#F5F7FF"/><rect x="202" y="475" width="620" height="176" rx="50" fill="url(#blue)"/><path d="M252 491h236v153H252q-35 0-35-36V526q0-35 35-35" fill="#66B4FF" opacity=".52"/><path d="M488 491h285q35 0 35 35v82H488z" fill="#1469D6" opacity=".4"/><path d="M488 567h320v42q0 35-35 35H488z" fill="#8DCBFF" opacity=".36"/></g>
+ <!-- suitcase combining travel services -->
+ <g transform="rotate(-9 505 365)">
+  <path d="M417 242v-53q0-35 35-35h108q35 0 35 35v53" fill="none" stroke="#159B75" stroke-width="34" stroke-linecap="round"/>
+  <rect x="303" y="239" width="410" height="296" rx="56" fill="#087B61" opacity=".34" transform="translate(0 20)"/>
+  <rect x="303" y="239" width="410" height="296" rx="56" fill="url(#green)"/>
+  <rect x="330" y="266" width="356" height="238" rx="38" fill="#C7F4DA"/>
+  <path d="M508 267v237" stroke="#63D5A1" stroke-width="14"/>
+  <path d="M476 262h64v35h-64z" rx="10" fill="#18B988"/>
+  <path d="M375 347h94m78 0h94" stroke="#89DEB2" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="384" cy="526" r="18" fill="#1764E8"/><circle cx="633" cy="526" r="18" fill="#1764E8"/>
+ </g>
+ <!-- location pin -->
+ <g transform="rotate(12 760 295)"><path d="M760 183c-69 0-124 55-124 124 0 94 124 201 124 201s124-107 124-201c0-69-55-124-124-124z" fill="#18C98B"/><path d="M760 211c-53 0-96 43-96 96 0 66 73 143 96 166 23-23 96-100 96-166 0-53-43-96-96-96z" fill="#BFF1D4"/><circle cx="760" cy="307" r="43" fill="url(#blue)"/><path d="m740 308 14 14 29-33" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g>
+ <!-- small itinerary token -->
+ <g transform="rotate(-16 270 320)"><circle cx="270" cy="320" r="64" fill="#EEF2FC"/><circle cx="270" cy="320" r="49" fill="url(#side)"/><path d="m241 329 62-28m-37 48 20-53" fill="none" stroke="#1764E8" stroke-width="12" stroke-linecap="round"/><circle cx="245" cy="328" r="8" fill="#18C98B"/><circle cx="297" cy="304" r="8" fill="#18C98B"/></g>
+</svg>

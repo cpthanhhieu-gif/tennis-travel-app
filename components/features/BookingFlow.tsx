@@ -34,6 +34,8 @@ export default function BookingFlow() {
   const selectedPackage=tourPackages.find(item=>item.id===booking.packageId)??tourPackages[0];
   const selectedSchedule = selectedTour.departureSchedules.find((schedule) => schedule.code === booking.departureCode)
     ?? selectedTour.departureSchedules[0];
+  const currentHeaderTitle=booking.entrySource==="ace"&&!booking.aceConsultation&&!consultationConfirmed?"Tư vấn cùng Ace":STEPS[visibleStep-1];
+  useEffect(()=>{const timer=window.setTimeout(()=>window.dispatchEvent(new CustomEvent("travel-header-title",{detail:{title:currentHeaderTitle}})),0);return()=>window.clearTimeout(timer);},[currentHeaderTitle]);
 
   const handleBack = () => {
     if (step > 1) setStep(previousStep);

@@ -72,8 +72,6 @@ export default function BookingStep3({ onNext }: Props) {
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.8rem]">
         {booking.packageId === "sbu2" ? "Liên hệ đại diện đoàn" : "Người đăng ký / liên hệ"}
       </h2>
-      {booking.packageId==="sbu2"&&<p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">Cung cấp liên hệ đại diện để nhận báo giá; hồ sơ từng thành viên được bổ sung sau.</p>}
-
       {autoFilled&&<p role="status">Đã tự điền thông tin từ hồ sơ. Bạn kiểm tra lại và bổ sung các mục còn thiếu trước khi tiếp tục.</p>}
       {savedContact&&<button type="button" className="ds-link mb-[1.6rem]" onClick={()=>{setName(savedContact.name);setPhone(savedContact.phone);setEmail(savedContact.email);updateBooking({name:savedContact.name,phone:savedContact.phone,email:savedContact.email});}}>Dùng liên hệ đã lưu trong hồ sơ</button>}
       <div className="booking-contact-fields">

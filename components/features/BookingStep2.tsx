@@ -63,10 +63,6 @@ export default function BookingStep2({ onNext }: Props) {
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.4rem]">
         Đánh giá trình độ tennis của người chơi
       </h2>
-      <p className="text-neutral-40 text-[1.4rem] mb-[2.4rem]">
-        Trả lời 5 câu để tham khảo trình độ tennis theo thang NTRP. Người chơi tự thực hiện đánh giá; người đi cùng không cần NTRP. Kết quả này không áp dụng chung cho những người chơi khác. HLV xác nhận riêng trước khi phân nhóm.
-      </p>
-
       <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung trình độ sau</Button>
       <label className="group-advice-choice"><input type="checkbox" checked={selfConfirmed} onChange={e=>setSelfConfirmed(e.target.checked)}/>Tôi tự đánh giá trình độ của mình, không khai thay người khác.</label>
       {saved&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">Trình độ đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button disabled={!selfConfirmed} onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}

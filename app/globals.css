@@ -967,7 +967,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .ancillary-card{align-self:start;min-height:0;height:auto}
 .ancillary-card-main{margin-top:0}
 @media(max-width:767px){.booking-step-four-content .ancillary-panel{margin:0;padding:17px 0 2px}.ancillary-card{min-height:0}}
-@media(max-width:767px){.app-service-discover .app-service-rail{padding-left:20px!important;padding-right:20px!important}}
+@media(max-width:767px){.app-service-discover .app-service-rail{padding-left:0!important;padding-right:20px!important}.app-service-discover .app-service-rail>.app-service-card:first-child{margin-left:20px}}
 .app-tour-photo-dots{position:absolute;z-index:3;bottom:12px;left:50%;display:flex;gap:6px;transform:translateX(-50%);padding:6px 9px;border-radius:999px;background:rgba(0,0,0,.28)}
 .app-tour-photo-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.62)}
 .app-tour-photo-dots span.is-active{width:16px;border-radius:999px;background:#fff}

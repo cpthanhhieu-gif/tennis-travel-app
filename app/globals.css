@@ -860,3 +860,46 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .app-personal-card-copy p{margin:0 0 14px!important;color:rgba(255,255,255,.92);font-size:13px!important;line-height:1.5!important}
 .app-personal-card-copy .ds-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border:1px solid white;border-radius:999px;background:white;color:var(--ds-primary);font-size:13px;font-weight:700;text-decoration:none}
 @media(max-width:767px){.app-personal-card-visual{width:100vw;max-width:none;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);min-height:245px;border-radius:0!important;box-shadow:none!important}.app-personal-card-copy{padding:18px}.app-personal-card-copy h3{font-size:20px!important}}
+
+/* Immersive mobile layout for experience details. */
+.app-tour-page{padding-bottom:0!important}
+.app-tour-detail{padding-top:0}
+.app-tour-hero{margin:0}
+.app-tour-photo{position:relative;height:420px;overflow:hidden;border-radius:var(--ds-radius-card)}
+.app-tour-photo>img{object-fit:cover}
+.app-tour-hero-actions{position:absolute;z-index:2;top:16px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.app-tour-hero-actions>*,.app-tour-hero-actions>div>*{pointer-events:auto}
+.app-tour-hero-actions>div{display:flex;gap:10px}
+.app-tour-hero-actions a,.app-tour-hero-actions button{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:rgba(20,25,32,.64);color:#fff;backdrop-filter:blur(8px)}
+.app-tour-gallery-button{position:absolute;z-index:2;right:16px;bottom:16px;display:flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;border:0;border-radius:999px;background:rgba(20,25,32,.68);color:white;font-size:13px;font-weight:700;backdrop-filter:blur(8px)}
+.app-tour-intro{padding:22px 0 18px}
+.app-tour-intro h1{margin:0 0 5px;font-size:28px;font-weight:800;line-height:1.25}
+.app-tour-intro>p{margin:0 0 12px;color:var(--ds-muted);font-size:15px}
+.app-tour-facts{display:grid;gap:9px;margin:12px 0}
+.app-tour-facts span{display:flex;align-items:center;gap:9px;font-size:14px;line-height:1.4}
+.app-tour-facts svg{flex:0 0 auto;color:var(--ds-muted)}
+.app-tour-mobile-booking{display:none}
+.app-tour-gallery{position:fixed;z-index:150;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.94)}
+.app-tour-gallery>img{object-fit:contain;padding:48px 12px}
+.app-tour-gallery>button{position:absolute;z-index:2;top:calc(12px + env(safe-area-inset-top,0px));right:16px;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.18);color:white}
+@media(max-width:767px){
+ .app-tour-page+.travel-bottom{display:none}
+ .app-tour-page{padding-bottom:0!important}
+ .app-tour-detail{padding:0 0 calc(90px + env(safe-area-inset-bottom,0px))}
+ .app-tour-photo{height:270px;border-radius:0}
+ .app-tour-hero-actions{top:12px;left:14px;right:14px}
+ .app-tour-intro{padding:18px 16px 16px}
+ .app-tour-intro h1{font-size:24px}
+ .app-tour-intro>p{font-size:14px}
+ .app-tour-facts{gap:8px}
+ .app-tour-detail>.app-tour-intro>.ds-tag{display:inline-block;margin-top:4px}
+ .app-tour-detail>.ds-detail-grid{display:block;margin:0;padding:0 16px}
+ .app-tour-detail .ds-detail-grid>div{width:100%;min-width:0}
+ .app-tour-detail .ui-tabset{border-radius:16px}
+ .app-tour-detail [role=tabpanel]{padding:0 14px 16px}
+ .app-tour-mobile-booking{position:fixed;z-index:45;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ds-border);background:var(--ds-surface);box-shadow:0 -5px 18px rgba(16,24,40,.1)}
+ .app-tour-mobile-booking>span{display:grid;gap:1px;min-width:0}
+ .app-tour-mobile-booking small{font-size:11px;color:var(--ds-muted)}
+ .app-tour-mobile-booking strong{font-size:19px;font-weight:800;white-space:nowrap}
+ .app-tour-mobile-booking .ds-cta{min-height:46px;max-width:62%;padding:8px 14px;background:var(--ds-booking,#dc1306);border-color:var(--ds-booking,#dc1306);text-align:center;line-height:1.2}
+}

@@ -1,4 +1,4 @@
-export type AncillaryUnit = "room" | "hour" | "visit" | "player-session";
+export type AncillaryUnit = "room" | "hour" | "visit" | "player-session" | "vehicle";
 export type AncillaryStatus = "priced-planning" | "provisional" | "inactive";
 
 export type AncillaryService = {
@@ -12,11 +12,15 @@ export type AncillaryService = {
   changeCancellation: string;
   priceBasis: string;
   note?: string;
+  durationLabel?: string;
+  vehicleCapacity?: number;
 };
 
 // Catalog prices are VND. Provisional external estimates can be calculated;
 // inactive entries are rejected until their price or itinerary is validated.
 export const ancillaryCatalog: AncillaryService[] = [
+  { id: "dalat-airport-transfer-4", name: "Xe riêng Liên Khương · 4 chỗ", packageIds: ["sbu1"], unit: "vehicle", unitPrice: 270_000, status: "priced-planning", maxPerGuest: 1, vehicleCapacity: 3, durationLabel: "40–50 phút · 05:00–21:30", changeCancellation: "Tham khảo nhà xe: miễn phí hủy trước giờ đi ít nhất 2 giờ. Áp dụng tuyến sân bay Liên Khương ↔ trung tâm Đà Lạt, một chiều, một điểm đón và một điểm trả; hành lý gọn.", priceBasis: "Mức tham khảo 2026: 250.000đ/xe + VAT 8% = 270.000đ. Giá và điều kiện nhà cung cấp cần được Vietravel xác nhận trước khi mở bán thực tế.", note: "Sức chứa tối đa 3 khách với hành lý gọn. Túi golf hoặc nhiều vali có thể cần xe 7 chỗ." },
+  { id: "dalat-airport-transfer-7", name: "Xe riêng Liên Khương · 7 chỗ", packageIds: ["sbu1"], unit: "vehicle", unitPrice: 324_000, status: "priced-planning", maxPerGuest: 1, vehicleCapacity: 5, durationLabel: "40–50 phút · 05:00–21:30", changeCancellation: "Tham khảo nhà xe: miễn phí hủy trước giờ đi ít nhất 2 giờ. Áp dụng tuyến sân bay Liên Khương ↔ trung tâm Đà Lạt, một chiều, một điểm đón và một điểm trả; giá ban ngày.", priceBasis: "Mức tham khảo 2026: 300.000đ/xe + VAT 8% = 324.000đ. Giá và điều kiện nhà cung cấp cần được Vietravel xác nhận trước khi mở bán thực tế.", note: "Sức chứa pilot tối đa 5 khách có hành lý gọn; hành lý cồng kềnh có thể cần thêm xe." },
   { id: "sbu1-single-room", name: "Phụ thu phòng đơn · Đà Lạt", packageIds: ["sbu1"], unit: "room", unitPrice: 1_200_000, status: "priced-planning", maxPerGuest: 1, changeCancellation: "Đề xuất: hủy/đổi trước 72 giờ không mất phí; 24–72 giờ thu 50%; dưới 24 giờ hoặc không đến thu 100%. Cần khớp điều kiện phòng và chính sách tour khi ký đối tác.", priceBasis: "Bảng giá package v2.12; đơn vị: phòng/tour." },
   { id: "sbu2-single-room", name: "Phụ thu phòng đơn · Đà Nẵng", packageIds: ["sbu2"], unit: "room", unitPrice: 2_400_000, status: "priced-planning", maxPerGuest: 1, changeCancellation: "Đề xuất: hủy/đổi trước 72 giờ không mất phí; 24–72 giờ thu 50%; dưới 24 giờ hoặc không đến thu 100%. Cần khớp điều kiện phòng và chính sách tour khi ký đối tác.", priceBasis: "Bảng giá package v2.12; đơn vị: phòng/tour." },
   { id: "sbu3-single-room", name: "Phụ thu phòng đơn · Phú Quốc", packageIds: ["sbu3"], unit: "room", unitPrice: 9_000_000, status: "priced-planning", maxPerGuest: 1, changeCancellation: "Đề xuất: hủy/đổi trước 72 giờ không mất phí; 24–72 giờ thu 50%; dưới 24 giờ hoặc không đến thu 100%. Cần khớp điều kiện phòng và chính sách tour khi ký đối tác.", priceBasis: "Bảng giá package v2.12; đơn vị: phòng/tour." },
@@ -47,7 +51,8 @@ export function normalizeAncillarySelections(packageId: string, guests: number, 
   return [...quantities].flatMap(([id, quantity]) => {
     const service = ancillaryCatalog.find(item => item.id === id)!;
     const capped = Math.min(quantity, guestLimit * service.maxPerGuest);
-    return capped > 0 ? [{ id, quantity: capped }] : [];
+    const normalized = service.unit === "vehicle" && service.vehicleCapacity ? Math.ceil(guestLimit / service.vehicleCapacity) : capped;
+    return normalized > 0 ? [{ id, quantity: normalized }] : [];
   });
 }
 
@@ -56,6 +61,7 @@ export function priceAncillaryServices(packageId: string, guests: number, value:
   if (!Array.isArray(value) || value.length > ancillaryCatalog.length) throw new Error("Danh sách dịch vụ không hợp lệ.");
   const ids = new Set<string>();
   const lines: AncillaryLine[] = [];
+  let vehicleCapacity = 0;
   for (const raw of value) {
     if (!raw || typeof raw !== "object") throw new Error("Thông tin dịch vụ không hợp lệ.");
     const { id, quantity } = raw as Partial<AncillarySelection>;
@@ -65,9 +71,14 @@ export function priceAncillaryServices(packageId: string, guests: number, value:
     if (!service || !service.packageIds.includes(packageId)) throw new Error("Dịch vụ không áp dụng cho tour đã chọn.");
     if (service.status === "inactive") throw new Error(`${service.name} chưa mở bán: ${service.note ?? "cần xác nhận điều kiện nhà cung cấp"}`);
     if ((quantity as number) > guests * service.maxPerGuest) throw new Error(`Số lượng ${service.name} vượt giới hạn ${guests * service.maxPerGuest}.`);
+    if (service.unit === "vehicle") {
+      if (vehicleCapacity || !service.vehicleCapacity) throw new Error("Chọn một loại xe đưa đón cho chuyến đi.");
+      vehicleCapacity = service.vehicleCapacity * (quantity as number);
+    }
     const total = service.unitPrice * (quantity as number);
     if (!Number.isSafeInteger(total)) throw new Error("Giá dịch vụ vượt giới hạn hợp lệ.");
     lines.push({ id, name: service.name, unit: service.unit, quantity: quantity as number, unitPrice: service.unitPrice, total });
   }
+  if (vehicleCapacity > 0 && vehicleCapacity < guests) throw new Error("Số xe đưa đón chưa đủ chỗ cho cả đoàn.");
   return { lines, subtotal: lines.reduce((sum, line) => sum + line.total, 0) };
 }

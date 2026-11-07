@@ -16,12 +16,12 @@ function categoryFor(item:AncillaryService):Category{
  if(item.id.includes("ambassador")||item.id.includes("ace-lab")||item.id.includes("pickleball"))return "tennis";
  return "experiences";
 }
-function unitLabel(unit:AncillaryService["unit"]){return ({room:"phòng/tour",hour:"giờ",visit:"lần", "player-session":"người/buổi"})[unit];}
+function unitLabel(unit:AncillaryService["unit"]){return ({room:"phòng/tour",hour:"giờ",visit:"lần", "player-session":"người/buổi",vehicle:"xe/chiều"})[unit];}
 
-export default function BookingAncillaryPicker({packageId,guests,selections,onChange,catalog,onCatalogRetry,loading,error}:{packageId:string;guests:number;selections:AncillarySelection[];onChange:(next:AncillarySelection[])=>void;catalog:AncillaryService[];onCatalogRetry:()=>void;loading:boolean;error:string}){
+export default function BookingAncillaryPicker({packageId,guests,selections,onChange,catalog,onCatalogRetry,loading,error,excludeUnits=[]}:{packageId:string;guests:number;selections:AncillarySelection[];onChange:(next:AncillarySelection[])=>void;catalog:AncillaryService[];onCatalogRetry:()=>void;loading:boolean;error:string;excludeUnits?:AncillaryService["unit"][]}){
  const [tab,setTab]=useState<Category>("all");
  const [detailService,setDetailService]=useState<AncillaryService|null>(null);
- const available=useMemo(()=>catalog.filter(item=>item.packageIds.includes(packageId)),[catalog,packageId]);
+ const available=useMemo(()=>catalog.filter(item=>item.packageIds.includes(packageId)&&!excludeUnits.includes(item.unit)),[catalog,packageId,excludeUnits]);
  const filtered=tab==="all"?available:available.filter(item=>categoryFor(item)===tab);
  const visibleTabs=tabs.filter(item=>item.id==="all"||available.some(service=>categoryFor(service)===item.id));
  function quantity(id:string){return selections.find(item=>item.id===id)?.quantity??0;}

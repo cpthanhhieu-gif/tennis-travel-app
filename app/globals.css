@@ -859,4 +859,4 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .app-personal-card-copy h3{margin:0 0 8px!important;color:inherit;font-size:22px!important;line-height:1.25!important}
 .app-personal-card-copy p{margin:0 0 14px!important;color:rgba(255,255,255,.92);font-size:13px!important;line-height:1.5!important}
 .app-personal-card-copy .ds-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border:1px solid white;border-radius:999px;background:white;color:var(--ds-primary);font-size:13px;font-weight:700;text-decoration:none}
-@media(max-width:767px){.app-personal-card-visual{min-height:245px}.app-personal-card-copy{padding:18px}.app-personal-card-copy h3{font-size:20px!important}}
+@media(max-width:767px){.app-personal-card-visual{width:100vw;max-width:none;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);min-height:245px;border-radius:0!important;box-shadow:none!important}.app-personal-card-copy{padding:18px}.app-personal-card-copy h3{font-size:20px!important}}

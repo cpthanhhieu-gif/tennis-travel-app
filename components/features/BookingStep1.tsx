@@ -3,6 +3,7 @@
 import {initialParty} from "@/lib/booking-entry";
 import {browserScenario} from "@/lib/demo-experience";
 import {coupleTotal,companionRate} from "@/lib/couple-pricing";
+import {normalizeAncillarySelections} from "@/lib/ancillary-catalog";
 import { useEffect, useState } from "react";
 import GroupRequestFields from "./GroupRequestFields";
 import {validGroupRequest} from "@/lib/group-request";
@@ -64,7 +65,7 @@ export default function BookingStep1({ onNext }: Props) {
       const party=booking.entrySource==="scenario"&&!booking.aceConsultation?initialParty("scenario",tour.packageId,browserScenario()):{numPeople:people,numCompanions:companions};setPeople(party.numPeople);setCompanions(party.numCompanions);updateBooking({participants:undefined,groupRequestEdited:false,groupRequest:tour.packageId==="sbu2"?{min:Math.max(8,party.numPeople),max:Math.max(8,party.numPeople),dates:[tour.departureSchedules[0].date,""],budget:tour.departureSchedules[0].price,format:"Đánh đôi",courts:4,gala:true,companions:party.numCompanions}:undefined,premiumRequest:undefined});
     }
 
-    updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions)});
+    updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions),serviceSelections:normalizeAncillarySelections(tour.packageId,people,booking.serviceSelections)});
     const limit=packageCapacity(tour.packageId);
     if(people>limit){const nextCompanions=Math.min(companions,limit-1);setCompanions(nextCompanions);setPeople(limit);}
     setSelectedTourId(tour.id);
@@ -80,6 +81,8 @@ export default function BookingStep1({ onNext }: Props) {
   const handleNext = () => {
     if(selectedTour.packageId==="sbu2"&&!validGroupRequest(booking.groupRequest)){setGroupError(true);requestAnimationFrame(()=>{const field=document.querySelector<HTMLElement>('.premium-request-fields [aria-invalid="true"]');field?.focus({preventScroll:true});field?.scrollIntoView({behavior:"smooth",block:"center"});});return;}
     if(!Number.isInteger(people)||!Number.isInteger(companions)||people<1||companions<0||people-companions<1||people > maxPeople)return;
+    const effectiveGuests=selectedTour.packageId==="sbu2"?booking.groupRequest?.max??people:people;
+    const serviceSelections=normalizeAncillarySelections(selectedTour.packageId,effectiveGuests,booking.serviceSelections);
     updateBooking({
       tourId: selectedTour.id,
       packageId: selectedTour.packageId,
@@ -89,6 +92,7 @@ export default function BookingStep1({ onNext }: Props) {
       numPeople: people,
       numCompanions: companions,
       totalPrice: coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions),
+      serviceSelections,
     });
     if(selectedTour.packageId==="sbu2"&&booking.groupRequest)updateBooking({numPeople:booking.groupRequest.max,numCompanions:booking.groupRequest.companions,totalPrice:coupleTotal(selectedTour.packageId,selectedSchedule.price,booking.groupRequest.max,booking.groupRequest.companions)});
     onNext();

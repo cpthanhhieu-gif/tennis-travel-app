@@ -35,6 +35,22 @@ export type AncillarySelection = { id: string; quantity: number };
 export type AncillaryLine = { id: string; name: string; unit: AncillaryUnit; quantity: number; unitPrice: number; total: number };
 export type AncillaryPricing = { lines: AncillaryLine[]; subtotal: number };
 
+export function normalizeAncillarySelections(packageId: string, guests: number, value: readonly AncillarySelection[] | undefined): AncillarySelection[] {
+  if (!value?.length) return [];
+  const guestLimit = Number.isSafeInteger(guests) ? Math.max(0, guests) : 0;
+  const quantities = new Map<string, number>();
+  for (const selection of value) {
+    const service = ancillaryCatalog.find(item => item.id === selection.id && item.packageIds.includes(packageId) && item.status !== "inactive");
+    if (!service || !Number.isSafeInteger(selection.quantity) || selection.quantity < 1) continue;
+    quantities.set(selection.id, (quantities.get(selection.id) ?? 0) + selection.quantity);
+  }
+  return [...quantities].flatMap(([id, quantity]) => {
+    const service = ancillaryCatalog.find(item => item.id === id)!;
+    const capped = Math.min(quantity, guestLimit * service.maxPerGuest);
+    return capped > 0 ? [{ id, quantity: capped }] : [];
+  });
+}
+
 export function priceAncillaryServices(packageId: string, guests: number, value: unknown): AncillaryPricing {
   if (value === undefined) return { lines: [], subtotal: 0 };
   if (!Array.isArray(value) || value.length > ancillaryCatalog.length) throw new Error("Danh sách dịch vụ không hợp lệ.");

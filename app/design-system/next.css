@@ -54,8 +54,8 @@
 :root[data-design-theme="next"] :is(.ds-cta,.vt-booking-button):hover{background:var(--ds-booking-hover)}
 :root[data-design-theme="next"] .ds-cta.ds-lime{background:var(--ds-subtle);color:var(--ds-primary)}
 :root[data-design-theme="next"] :is(.ds-link,.ui-text-button){color:var(--ds-primary)}
-:root[data-design-theme="next"] :is(.ds-filters,.app-intent-chips,.premium-benefit-tabs) button{border-radius:999px;background:var(--ds-surface);color:var(--ds-ink);border:1px solid var(--ds-border);min-height:44px;padding:10px 18px}
-:root[data-design-theme="next"] :is(.ds-filters,.app-intent-chips,.premium-benefit-tabs) button[aria-pressed=true]{background:var(--ds-primary);border-color:var(--ds-primary);color:white}
+:root[data-design-theme="next"] :is(.ds-filters,.premium-benefit-tabs) button{border-radius:999px;background:var(--ds-surface);color:var(--ds-ink);border:1px solid var(--ds-border);min-height:44px;padding:10px 18px}
+:root[data-design-theme="next"] :is(.ds-filters,.premium-benefit-tabs) button[aria-pressed=true]{background:var(--ds-primary);border-color:var(--ds-primary);color:white}
 :root[data-design-theme="next"] .ui-tabs{background:var(--ds-surface);border-bottom:1px solid var(--ds-border)}
 :root[data-design-theme="next"] .ui-tabs button{border-radius:0;min-height:52px;color:var(--ds-ink)}
 :root[data-design-theme="next"] .ui-tabs button[aria-selected=true]{color:var(--ds-primary);border-bottom:3px solid var(--ds-primary);background:transparent}

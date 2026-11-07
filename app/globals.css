@@ -679,3 +679,49 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 /* Hide the filter scrollbar while preserving horizontal swiping. */
 .app-intent-chips{scrollbar-width:none;-ms-overflow-style:none}
 .app-intent-chips::-webkit-scrollbar{display:none;width:0;height:0}
+
+/* Ancillary service picker: horizontal card rail, compact controls, live order summary. */
+.ancillary-panel{margin:22px -20px 0;padding:20px 0 4px;border-top:1px solid var(--ds-border);min-width:0}
+.ancillary-panel-heading,.ancillary-order>header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.ancillary-panel-heading h3,.ancillary-order h3{margin:5px 0 4px;font-size:19px;line-height:1.35;font-weight:750;color:var(--ds-ink)}
+.ancillary-panel-heading p{margin:0;color:var(--ds-muted);font-size:13px;line-height:1.5}
+.ancillary-count{flex:0 0 auto;padding:6px 10px;border-radius:999px;background:var(--ds-subtle);color:var(--ds-primary);font-size:12px;font-weight:700}
+.ancillary-tabs{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;margin:16px 0 12px;padding:2px 2px 8px}
+.ancillary-tabs::-webkit-scrollbar{display:none}
+.ancillary-tabs button{min-height:40px;padding:8px 14px;border:1px solid var(--ds-border);border-radius:999px;background:var(--ds-surface);color:var(--ds-ink);font-size:13px;font-weight:650;white-space:nowrap}
+.ancillary-tabs button[aria-pressed=true]{border-color:var(--ds-primary);background:var(--ds-primary);color:white}
+.ancillary-track{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,31%);gap:12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:thin;scrollbar-color:var(--ds-border) transparent;padding:2px 2px 12px}
+.ancillary-card{display:flex;flex-direction:column;min-height:286px;padding:14px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-card);background:var(--ds-surface);scroll-snap-align:start;box-shadow:0 3px 12px rgb(19 48 84 / .05)}
+.ancillary-card.is-selected{border-color:var(--ds-primary);box-shadow:0 0 0 1px var(--ds-primary),0 5px 16px rgb(16 70 200 / .1)}
+.ancillary-card.is-unavailable{background:var(--ds-subtle);opacity:.82}
+.ancillary-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ancillary-card-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:var(--ds-subtle);color:var(--ds-primary)}
+.ancillary-status{padding:5px 8px;border-radius:999px;background:var(--ds-subtle);color:var(--ds-primary);font-size:10px;font-weight:750;white-space:nowrap}
+.ancillary-status.is-estimate{background:#fff3cc;color:#715600}.ancillary-status.is-muted{background:var(--ds-surface);color:var(--ds-muted)}
+.ancillary-card h4{margin:12px 0 5px;font-size:15px;line-height:1.4;font-weight:750;color:var(--ds-ink)}
+.ancillary-card .ancillary-price{margin:0;color:var(--ds-primary);font-size:17px;line-height:1.45;font-weight:800;font-variant-numeric:tabular-nums}
+.ancillary-card .ancillary-price small{font-size:11px;font-weight:500;color:var(--ds-muted);white-space:nowrap}
+.ancillary-note{margin:8px 0 4px;color:var(--ds-muted);font-size:11px;line-height:1.45}
+.ancillary-card details{margin:9px 0 12px;color:var(--ds-muted);font-size:11px;line-height:1.5}
+.ancillary-card summary{min-height:32px;display:flex;align-items:center;cursor:pointer;color:var(--ds-primary);font-weight:650}
+.ancillary-card details p{margin:5px 0}
+.ancillary-stepper{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin-top:auto;padding-top:10px}
+.ancillary-stepper button{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--ds-primary);border-radius:var(--ds-radius-control);background:var(--ds-surface);color:var(--ds-primary)}
+.ancillary-stepper button:disabled{border-color:var(--ds-border);color:var(--ds-muted);background:var(--ds-subtle)}
+.ancillary-stepper span{text-align:center;color:var(--ds-ink);font-size:13px;font-weight:700}
+.ancillary-unavailable-button{width:100%;min-height:44px;margin-top:auto;border:1px solid var(--ds-border);border-radius:var(--ds-radius-control);background:var(--ds-subtle);color:var(--ds-muted);font-size:12px;font-weight:650}
+.ancillary-scroll-hint{text-align:right;color:var(--ds-muted);font-size:11px;margin:2px 4px 0}
+.ancillary-empty{padding:14px;border-radius:var(--ds-radius-control);background:var(--ds-subtle);color:var(--ds-muted);font-size:13px;line-height:1.5}
+.ancillary-panel>.ui-text-button{min-height:44px;color:var(--ds-primary)}
+.ancillary-order{margin:16px 0;padding:16px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-card);background:var(--ds-surface);min-width:0}
+.ancillary-order-status{max-width:50%;padding:6px 9px;border-radius:999px;background:var(--ds-subtle);color:var(--ds-primary);font-size:11px;line-height:1.4;font-weight:700;text-align:center}
+.ancillary-order ul{list-style:none;margin:10px 0 0;padding:0}
+.ancillary-order li{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--ds-border);font-size:13px;line-height:1.5}
+.ancillary-order li>span{min-width:0}.ancillary-order li small{display:block;color:var(--ds-muted);font-size:11px}
+.ancillary-order li strong{flex-shrink:0;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ancillary-order-total{display:flex;justify-content:space-between;gap:12px;padding:12px 0 0;color:var(--ds-muted);font-size:13px}
+.ancillary-order-total strong{color:var(--ds-ink);white-space:nowrap}
+.ancillary-order-total.is-grand{margin-top:10px;padding-top:12px;border-top:1px solid var(--ds-border);color:var(--ds-ink);font-weight:750}
+.ancillary-order-note{margin:10px 0 0;color:var(--ds-muted);font-size:12px;line-height:1.5}
+.booking-price-breakdown .booking-addon-subtotal{padding-top:8px;margin-top:5px;border-top:1px dashed var(--ds-border);font-weight:750;color:var(--ds-ink)}
+@media(max-width:767px){.ancillary-panel{margin:18px -18px 0;padding:17px 0 2px}.ancillary-panel-heading{padding:0 18px}.ancillary-tabs{margin:14px 0 10px;padding-left:18px;padding-right:18px}.ancillary-track{grid-auto-columns:minmax(250px,82%);gap:10px;padding-left:18px;padding-right:18px}.ancillary-scroll-hint{padding-right:18px}.ancillary-card{min-height:270px;padding:13px}.ancillary-order{padding:14px}.ancillary-order-status{max-width:46%;font-size:10px}}

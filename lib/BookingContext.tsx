@@ -14,7 +14,9 @@ import {coupleTotal} from "./couple-pricing";
 import { getNtrpLevel, tours } from "@/lib/mock-data";
 
 import type {BookingParticipant} from "./booking-participants";
+import type {AncillarySelection} from "./ancillary-catalog";
 export interface BookingState {
+  serviceSelections?: AncillarySelection[];
   participants?:BookingParticipant[];
   contactParticipates?:boolean;
   submissionKey?: string;

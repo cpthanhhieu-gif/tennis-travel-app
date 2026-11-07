@@ -944,3 +944,12 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .app-tour-mobile-booking .app-tour-loyalty{color:var(--ds-primary);font-size:10px;font-weight:700}
 .app-tour-booking-error{position:absolute;right:12px;bottom:calc(100% + 4px);left:12px;margin:0;padding:8px 12px;border:1px solid #f3b6b0;border-radius:10px;background:#fff7f6;color:var(--ds-danger);font-size:12px;box-shadow:0 3px 12px rgba(0,0,0,.08)}
 @media(max-width:767px){.tour-calendar-grid{gap:3px}.tour-calendar-grid>button,.tour-calendar-grid>.is-unavailable{min-height:52px;border-radius:10px}.tour-calendar-grid>span:not(.tour-calendar-weekday){min-height:48px}.tour-calendar-action{align-items:flex-start}.tour-time-picker{padding:12px}}
+
+/* Requested mobile polish: cleaner rails and compact tour dates. */
+:root[data-design-theme="next"] .app-offer-heading>button{background:transparent;color:var(--ds-booking)}
+:root[data-design-theme="next"] .app-voucher-rail,.app-service-rail,.tour-date-rail{scrollbar-width:none;-ms-overflow-style:none;scrollbar-color:transparent transparent}
+:root[data-design-theme="next"] .app-voucher-rail::-webkit-scrollbar,.app-service-rail::-webkit-scrollbar,.tour-date-rail::-webkit-scrollbar{display:none;width:0;height:0}
+.tour-date-card{min-height:108px;padding:12px}
+.tour-date-card.is-selected{padding:11px}
+.tour-date-card>b{display:none}
+@media(max-width:767px){.tour-date-card{min-height:108px}}

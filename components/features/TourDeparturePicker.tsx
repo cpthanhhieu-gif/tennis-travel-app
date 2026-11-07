@@ -42,7 +42,7 @@ export default function TourDeparturePicker({packageId,schedules,referral="",ace
   <div className="tour-date-rail" aria-label="Ngày khởi hành, cuộn ngang">{schedules.map(schedule=>{
    const [, ,day]=schedule.date.split("-"),active=schedule.code===departureCode;
    return <button type="button" key={schedule.code} className={`tour-date-card${active?" is-selected":""}`} aria-pressed={active} onClick={()=>selectSchedule(schedule)}>
-    <span>{monthLabel(schedule.date)}</span><strong>{Number(day)}</strong><small>{schedule.dateLabel.slice(-4)} · {schedule.dayOfWeek}</small><b>{packageId==="sbu2"?"Báo giá đoàn":formatVND(schedule.price)}</b>{active&&<em>Đã chọn</em>}
+    <span>{monthLabel(schedule.date)}</span><strong>{Number(day)}</strong><small>{schedule.dateLabel.slice(-4)} · {schedule.dayOfWeek}</small>{active&&<em>Đã chọn</em>}
    </button>;
   })}</div>
   <div className="tour-calendar-action"><span>{selected?`Ngày đã chọn: ${selected.dateLabel}`:"Chưa chọn ngày khởi hành"}</span></div>

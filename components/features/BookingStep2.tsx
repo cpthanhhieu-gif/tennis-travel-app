@@ -30,8 +30,6 @@ export default function BookingStep2({ onNext }: Props) {
     try{const r=await fetch("/api/local",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"ntrp",answers})});const d=await r.json();if(r.status===401||r.status===403){applyResult(getNtrpLevel(Object.values(answers).reduce((sum,n)=>sum+n,0)/ntrpQuiz.length));return;}if(!r.ok)throw Error(d.error);setSaved(d.ntrpProfile);applyResult(getNtrpLevel(d.ntrpProfile.level));}catch(e){setSaveError(requestErrorMessage(e));}finally{setSaving(false);}
   };
 
-  const deferAssessment = ()=>{updateBooking({ntrpDeferred:true,ntrpLevel:0,ntrpLabel:"",contactParticipates:false});updateNtrpQuizState({answers:{},showResult:false,ntrpResult:null});onNext();};
-
   if (showResult && ntrpResult) {
     return (
       <div className="ntrp-result">
@@ -65,7 +63,6 @@ export default function BookingStep2({ onNext }: Props) {
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.4rem]">
         Đánh giá trình độ tennis
       </h2>
-      <Button variant="secondary" onClick={deferAssessment}>Tôi đặt giúp / không chơi — bổ sung trình độ sau</Button>
       <label className="group-advice-choice"><input type="checkbox" checked={assessingOther} onChange={e=>setAssessingOther(e.target.checked)}/>Đánh giá giúp cho người khác</label>
       {saved&&!assessingOther&&<section className="ds-quality mb-[2.4rem]"><h3 className="text-[2rem] font-bold">Trình độ đã lưu: {saved.level} — {saved.label}</h3><p>Đánh giá ngày {new Date(saved.assessedAt).toLocaleDateString("vi-VN")}.</p><Button onClick={()=>applyResult(getNtrpLevel(saved.level))}>Dùng kết quả đã lưu</Button><p>Hoặc trả lời lại 5 câu bên dưới để cập nhật.</p></section>}
       {saveError&&<p role="alert">{saveError}</p>}

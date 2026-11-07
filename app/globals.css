@@ -708,6 +708,8 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 
 :root[data-design-theme="next"] .travel-header-brand{flex:1}
 :root[data-design-theme="next"] .travel-header-title{display:block;min-width:0;overflow:hidden;color:var(--ds-ink);font-size:18px;font-weight:750;line-height:1.25;letter-spacing:-.02em;text-overflow:ellipsis;white-space:nowrap}
+:root[data-design-theme="next"] .travel-header-home-back{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:28px;color:var(--ds-primary);border-radius:50%;text-decoration:none}
+:root[data-design-theme="next"] .travel-header-home-back:hover{background:var(--ds-subtle)}
 @media(max-width:1023px){:root[data-design-theme="next"] .travel-header-brand{gap:12px}:root[data-design-theme="next"] .travel-header-title{font-size:17px}}
 
 /* Header status stays on one swipeable line. */

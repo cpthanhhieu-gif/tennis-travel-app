@@ -38,9 +38,7 @@ export default function BookingStep2({ onNext }: Props) {
           <div className="ntrp-score"><span>NTRP</span><strong>{ntrpResult.level.toFixed(1)}</strong></div>
           <div><h3>{ntrpResult.label}</h3><p>{ntrpResult.description}</p><small>Trình độ sẽ được xác nhận riêng theo chuyến.</small></div>
         </section>
-        <p className="ntrp-profile-note">Kết quả dành cho người chơi đang khai hồ sơ. Người đi cùng không chơi tennis không cần đánh giá trình độ tennis.</p>
-        <section className="ntrp-recommendation"><h3>Tư vấn nhóm tập</h3><p>HLV sẽ xác nhận trình độ và xếp nhóm trước buổi tập đầu tiên.</p><label className="group-advice-choice"><input type="checkbox" checked={booking.groupAdviceRequested===true} onChange={e=>updateBooking({groupAdviceRequested:e.target.checked})}/><span>Tôi muốn được tư vấn thêm về nhóm tập<small>Vietravel sẽ liên hệ theo thông tin bạn cung cấp ở bước tiếp theo.</small></span></label></section>
-        <p>Kết quả không tự đổi gói hoặc xác nhận sẵn nhóm chơi. Nếu muốn đổi trải nghiệm, quay lại bước chọn gói.</p>
+        <label className="group-advice-choice ntrp-result-advice"><input type="checkbox" checked={booking.groupAdviceRequested===true} onChange={e=>updateBooking({groupAdviceRequested:e.target.checked})}/><span>Tôi muốn được tư vấn thêm về nhóm tập<small>Vietravel sẽ liên hệ theo thông tin bạn cung cấp ở bước tiếp theo.</small></span></label>
         <div className="booking-result-actions">
           <Button variant="primary" size="lg" onClick={onNext}>Tiếp tục — Nhập thông tin</Button>
           <Button variant="secondary" size="lg" onClick={()=>{setCurrentQ(0);updateNtrpQuizState({showResult:false,answers:{}});}}>Đánh giá lại</Button>

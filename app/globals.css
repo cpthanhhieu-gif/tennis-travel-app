@@ -910,3 +910,6 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
  .app-tour-detail .tour-picker-footer{position:static;left:auto;right:auto;bottom:auto;margin-top:18px;padding:12px 0 0;background:transparent;box-shadow:none}
  .app-tour-detail .tour-picker-footer .ds-cta{min-width:110px}
 }
+.booking-received-trip .booking-received-status{display:block;margin:0 0 12px}
+.booking-received-trip .booking-received-status strong{display:block;font-size:16px;line-height:1.5}
+.booking-received-trip .booking-received-status p{margin:4px 0 0}

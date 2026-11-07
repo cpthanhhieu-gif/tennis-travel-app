@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronLeft, Check, CalendarDays, Users, ArrowRight } from "lucide-react";
+import { ChevronLeft, CalendarDays, Users, ArrowRight } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
 import { useBooking } from "@/lib/BookingContext";
@@ -158,7 +158,7 @@ export default function BookingFlow() {
         </div>
       </Modal>
 
-      {celebrating&&<div className="booking-success-celebration" role="status" aria-live="assertive"><div className="booking-success-confetti" aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/></div><span className="booking-success-mark"><Check size={40} aria-hidden="true"/></span><strong>Đặt chuyến thành công!</strong><p>Đang chuẩn bị xác nhận chuyến đi của bạn</p></div>}
+      {celebrating&&<div className="booking-success-celebration" role="status" aria-live="assertive"><div className="booking-success-confetti" aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/><i/></div><strong>Đặt chuyến thành công!</strong><p>Đang chuẩn bị xác nhận chuyến đi của bạn</p></div>}
       {/* Success modal */}
       <Modal
         isOpen={showSuccess}
@@ -167,8 +167,7 @@ export default function BookingFlow() {
         bottomSheet
       >
         <div className="booking-received">
-          <div className="booking-received-status"><span className="booking-received-icon"><Check size={24} aria-hidden="true"/></span><div><strong>Đã xác nhận đặt chuyến</strong><p>Cảm ơn {booking.name}. Khoản cọc đã được xác nhận. Đăng ký đã hoàn tất.</p></div></div>
-          <section className="booking-received-trip" aria-label="Thông tin chuyến đi"><Image className="booking-received-trip-image" src={selectedPackage.image} alt={`Ảnh ${selectedTour.name}`} width={640} height={300} sizes="(max-width: 640px) 80vw, 520px"/><div className="booking-received-trip-copy"><span className="ds-eyebrow">CHUYẾN BẠN ĐÃ CHỌN</span><h3>{selectedTour.destinationName} – {selectedPackage.name}</h3><p><CalendarDays size={18} aria-hidden="true"/>{selectedSchedule.dateLabel} · {selectedTour.duration}</p><p><Users size={18} aria-hidden="true"/>{booking.numPeople-booking.numCompanions} người chơi · {booking.numCompanions} người đi cùng</p></div></section>
+          <section className="booking-received-trip" aria-label="Thông tin chuyến đi"><Image className="booking-received-trip-image" src={selectedPackage.image} alt={`Ảnh ${selectedTour.name}`} width={640} height={300} sizes="(max-width: 640px) 80vw, 520px"/><div className="booking-received-trip-copy"><div className="booking-received-status"><strong>Đã xác nhận đặt chuyến</strong><p>Cảm ơn {booking.name}. Khoản cọc đã được xác nhận. Đăng ký đã hoàn tất.</p></div><span className="ds-eyebrow">CHUYẾN BẠN ĐÃ CHỌN</span><h3>{selectedTour.destinationName} – {selectedPackage.name}</h3><p><CalendarDays size={18} aria-hidden="true"/>{selectedSchedule.dateLabel} · {selectedTour.duration}</p><p><Users size={18} aria-hidden="true"/>{booking.numPeople-booking.numCompanions} người chơi · {booking.numCompanions} người đi cùng</p></div></section>
           <p>Chuyến đi đã chuyển sang Sắp đi. Mở Hành trình để xem nhóm tập và chuẩn bị.</p>
           <p className="booking-received-note">Đã nhận cọc và xác nhận chỗ. Vui lòng thanh toán phần còn lại trước ngày khởi hành 15 ngày.</p>
           <Button variant="primary" onClick={handleViewPreTour} className="w-full" size="lg">Theo dõi trong Hành trình <ArrowRight size={18} aria-hidden="true"/></Button>

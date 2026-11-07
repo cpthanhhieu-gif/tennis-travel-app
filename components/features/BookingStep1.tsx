@@ -3,7 +3,7 @@
 import {initialParty} from "@/lib/booking-entry";
 import {browserScenario} from "@/lib/demo-experience";
 import {coupleTotal,companionRate} from "@/lib/couple-pricing";
-import {normalizeAncillarySelections,priceAncillaryServices} from "@/lib/ancillary-catalog";
+import {normalizeAncillarySelections} from "@/lib/ancillary-catalog";
 import { useEffect, useMemo, useState } from "react";
 import GroupRequestFields from "./GroupRequestFields";
 import {validGroupRequest} from "@/lib/group-request";
@@ -12,7 +12,6 @@ import { useBooking } from "@/lib/BookingContext";
 import { tours, packageCapacity, formatVNDShort, type Tour } from "@/lib/mock-data";
 import { Check, Calendar, Clock3, MapPin } from "lucide-react";
 import { departureTimeSlots } from "@/lib/departure-times";
-import BookingTripAddOnPicker from "./BookingTripAddOnPicker";
 
 interface Props { onNext: () => void }
 
@@ -62,8 +61,6 @@ export default function BookingStep1({ onNext }: Props) {
     selectedTour.departureSchedules.find((s) => s.code === scheduleCode) ?? firstSchedule;
   const effectiveGuests=selectedTour.packageId==="sbu2"?booking.groupRequest?.max??people:people;
   const normalizedSelections=useMemo(()=>normalizeAncillarySelections(selectedTour.packageId,effectiveGuests,booking.serviceSelections),[selectedTour.packageId,effectiveGuests,booking.serviceSelections]);
-  const addOnTotal=priceAncillaryServices(selectedTour.packageId,effectiveGuests,normalizedSelections).subtotal;
-  const bookingTotal=coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions)+addOnTotal;
 
   useEffect(()=>{const patch={tourId:selectedTour.id,packageId:selectedTour.packageId,destination:selectedTour.destinationId,departureDate:selectedSchedule.date,departureCode:selectedSchedule.code,numPeople:people,numCompanions:companions,totalPrice:coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions),...(JSON.stringify(normalizedSelections)!==JSON.stringify(booking.serviceSelections)?{serviceSelections:normalizedSelections}:{})};updateBooking(patch);},[selectedTourId,scheduleCode,people,companions,updateBooking,booking.serviceSelections,normalizedSelections]);
 
@@ -143,9 +140,8 @@ export default function BookingStep1({ onNext }: Props) {
         <details className="booking-companion-details"><summary>Hoạt động & điều kiện người đi cùng</summary><p className="text-[1.4rem]">{selectedTour.packageId==="sbu3"?"Nghỉ dưỡng, spa, ẩm thực và tham quan theo phương án; có thể cùng cooking class, gala và cổ vũ Ace Cup.":"Nghỉ dưỡng, ẩm thực và tham quan theo phương án. Spa và hoạt động cụ thể cần xác nhận theo chuyến."} Hoạt động tùy chọn và phụ thu phòng được báo giá riêng.</p></details>
         <p className="mt-[1.6rem]">Tổng: {people} khách · {people-companions} người chơi + {companions} người đi cùng (tối đa {maxPeople}). Cần ít nhất một người chơi.</p>
       </section>}
-      <BookingTripAddOnPicker packageId={selectedTour.packageId} guests={selectedTour.packageId==="sbu2"?booking.groupRequest?.max??people:people} departureDate={selectedSchedule.date} selections={booking.serviceSelections??[]} onChange={serviceSelections=>updateBooking({serviceSelections})}/>
       {people > maxPeople && <p role="alert">Gói này tối đa {maxPeople} khách. Vui lòng điều chỉnh số người trước khi tiếp tục.</p>}
-      <div className="booking-continue">{groupError&&selectedTour.packageId==="sbu2"&&!validGroupRequest(booking.groupRequest)&&<p role="alert" className="booking-field-error">Chưa thể tiếp tục. Vui lòng bổ sung hoặc sửa các ô được đánh dấu phía trên.</p>}<div><span>{selectedTour.packageId==="sbu2"?`Quy mô dự kiến · ${booking.groupRequest?.min??12}–${booking.groupRequest?.max??16} khách`:addOnTotal?`Tour + dịch vụ · ${people} khách`:`Tổng dự kiến · ${people} khách`}</span><strong>{selectedTour.packageId==="sbu2"?"Chờ báo giá đoàn":`${bookingTotal.toLocaleString("vi-VN")} ₫`}</strong></div><Button variant="primary" size="lg" className="w-full" disabled={people > maxPeople} onClick={handleNext}>
+      <div className="booking-continue">{groupError&&selectedTour.packageId==="sbu2"&&!validGroupRequest(booking.groupRequest)&&<p role="alert" className="booking-field-error">Chưa thể tiếp tục. Vui lòng bổ sung hoặc sửa các ô được đánh dấu phía trên.</p>}<div><span>{selectedTour.packageId==="sbu2"?`Quy mô dự kiến · ${booking.groupRequest?.min??12}–${booking.groupRequest?.max??16} khách`:`Tổng dự kiến · ${people} khách`}</span><strong>{selectedTour.packageId==="sbu2"?"Chờ báo giá đoàn":`${coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions).toLocaleString("vi-VN")} ₫`}</strong></div><Button variant="primary" size="lg" className="w-full" disabled={people > maxPeople} onClick={handleNext}>
         {selectedTour.packageId === "sbu2" ? "Tiếp tục — Liên hệ đại diện" : "Tiếp tục — Đánh giá trình độ tennis"}
       </Button></div>
     </div>

@@ -10,6 +10,8 @@ import {useLocalAccount} from "@/lib/use-local-account";
 import {journeyPhase} from "@/lib/journey";
 import type {AncillaryService} from "@/lib/ancillary-catalog";
 import {ancillaryImage} from "@/lib/ancillary-presentation";
+import {BOOKING_RESUME_STORAGE_KEY,type BookingResumePointer} from "@/lib/booking-initialization";
+import type {Tour} from "@/lib/mock-data";
 const intents=[{id:"all",label:"Tất cả"},{id:"sbu1",label:"Học & chơi"},{id:"sbu2",label:"Thi đấu"},{id:"sbu3",label:"Nghỉ dưỡng"}];
 const serviceSpotlight=[
  {id:"ace-check-screening",description:"Sàng lọc thể lực trước chuyến đi; có thể thêm vào nhiều gói.",href:"#tour-packages",cta:"Chọn tour phù hợp"},
@@ -17,10 +19,13 @@ const serviceSpotlight=[
  {id:"phu-quoc-room-sea-view",description:"Nâng hạng phòng theo nhu cầu lưu trú của chuyến Phú Quốc.",href:"/tours/sbu3",cta:"Xem tour Phú Quốc"},
 ];
 const normalize=(s:string)=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[đĐ]/g,"d").toLowerCase().trim();
+function bookingStage(pointer:BookingResumePointer){if(pointer.submitted)return pointer.packageId==="sbu2"?"Theo dõi yêu cầu đã gửi":"Tiếp tục thanh toán";if(pointer.packageId==="sbu2")return pointer.step===1?"Quy mô & yêu cầu đoàn":pointer.step===3?"Liên hệ đại diện":"Xem lại & gửi yêu cầu";return pointer.step<=1?"Chọn lịch & số khách":pointer.step===2?"Đánh giá trình độ tennis":pointer.step===3?"Thông tin liên hệ":"Xác nhận & đặt cọc";}
 export default function ActiveHome(){
  const [q,setQ]=useState(""),[filter,setFilter]=useState("all"),[destination,setDestination]=useState("all"),[filtersOpen,setFiltersOpen]=useState(false);
  const [restored,setRestored]=useState(false);
+ const [bookingResume,setBookingResume]=useState<{pointer:BookingResumePointer;tour:Tour;dateLabel:string}|null>(null);
  useEffect(()=>{try{const saved=JSON.parse(sessionStorage.getItem(browserStorageKey("tennis-home-filters-v1"))??"null");if(saved){if(typeof saved.q==="string")setQ(saved.q.slice(0,200));if(intents.some(i=>i.id===saved.filter))setFilter(saved.filter);if(saved.destination==="all"||tours.some(t=>t.destinationId===saved.destination))setDestination(saved.destination);}}catch{}if(!browserExploring()&&document.cookie.includes("tt-scenario=")){setFilter("all");setDestination("all");setQ("");}setRestored(true);},[]);
+ useEffect(()=>{try{const key=browserStorageKey(BOOKING_RESUME_STORAGE_KEY),pointer=JSON.parse(sessionStorage.getItem(key)??"null") as BookingResumePointer|null;if(pointer?.version===1&&typeof pointer.href==="string"&&/^\/booking(?:\?|$)/.test(pointer.href)&&sessionStorage.getItem(pointer.draftKey)){const tour=tours.find(item=>item.id===pointer.tourId),schedule=tour?.departureSchedules.find(item=>item.code===pointer.departureCode);if(tour&&schedule&&tour.packageId===pointer.packageId&&Number.isInteger(pointer.numPeople)&&pointer.numPeople>0)setBookingResume({pointer,tour,dateLabel:schedule.dateLabel});}}catch{}},[]);
  useEffect(()=>{if(restored)try{sessionStorage.setItem(browserStorageKey("tennis-home-filters-v1"),JSON.stringify({q,filter,destination}));}catch{}},[q,filter,destination,restored]);
  const {data,error,refresh}=useLocalAccount();
  const live=data?.orders.find(o=>o.startedAt&&!o.completedAt);
@@ -32,7 +37,8 @@ export default function ActiveHome(){
  const reset=()=>{setQ("");setFilter("all");setDestination("all");};
  return <div className="ds-container app-home">
  <header className="app-home-header"><div><p className="ui-kicker">TENNIS TRAVEL</p><h1>Khám phá</h1><p>Chọn trải nghiệm cho lần ra sân tiếp theo.</p></div></header>
- {active&&tour&&<Link className="app-mobile-resume" href={live||upcoming?`/in-tour?booking=${active.id}`:"/pre-tour"}><CalendarDays size={22}/><span><strong>{live?"Tiếp tục chuyến đi":upcoming?"Lịch & chuẩn bị":"Theo dõi yêu cầu"} · {tour.destinationName}</strong><small>{journeyPhase(active)} · {departure?.dateLabel??"Chờ xác nhận ngày"}</small></span><ArrowUpRight size={20}/></Link>}
+ {bookingResume&&<Link className="app-booking-resume" href={bookingResume.pointer.href}><span className="app-booking-resume-icon"><CalendarDays size={21}/></span><span className="app-booking-resume-copy"><small>ĐANG ĐẶT DỞ · {bookingStage(bookingResume.pointer)}</small><strong>{bookingResume.tour.destinationName} · {tourPackages.find(item=>item.id===bookingResume.pointer.packageId)?.name}</strong><span>{bookingResume.dateLabel} · {bookingResume.pointer.numPeople-bookingResume.pointer.numCompanions} người chơi + {bookingResume.pointer.numCompanions} người đi cùng</span></span><span className="app-booking-resume-cta">Tiếp tục <ArrowUpRight size={17}/></span></Link>}
+ {active&&tour&&!bookingResume&&<Link className="app-mobile-resume" href={live||upcoming?`/in-tour?booking=${active.id}`:"/pre-tour"}><CalendarDays size={22}/><span><strong>{live?"Tiếp tục chuyến đi":upcoming?"Lịch & chuẩn bị":"Theo dõi yêu cầu"} · {tour.destinationName}</strong><small>{journeyPhase(active)} · {departure?.dateLabel??"Chờ xác nhận ngày"}</small></span><ArrowUpRight size={20}/></Link>}
  <DemoScenarioGuide/>
  <div className="app-home-layout"><section className="app-discover" aria-label="Tìm trải nghiệm tennis">
  <div className="app-search-row"><div className="app-search-box"><Search size={21} aria-hidden="true"/><label className="sr-only" htmlFor="home-search">Tìm tour hoặc điểm đến</label><input id="home-search" value={q} onChange={e=>setQ(e.target.value)} placeholder="Bạn muốn chơi ở đâu?" autoComplete="off"/>{q&&<button type="button" aria-label="Xóa tìm kiếm" onClick={()=>setQ("")}><X size={18}/></button>}</div><button className="app-filter-button" type="button" aria-haspopup="dialog" onClick={()=>setFiltersOpen(true)} aria-label="Lọc theo điểm đến"><SlidersHorizontal size={20}/><span>Điểm đến{destination!=="all"?" · 1":""}</span></button></div>

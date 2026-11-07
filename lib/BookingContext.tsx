@@ -7,7 +7,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, Re
 import {browserScenario} from "./demo-experience";
 import {readAceSession} from "./ace-session";
 import {consultationSignature} from "./ace-booking";
-import {initializeBooking,bookingDraftName} from "./booking-initialization";
+import {initializeBooking,bookingDraftName,BOOKING_RESUME_STORAGE_KEY,type BookingResumePointer} from "./booking-initialization";
 import type {BookingSource} from "./booking-entry";
 import {browserStorageKey,browserExploring} from "./demo-scope";
 import {coupleTotal} from "./couple-pricing";
@@ -113,12 +113,12 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     const rekey=()=>setStorageVersion(v=>v+1);window.addEventListener("demo:mode",rekey);
     return()=>window.removeEventListener("demo:mode",rekey);
   },[]);
-  useEffect(()=>{if(!hydrated||draftConflict)return;try{draftKey.current=browserStorageKey(bookingDraftName(new URLSearchParams(window.location.search)));sessionStorage.setItem(draftKey.current,JSON.stringify({version:1,booking,quiz:ntrpQuizState,step}));}catch{}},[booking,ntrpQuizState,step,hydrated,storageVersion,draftConflict]);
+  useEffect(()=>{if(!hydrated||draftConflict)return;try{const params=new URLSearchParams(window.location.search),key=browserStorageKey(bookingDraftName(params));draftKey.current=key;sessionStorage.setItem(key,JSON.stringify({version:1,booking,quiz:ntrpQuizState,step}));params.set("resume","1");const pointer:BookingResumePointer={version:1,draftKey:key,href:`/booking?${params.toString()}`,tourId:booking.tourId,packageId:booking.packageId,departureCode:booking.departureCode,numPeople:booking.numPeople,numCompanions:booking.numCompanions,step,submitted:!!booking.submissionKey,updatedAt:new Date().toISOString()};sessionStorage.setItem(browserStorageKey(BOOKING_RESUME_STORAGE_KEY),JSON.stringify(pointer));}catch{}},[booking,ntrpQuizState,step,hydrated,storageVersion,draftConflict]);
   const updateBooking=useCallback((updates:Partial<BookingState>)=>{
     setBooking(prev=>{const changed=Object.entries(updates).some(([k,v])=>prev[k as keyof BookingState]!==v);if(!changed)return prev;const realChange=Object.keys(updates).some(k=>k!=="submissionKey"&&prev[k as keyof BookingState]!==updates[k as keyof BookingState]);return {...prev,...updates,...(realChange?{submissionKey:""}:{})};});
   },[]);
   const updateNtrpQuizState=useCallback((updates:Partial<NtrpQuizState>)=>setNtrpQuizState(prev=>({...prev,...updates})),[]);
-  const clearDraft=useCallback(()=>{try{sessionStorage.removeItem(draftKey.current);}catch{}},[]);
+  const clearDraft=useCallback(()=>{try{sessionStorage.removeItem(draftKey.current);const resumeKey=browserStorageKey(BOOKING_RESUME_STORAGE_KEY),pointer=JSON.parse(sessionStorage.getItem(resumeKey)??"null") as BookingResumePointer|null;if(pointer?.draftKey===draftKey.current)sessionStorage.removeItem(resumeKey);}catch{}},[]);
   const resetBooking=()=>{clearDraft();setBooking(defaultBooking);setNtrpQuizState(defaultNtrpQuizState);setStep(1);};
   if(!hydrated)return <p role="status">Đang chuẩn bị thông tin đặt gói…</p>;
 

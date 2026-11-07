@@ -3,6 +3,8 @@ import { coupleTotal } from "./couple-pricing";
 import { bookingSource, initialParty } from "./booking-entry";
 import type { ScenarioId } from "./demo-scope";
 import type { BookingState, NtrpQuizState } from "./BookingContext";
+export const BOOKING_RESUME_STORAGE_KEY="tennis-booking-resume-v1";
+export type BookingResumePointer={version:1;draftKey:string;href:string;tourId:string;packageId:string;departureCode:string;numPeople:number;numCompanions:number;step:number;submitted:boolean;updatedAt:string};
 export function initializeBooking(params: URLSearchParams, exploring: boolean, scenario: ScenarioId | undefined, defaults: BookingState, raw: string | null) {
  const source=bookingSource(params.get("from")==="ace",exploring,scenario);
  const t=tours.find(t=>(!params.get("package")||t.packageId===params.get("package"))&&(!params.get("destination")||t.destinationId===params.get("destination")))??tours[0];
@@ -17,7 +19,7 @@ export function initializeBooking(params: URLSearchParams, exploring: boolean, s
  let quiz:Partial<NtrpQuizState>|undefined;let step=1,restored=false;let draftConflict:{savedDate:string;requestedDate:string}|undefined;
  try{const saved=JSON.parse(raw??"null");const tour=tours.find(t=>t.id===saved?.booking?.tourId);const schedule=tour?.departureSchedules.find(d=>d.code===saved?.booking?.departureCode);
  if(saved?.version===1&&tour&&schedule&&Number.isInteger(saved.booking.numPeople)&&saved.booking.numPeople>=1&&saved.booking.numPeople<=packageCapacity(tour.packageId)){
- if(params.has("departure")&&t.departureSchedules.some(x=>x.code===params.get("departure"))&&(tour.id!==t.id||schedule.code!==d.code))draftConflict={savedDate:schedule.dateLabel,requestedDate:d.dateLabel};
+ if(params.get("resume")!=="1"&&params.has("departure")&&t.departureSchedules.some(x=>x.code===params.get("departure"))&&(tour.id!==t.id||schedule.code!==d.code))draftConflict={savedDate:schedule.dateLabel,requestedDate:d.dateLabel};
  const b=saved.booking;const c=Number.isInteger(b.numCompanions)&&b.numCompanions>=0&&b.numCompanions<b.numPeople?b.numCompanions:0;
  booking={...booking,...b,entrySource:source,originScenario:scenario,tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:schedule.code,departureDate:schedule.date,numCompanions:c,notes:typeof b.notes==="string"?b.notes.slice(0,2000):"",totalPrice:coupleTotal(tour.packageId,schedule.price,b.numPeople,c)};
  if(saved.quiz?.answers&&typeof saved.quiz.answers==="object")quiz=saved.quiz;

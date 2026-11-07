@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+ <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#54B9FF"/><stop offset="1" stop-color="#1764E8"/></linearGradient>
+ <linearGradient id="side" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#DCE5FF"/><stop offset="1" stop-color="#AEBBFA"/></linearGradient>
+ <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#85E4B4"/><stop offset="1" stop-color="#18C98B"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<ellipse cx="520" cy="797" rx="310" ry="55" fill="#6D8AEF" opacity=".18" filter="url(#shadow)"/>
+<!-- stacked rounded platform -->
+<g transform="rotate(-8 510 650)"><rect x="202" y="583" width="620" height="190" rx="52" fill="#2168E9"/><rect x="202" y="548" width="620" height="172" rx="50" fill="url(#side)"/><rect x="202" y="512" width="620" height="172" rx="50" fill="#F5F7FF"/><rect x="202" y="475" width="620" height="176" rx="50" fill="url(#blue)"/><path d="M252 491h236v153H252q-35 0-35-36V526q0-35 35-35" fill="#66B4FF" opacity=".52"/><path d="M488 491h285q35 0 35 35v82H488z" fill="#1469D6" opacity=".4"/><path d="M488 567h320v42q0 35-35 35H488z" fill="#8DCBFF" opacity=".36"/></g>
+<!-- open book -->
+<g transform="rotate(-8 514 400)"><path d="M270 290Q385 258 510 330v201q-120-67-240-31z" fill="#B6F1D1"/><path d="M510 330q122-72 242-40v210q-121-36-242 31z" fill="url(#green)"/><path d="M510 330v201" stroke="#16A877" stroke-width="13"/><path d="M310 330q88-20 163 21M310 374q88-20 163 21" fill="none" stroke="#45BD93" stroke-width="12" stroke-linecap="round" opacity=".55"/></g>
+<!-- floating puzzle/game token -->
+<g transform="rotate(16 730 245)"><rect x="660" y="158" width="136" height="136" rx="38" fill="#18C98B"/><path d="M728 158a27 27 0 1 0-1 0" fill="#fff" opacity="0"/><circle cx="728" cy="158" r="25" fill="#78DDB0"/><circle cx="660" cy="226" r="25" fill="#78DDB0"/></g>
+<g transform="rotate(-18 255 367)"><circle cx="255" cy="367" r="69" fill="#EEF2FC"/><circle cx="255" cy="367" r="55" fill="#DDE5F7"/><path d="M225 367h60M255 337v60" stroke="#98A6C4" stroke-width="14" stroke-linecap="round"/></g>
+</svg>

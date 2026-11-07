@@ -49,7 +49,6 @@ export default function BookingAncillaryPicker({packageId,guests,selections,onCh
    return <article className={`ancillary-card${qty?" is-selected":""}${inactive?" is-unavailable":""}`} key={service.id}>
     <div className="ancillary-card-top"><span className="ancillary-card-icon"><Icon size={19} aria-hidden="true"/></span><span className={`ancillary-status ${inactive?"is-muted":service.status==="provisional"?"is-estimate":""}`}>{inactive?"Chưa mở":service.status==="provisional"?"Giá dự toán":"Theo hồ sơ"}</span></div>
     <div className="ancillary-card-main"><Image className="ancillary-card-image" src={ancillaryImage(service.id)} alt="" width={76} height={76} sizes="76px"/><div><h4>{service.name}</h4><p className="ancillary-price">{formatVND(service.unitPrice)} <small>/ {unitLabel(service.unit)}</small></p></div></div>
-    {service.note&&<p className="ancillary-note">{service.note}</p>}
     <button type="button" className="ancillary-details-trigger" aria-haspopup="dialog" onClick={()=>setDetailService(service)}>Giá và điều kiện</button>
     {inactive?<button type="button" disabled className="ancillary-unavailable-button">Chưa thể thêm</button>:<div className="ancillary-stepper" role="group" aria-label={`Số lượng ${service.name}`}>
      <button type="button" aria-label={`Bớt ${service.name}`} disabled={qty===0} onClick={()=>setQuantity(service,qty-1)}><Minus size={16} aria-hidden="true"/></button>

@@ -11,6 +11,7 @@ export function initializeBooking(params: URLSearchParams, exploring: boolean, s
  if(params.has("players")&&Number.isInteger(players)&&players>=1&&Number.isInteger(companions)&&companions>=0&&players+companions<=packageCapacity(t.packageId))party={numPeople:players+companions,numCompanions:companions};
  else if(t.packageId==="sbu3"&&params.get("couple")==="1")party={numPeople:2,numCompanions:1};
  const d=t.departureSchedules.find(d=>d.code===params.get("departure"))??t.departureSchedules[0];
+ const completeTourSelection=params.get("package")===t.packageId&&params.has("departure")&&d.code===params.get("departure")&&params.has("players")&&params.has("companions")&&Number.isInteger(players)&&players>=1&&Number.isInteger(companions)&&companions>=0&&players+companions<=packageCapacity(t.packageId);
  let booking:BookingState={...defaults,...party,entrySource:source,originScenario:scenario,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,referralToken:params.get("ref")??"",totalPrice:coupleTotal(t.packageId,d.price,party.numPeople,party.numCompanions)};
  if(t.packageId==="sbu2"&&source!=="scenario")booking.groupRequest={min:Math.max(8,party.numPeople),max:Math.max(8,party.numPeople),dates:[d.date,""],budget:d.price,format:"Đánh đôi",courts:4,gala:true,companions:party.numCompanions};
  let quiz:Partial<NtrpQuizState>|undefined;let step=1,restored=false;let draftConflict:{savedDate:string;requestedDate:string}|undefined;
@@ -23,6 +24,7 @@ export function initializeBooking(params: URLSearchParams, exploring: boolean, s
  if(Number.isInteger(saved.step)&&saved.step>=1&&saved.step<=4)step=tour.packageId==="sbu2"&&saved.step===2?3:saved.step;
  restored=true;
  }}catch{}
+ if(!restored&&completeTourSelection&&t.packageId!=="sbu2")step=2;
  return {booking,quiz,step,restored,draftConflict};
 }
 export function bookingDraftName(params:URLSearchParams){return `tennis-booking-draft-v2:${params.get("package")??"all"}:${params.get("destination")??"all"}:${params.get("ref")??"direct"}:${params.get("from")==="ace"?`ace:${params.get("consultation")??"current"}`:"normal"}`;}

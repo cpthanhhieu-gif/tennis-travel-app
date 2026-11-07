@@ -29,6 +29,7 @@ export interface BookingState {
   destination: string;
   departureDate: string;
   departureCode: string;   // mã chuyến Vietravel, ví dụ FESGN567-010-130626XE-H
+  departureTime: string;
   numPeople: number;
   numCompanions: number;
   ntrpDeferred?: boolean;
@@ -69,6 +70,7 @@ const defaultBooking: BookingState = {
   destination: "dalat",
   departureDate: "2027-04-24",
   departureCode: "VTR-SIG-TNS-01-DL2-240427",
+  departureTime: "",
   numPeople: 2,
   numCompanions: 0,
   ntrpLevel: 0,

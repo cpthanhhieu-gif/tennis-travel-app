@@ -10,7 +10,8 @@ import {validGroupRequest} from "@/lib/group-request";
 import Button from "@/components/ui/Button";
 import { useBooking } from "@/lib/BookingContext";
 import { tours, packageCapacity, formatVNDShort, type Tour } from "@/lib/mock-data";
-import { Check, Calendar, MapPin } from "lucide-react";
+import { Check, Calendar, Clock3, MapPin } from "lucide-react";
+import { departureTimeSlots } from "@/lib/departure-times";
 
 interface Props { onNext: () => void }
 
@@ -32,6 +33,7 @@ export default function BookingStep1({ onNext }: Props) {
   const { booking, updateBooking, restoredDraft } = useBooking();
 
   const [groupError,setGroupError]=useState(false);
+  const [departureTimeError,setDepartureTimeError]=useState(false);
   const [changeTour,setChangeTour]=useState(false);
   const [pkgFilter, setPkgFilter]   = useState("all");
   const [destFilter, setDestFilter] = useState("all");
@@ -65,7 +67,7 @@ export default function BookingStep1({ onNext }: Props) {
       const party=booking.entrySource==="scenario"&&!booking.aceConsultation?initialParty("scenario",tour.packageId,browserScenario()):{numPeople:people,numCompanions:companions};setPeople(party.numPeople);setCompanions(party.numCompanions);updateBooking({participants:undefined,groupRequestEdited:false,groupRequest:tour.packageId==="sbu2"?{min:Math.max(8,party.numPeople),max:Math.max(8,party.numPeople),dates:[tour.departureSchedules[0].date,""],budget:tour.departureSchedules[0].price,format:"Đánh đôi",courts:4,gala:true,companions:party.numCompanions}:undefined,premiumRequest:undefined});
     }
 
-    updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions),serviceSelections:normalizeAncillarySelections(tour.packageId,people,booking.serviceSelections)});
+    updateBooking({tourId:tour.id,packageId:tour.packageId,destination:tour.destinationId,departureCode:tour.departureSchedules[0].code,departureDate:tour.departureSchedules[0].date,departureTime:"",numCompanions:companions,totalPrice:coupleTotal(tour.packageId,tour.departureSchedules[0].price,people,companions),serviceSelections:normalizeAncillarySelections(tour.packageId,people,booking.serviceSelections)});
     const limit=packageCapacity(tour.packageId);
     if(people>limit){const nextCompanions=Math.min(companions,limit-1);setCompanions(nextCompanions);setPeople(limit);}
     setSelectedTourId(tour.id);
@@ -75,10 +77,12 @@ export default function BookingStep1({ onNext }: Props) {
 
   const handleSelectSchedule = (code: string) => {
     setScheduleCode(code);
-
+    setDepartureTimeError(false);
+    updateBooking({departureTime:""});
   };
 
   const handleNext = () => {
+    if(!booking.departureTime){setDepartureTimeError(true);return;}
     if(selectedTour.packageId==="sbu2"&&!validGroupRequest(booking.groupRequest)){setGroupError(true);requestAnimationFrame(()=>{const field=document.querySelector<HTMLElement>('.premium-request-fields [aria-invalid="true"]');field?.focus({preventScroll:true});field?.scrollIntoView({behavior:"smooth",block:"center"});});return;}
     if(!Number.isInteger(people)||!Number.isInteger(companions)||people<1||companions<0||people-companions<1||people > maxPeople)return;
     const effectiveGuests=selectedTour.packageId==="sbu2"?booking.groupRequest?.max??people:people;
@@ -89,6 +93,7 @@ export default function BookingStep1({ onNext }: Props) {
       destination: selectedTour.destinationId,
       departureDate: selectedSchedule.date,
       departureCode: selectedSchedule.code,
+      departureTime: booking.departureTime,
       numPeople: people,
       numCompanions: companions,
       totalPrice: coupleTotal(selectedTour.packageId,selectedSchedule.price,people,companions),
@@ -122,6 +127,7 @@ export default function BookingStep1({ onNext }: Props) {
           <span className="booking-departure-price"><b>{formatVNDShort(d.price)}</b><small>/ người chơi</small>{selectedSchedule.code===d.code&&<small className="booking-selection-status"><Check size={16} aria-hidden="true"/>Đã chọn</small>}</span>
         </label>)}</div>
       </fieldset>
+      <fieldset className="booking-departure-times"><legend><Clock3 size={20} aria-hidden="true"/> Khung giờ khởi hành</legend><p className="booking-field-help">Chọn khung giờ phù hợp với bạn.</p><div>{departureTimeSlots.map(slot=><button type="button" key={slot} aria-pressed={booking.departureTime===slot} className={booking.departureTime===slot?"is-selected":""} onClick={()=>{updateBooking({departureTime:slot});setDepartureTimeError(false);}}>{slot}</button>)}</div>{departureTimeError&&!booking.departureTime&&<p className="booking-field-error" role="alert">Vui lòng chọn khung giờ trước khi tiếp tục.</p>}</fieldset>
       {selectedTour.packageId==="sbu2"&&<><GroupRequestFields showErrors={groupError}/></>}
       {selectedTour.packageId!=="sbu2"&&<section className="mb-[3.2rem]" aria-labelledby="couple-heading">
         <h3 id="couple-heading" className="text-[2rem] font-bold">Ai cùng tham gia?</h3><p>Bạn có thể đăng ký cho nhiều người. Nhập số người chơi tennis và người đi cùng thực tế; tổng khách bao gồm cả hai nhóm.</p>

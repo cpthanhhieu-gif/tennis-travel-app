@@ -3,6 +3,7 @@ import { coupleTotal } from "./couple-pricing";
 import { bookingSource, initialParty } from "./booking-entry";
 import type { ScenarioId } from "./demo-scope";
 import type { BookingState, NtrpQuizState } from "./BookingContext";
+import {isDepartureTime} from "./departure-times";
 export const BOOKING_RESUME_STORAGE_KEY="tennis-booking-resume-v1";
 export type BookingResumePointer={version:1;draftKey:string;href:string;tourId:string;packageId:string;departureCode:string;numPeople:number;numCompanions:number;step:number;submitted:boolean;updatedAt:string};
 export function initializeBooking(params: URLSearchParams, exploring: boolean, scenario: ScenarioId | undefined, defaults: BookingState, raw: string | null) {
@@ -13,8 +14,8 @@ export function initializeBooking(params: URLSearchParams, exploring: boolean, s
  if(params.has("players")&&Number.isInteger(players)&&players>=1&&Number.isInteger(companions)&&companions>=0&&players+companions<=packageCapacity(t.packageId))party={numPeople:players+companions,numCompanions:companions};
  else if(t.packageId==="sbu3"&&params.get("couple")==="1")party={numPeople:2,numCompanions:1};
  const d=t.departureSchedules.find(d=>d.code===params.get("departure"))??t.departureSchedules[0];
- const completeTourSelection=params.get("package")===t.packageId&&params.has("departure")&&d.code===params.get("departure")&&params.has("players")&&params.has("companions")&&Number.isInteger(players)&&players>=1&&Number.isInteger(companions)&&companions>=0&&players+companions<=packageCapacity(t.packageId);
- let booking:BookingState={...defaults,...party,entrySource:source,originScenario:scenario,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,referralToken:params.get("ref")??"",totalPrice:coupleTotal(t.packageId,d.price,party.numPeople,party.numCompanions)};
+ const completeTourSelection=params.get("package")===t.packageId&&params.has("departure")&&d.code===params.get("departure")&&isDepartureTime(params.get("departureTime"))&&params.has("players")&&params.has("companions")&&Number.isInteger(players)&&players>=1&&Number.isInteger(companions)&&companions>=0&&players+companions<=packageCapacity(t.packageId);
+ let booking:BookingState={...defaults,...party,entrySource:source,originScenario:scenario,tourId:t.id,packageId:t.packageId,destination:t.destinationId,departureCode:d.code,departureDate:d.date,departureTime:isDepartureTime(params.get("departureTime"))?params.get("departureTime")!:"",referralToken:params.get("ref")??"",totalPrice:coupleTotal(t.packageId,d.price,party.numPeople,party.numCompanions)};
  if(t.packageId==="sbu2"&&source!=="scenario")booking.groupRequest={min:Math.max(8,party.numPeople),max:Math.max(8,party.numPeople),dates:[d.date,""],budget:d.price,format:"Đánh đôi",courts:4,gala:true,companions:party.numCompanions};
  let quiz:Partial<NtrpQuizState>|undefined;let step=1,restored=false;let draftConflict:{savedDate:string;requestedDate:string}|undefined;
  try{const saved=JSON.parse(raw??"null");const tour=tours.find(t=>t.id===saved?.booking?.tourId);const schedule=tour?.departureSchedules.find(d=>d.code===saved?.booking?.departureCode);

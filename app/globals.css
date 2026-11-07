@@ -897,7 +897,10 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
  :root .app-surface .app-tour-detail{padding-left:0!important;padding-right:0!important}
  .app-tour-detail .ds-detail-grid>.ds-summary{display:none!important}
  .app-tour-detail .ui-tabs{margin-bottom:0}
- .app-tour-detail .tour-date-rail{margin:0 -14px;padding:4px 14px 12px}
+ .app-tour-detail .tour-date-rail{margin:0 -14px 0 0;padding:4px 14px 12px 0}
+ .app-tour-detail .ui-tabset>.ui-tabs{padding:0}
+ .app-tour-detail .tour-picker-heading{align-items:flex-start}
+ .app-tour-detail .tour-calendar-trigger{align-self:flex-end;min-height:36px;margin-top:-4px;padding:4px 0;border:0;background:transparent;color:var(--ds-primary);font-size:13px;font-weight:700}
  .app-tour-detail .tour-picker-footer{position:static;left:auto;right:auto;bottom:auto;margin-top:18px;padding:12px 0 0;background:transparent;box-shadow:none}
  .app-tour-detail .tour-picker-footer .ds-cta{min-width:110px}
 }
@@ -906,7 +909,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .booking-received-trip .booking-received-status p{margin:4px 0 0}
 
 .tour-overview-facts{display:grid;gap:0;margin:12px 0 20px;border-top:1px solid var(--ds-border)}
-.tour-overview-facts p{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:8px;margin:0;padding:12px 0;border-bottom:1px solid var(--ds-border);font-size:14px;color:var(--ds-muted)}
+.tour-overview-facts p{display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:8px;margin:0;padding:6px 0;border-bottom:1px solid var(--ds-border);font-size:14px;color:var(--ds-muted)}
 .tour-overview-facts svg{grid-row:span 2;color:var(--ds-primary)}
 .tour-overview-facts span{font-size:12px}
 .tour-overview-facts strong{color:var(--ds-ink);font-size:14px}
@@ -914,7 +917,7 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .tour-highlight-list li{display:flex;align-items:flex-start;gap:9px;padding:0!important;font-size:14px;line-height:1.5}
 .tour-highlight-list svg{flex:0 0 auto;margin-top:2px;color:var(--ds-primary)}
 .tour-calendar-action{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 12px;font-size:12px;color:var(--ds-muted)}
-.tour-calendar-action button{min-height:40px;padding:7px 12px;border:1px solid var(--ds-primary);border-radius:999px;color:var(--ds-primary);font-size:13px;font-weight:700;white-space:nowrap}
+.tour-calendar-trigger{min-height:36px;padding:4px 0;border:0;background:transparent;color:var(--ds-primary);font-size:13px;font-weight:700;white-space:nowrap}
 .tour-time-picker{margin:8px 0 16px;padding:14px;border:1px solid var(--ds-border);border-radius:14px;background:var(--ds-surface)}
 .tour-time-picker h3{margin:0 0 10px;font-size:15px;font-weight:700}
 .tour-time-picker>div{display:flex;flex-wrap:wrap;gap:8px}

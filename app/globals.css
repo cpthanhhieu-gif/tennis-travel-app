@@ -967,3 +967,4 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .ancillary-card{align-self:start;min-height:0;height:auto}
 .ancillary-card-main{margin-top:0}
 @media(max-width:767px){.booking-step-four-content .ancillary-panel{margin:0;padding:17px 0 2px}.ancillary-card{min-height:0}}
+@media(max-width:767px){.app-service-rail{padding-left:24px}}

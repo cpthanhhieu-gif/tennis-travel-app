@@ -851,3 +851,12 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .app-intent-chips button img{display:block;width:42px;height:42px;object-fit:contain;flex:0 0 42px}
 .app-intent-chips button[aria-pressed=true]{background:var(--ds-primary);border-color:var(--ds-primary);color:white}
 @media(max-width:767px){.app-intent-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;overflow:visible;padding:4px 0;margin:12px 0 16px}.app-intent-chips button{min-width:0;min-height:76px;flex-direction:column;justify-content:center;gap:0;padding:4px 2px;border-radius:14px;font-size:11px;line-height:1.15;text-align:center;white-space:normal}.app-intent-chips button img{width:52px;height:48px;flex:0 0 48px}.app-intent-chips button span{display:block;min-height:24px;align-content:center}}
+.app-personal-card-visual{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:300px;padding:0!important;overflow:hidden;border:0!important;border-radius:var(--ds-radius-card);background:#143f6b!important;color:#fff;isolation:isolate}
+.app-personal-card-visual>img{z-index:0;object-fit:cover;object-position:center 55%}
+.app-personal-card-overlay{position:absolute;z-index:1;inset:0;background:linear-gradient(180deg,rgba(8,27,52,.04) 20%,rgba(8,27,52,.34) 52%,rgba(8,27,52,.88) 100%)}
+.app-personal-card-copy{position:relative;z-index:2;padding:22px;color:white}
+.app-personal-card-copy>svg{margin-bottom:8px}
+.app-personal-card-copy h3{margin:0 0 8px!important;color:inherit;font-size:22px!important;line-height:1.25!important}
+.app-personal-card-copy p{margin:0 0 14px!important;color:rgba(255,255,255,.92);font-size:13px!important;line-height:1.5!important}
+.app-personal-card-copy .ds-link{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border:1px solid white;border-radius:999px;background:white;color:var(--ds-primary);font-size:13px;font-weight:700;text-decoration:none}
+@media(max-width:767px){.app-personal-card-visual{min-height:245px}.app-personal-card-copy{padding:18px}.app-personal-card-copy h3{font-size:20px!important}}

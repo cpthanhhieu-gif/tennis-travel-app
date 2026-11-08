@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { ArrowRight, BusFront, CarFront, Check, CircleCheck, MapPin, Plane, TrainFront, Users } from "lucide-react";
 import { activityAmount, formatTransportMoney, parseTransportOrders, TRANSPORT_ACTIVITY, TRANSPORT_ORDER_KEY, transportAmount, transportGrandTotal, type TransportDemoOrder } from "@/lib/transport-order";
 
-const modeNames = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay" };
-const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane };
+const modeNames = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay", private_car: "Xe riêng ngoài lịch đoàn" };
+const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane, private_car: CarFront };
 
 export default function TransportOrderStatus() {
   const [order, setOrder] = useState<TransportDemoOrder | null>(null);

@@ -6,14 +6,12 @@ import Button from "@/components/ui/Button";
 import { ChevronLeft } from "lucide-react";
 import { useBooking } from "@/lib/BookingContext";
 import { ntrpQuiz, getNtrpLevel } from "@/lib/mock-data";
-import BookingTripAddOnPicker from "./BookingTripAddOnPicker";
 
 interface Props { onNext: () => void }
 
 export default function BookingStep2({ onNext }: Props) {
   const { booking, updateBooking, ntrpQuizState, updateNtrpQuizState } = useBooking();
   const { answers, showResult, ntrpResult } = ntrpQuizState;
-  const tripAddOns=<BookingTripAddOnPicker packageId={booking.packageId} guests={booking.numPeople} departureDate={booking.departureDate} selections={booking.serviceSelections??[]} onChange={serviceSelections=>updateBooking({serviceSelections})}/>;
 
   const [currentQ, setCurrentQ] = useLocalState(0); // index 0–4
   const advancing=false;
@@ -35,7 +33,6 @@ export default function BookingStep2({ onNext }: Props) {
   if (showResult && ntrpResult) {
     return (
       <div className="ntrp-result">
-        {tripAddOns}
         <header className="ntrp-result-heading"><span className="ds-eyebrow">HỒ SƠ TENNIS</span><h2>Kết quả trình độ tennis</h2><p>Kết quả tự đánh giá để HLV xác nhận trình độ và tư vấn nhóm chơi.</p></header>
         <section className="ntrp-score-panel" aria-label="Kết quả tự đánh giá">
           <div className="ntrp-score"><span>NTRP</span><strong>{ntrpResult.level.toFixed(1)}</strong></div>
@@ -63,7 +60,6 @@ export default function BookingStep2({ onNext }: Props) {
 
   return (
     <div>
-      {tripAddOns}
       <h2 className="text-[2.2rem] font-bold text-neutral-90 mb-[0.4rem]">
         Đánh giá trình độ tennis
       </h2>

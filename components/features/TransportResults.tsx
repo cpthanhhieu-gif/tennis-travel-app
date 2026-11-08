@@ -14,8 +14,9 @@ const modeInfo: Record<Mode, { label: string; Icon: typeof TrainFront }> = {
   bus: { label: "Xe buýt", Icon: BusFront },
   rental: { label: "Thuê xe", Icon: CarFront },
   airport: { label: "Xe sân bay", Icon: Plane },
+  private_car: { label: "Xe riêng ngoài lịch đoàn", Icon: CarFront },
 };
-const validModes: Mode[] = ["train", "bus", "rental", "airport"];
+const validModes: Mode[] = ["train", "bus", "rental", "airport", "private_car"];
 const money = (amount: number) => `${amount.toLocaleString("vi-VN")} đ`;
 
 export default function TransportResults({ initialSearch }: { initialSearch: Record<string, string | undefined> }) {
@@ -23,8 +24,11 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
   const mode = validModes.includes(initialSearch.mode as Mode) ? initialSearch.mode as Mode : "train";
   const { label, Icon } = modeInfo[mode];
   const rides = transportRidesByMode[mode];
-  const [selectedId, setSelectedId] = useState(rides[0].id);
-  const [passengers, setPassengers] = useState(1);
+  const requestedRide = rides.find(ride => ride.id === initialSearch.rideId);
+  const requestedPassengers = Math.max(1, Math.trunc(Number(initialSearch.passengers) || 1));
+  const defaultRide = requestedRide ?? (mode === "private_car" ? rides.find(ride => (ride.maxPassengers ?? 16) >= requestedPassengers) : undefined) ?? rides[0];
+  const [selectedId, setSelectedId] = useState(defaultRide.id);
+  const [passengers, setPassengers] = useState(requestedPassengers);
   const [date, setDate] = useState(initialSearch.date ?? "");
   const selected = rides.find(ride => ride.id === selectedId) ?? rides[0];
   const maxPassengers = selected.maxPassengers ?? 16;
@@ -34,13 +38,13 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
     try {
       const saved = JSON.parse(sessionStorage.getItem(TRANSPORT_DRAFT_KEY) ?? "null") as Partial<{ mode: Mode; from: string; to: string; date: string; rideId: string; passengers: number }> | null;
       if (saved?.mode === mode && saved.from === initialSearch.from && saved.to === initialSearch.to && saved.date === initialSearch.date && rides.some(ride => ride.id === saved.rideId)) {
-        setSelectedId(saved.rideId!);
+        if (!requestedRide) setSelectedId(saved.rideId!);
         const ride = rides.find(item => item.id === saved.rideId)!;
-        setPassengers(Math.max(1, Math.min(ride.maxPassengers ?? 16, Number(saved.passengers) || 1)));
+        if (!initialSearch.passengers) setPassengers(Math.max(1, Math.min(ride.maxPassengers ?? 16, Number(saved.passengers) || 1)));
         if (saved.date) setDate(saved.date);
       }
     } catch { /* Use default results if browser storage is unavailable. */ }
-  }, [initialSearch, mode, rides]);
+  }, [initialSearch, mode, rides, requestedRide]);
   function confirmSelection() {
     const draft = { version: 1, mode, from: initialSearch.from ?? "", to: initialSearch.to ?? "", date, rideId: selected.id, rideName: selected.name, time: selected.time, passengers, unitPrice: selected.price, unit: selected.unit, total, activityId: undefined as string | undefined, activityCount: 0 };
     try {
@@ -56,11 +60,11 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
 
   return <div className="ds-container transport-page transport-results-page">
     <Link className="transport-back-link" href="/transport"><ArrowLeft size={17}/> Sửa tìm kiếm</Link>
-    <header className="transport-results-heading"><div className="transport-results-title"><span className="transport-results-icon"><Icon size={21}/></span><div><span className="ui-kicker">{label.toUpperCase()}</span><h1>{initialSearch.from || "Điểm đi"}<ArrowRight size={19}/>{initialSearch.to || "Điểm đến"}</h1></div></div><p>{date || "Chưa chọn ngày"} · Giá demo cho một lượt</p></header>
+    <header className="transport-results-heading"><div className="transport-results-title"><span className="transport-results-icon"><Icon size={21}/></span><div><span className="ui-kicker">{label.toUpperCase()}</span><h1>{initialSearch.from || "Điểm đi"}<ArrowRight size={19}/>{initialSearch.to || "Điểm đến"}</h1></div></div><p>{date || "Chưa chọn ngày"} · {mode === "private_car" ? "Giá demo theo thời lượng thuê" : "Giá demo cho một lượt"}</p></header>
     <div className="transport-results-layout">
       <section className="transport-ride-list" aria-labelledby="transport-ride-list-title">
         <div className="transport-results-section-heading"><div><span className="ui-kicker">CHỌN PHƯƠNG ÁN</span><h2 id="transport-ride-list-title">{rides.length} chuyến / xe phù hợp</h2></div><span className="transport-count-badge">Dữ liệu demo</span></div>
-        {rides.map(ride => <button type="button" key={ride.id} className={`transport-ride-card${selectedId === ride.id ? " is-selected" : ""}`} aria-pressed={selectedId === ride.id} onClick={() => { setSelectedId(ride.id); setPassengers(value => Math.min(value, ride.maxPassengers ?? 16)); }}>
+        {rides.map(ride => <button type="button" key={ride.id} className={`transport-ride-card${selectedId === ride.id ? " is-selected" : ""}`} aria-pressed={selectedId === ride.id} onClick={() => setSelectedId(ride.id)}>
           <span className="transport-ride-radio" aria-hidden="true">{selectedId === ride.id && <Check size={14}/>}</span>
           <span className="transport-ride-main"><strong>{ride.time}</strong><span className="transport-ride-line"/><span className="transport-ride-duration"><Clock3 size={14}/>{ride.duration}</span></span>
           <span className="transport-ride-copy"><strong>{ride.name}</strong><small>{ride.detail}</small><small>{initialSearch.from || "Điểm đi"} → {initialSearch.to || "Điểm đến"}</small></span>
@@ -72,9 +76,10 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
         <label className="transport-result-date"><span>Ngày khởi hành</span><input type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={event => setDate(event.target.value)}/></label>
         <p className="transport-passenger-note"><Users size={17}/> Khách đi cùng chuyến</p>
         <div className="transport-passenger-stepper"><button type="button" aria-label="Giảm số khách" disabled={passengers <= 1} onClick={() => setPassengers(value => Math.max(1, value - 1))}>−</button><strong aria-live="polite">{passengers}</strong><button type="button" aria-label="Tăng số khách" disabled={passengers >= maxPassengers} onClick={() => setPassengers(value => Math.min(maxPassengers, value + 1))}>+</button></div>
+        {passengers > maxPassengers && <p className="transport-price-disclaimer" role="status">Xe đang chọn tối đa {maxPassengers} khách. Hãy chọn xe phù hợp hoặc giảm số khách để tiếp tục.</p>}
         <div className="transport-selection-summary"><span>{selected.name}</span><strong>{money(selected.price)} <small>{selected.unit === "person" ? "× khách" : "/ xe"}</small></strong>{selected.unit === "person" && <span>{passengers} khách</span>}<span className="transport-selection-date">Ngày {date || "chưa chọn"} · {selected.time}</span></div>
         <div className="transport-total"><span>Tổng tạm tính</span><strong>{money(total)}</strong></div>
-        <Button className="transport-confirm-button" onClick={confirmSelection}>Chọn chuyến này</Button>
+        <Button className="transport-confirm-button" disabled={passengers > maxPassengers} onClick={confirmSelection}>Chọn chuyến này</Button>
         <p className="transport-price-disclaimer">Giá minh họa để xem luồng. Chưa xác nhận với nhà cung cấp và không phải giá đặt bán.</p>
       </aside>
     </div>

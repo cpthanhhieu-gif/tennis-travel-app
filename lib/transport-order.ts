@@ -69,7 +69,7 @@ export const transportGrandTotal = (draft: TransportDraft) => transportAmount(dr
 export function isTransportDraft(value: unknown): value is TransportDraft {
   if (!value || typeof value !== "object") return false;
   const draft = value as Partial<TransportDraft>;
-  return draft.version === 1 && ["train", "bus", "rental", "airport"].includes(draft.mode ?? "") &&
+  return draft.version === 1 && ["train", "bus", "rental", "airport", "private_car"].includes(draft.mode ?? "") &&
     typeof draft.from === "string" && typeof draft.to === "string" && typeof draft.date === "string" &&
     typeof draft.rideId === "string" && typeof draft.rideName === "string" && typeof draft.time === "string" &&
     Number.isInteger(draft.passengers) && (draft.passengers ?? 0) > 0 && Number.isFinite(draft.unitPrice) &&

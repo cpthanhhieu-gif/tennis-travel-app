@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import { formatTransportMoney, parseTransportOrders, TRANSPORT_ORDER_KEY, type TransportDemoOrder } from "@/lib/transport-order";
 import type { TransportMode } from "@/lib/transport-catalog";
 
-const modeNames: Record<TransportMode, string> = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay" };
-const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane };
+const modeNames: Record<TransportMode, string> = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay", private_car: "Xe riêng ngoài lịch đoàn" };
+const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane, private_car: CarFront };
 
 export default function JourneyServiceOrders() {
   const [orders, setOrders] = useState<TransportDemoOrder[]>([]);

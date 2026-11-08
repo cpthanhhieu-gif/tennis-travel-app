@@ -1,4 +1,4 @@
-export type TransportMode = "train" | "bus" | "rental" | "airport";
+export type TransportMode = "train" | "bus" | "rental" | "airport" | "private_car";
 
 export type TransportRide = {
   id: string;
@@ -31,6 +31,10 @@ export const transportRidesByMode: Record<TransportMode, TransportRide[]> = {
     { id: "airport-4", name: "Xe đưa đón 4 chỗ", time: "08:00", duration: "Một chiều", detail: "Tối đa 3 khách · 2 kiện hành lý", price: 350000, unit: "vehicle", maxPassengers: 3 },
     { id: "airport-7", name: "Xe đưa đón 7 chỗ", time: "08:00", duration: "Một chiều", detail: "Tối đa 6 khách · 4 kiện hành lý", price: 480000, unit: "vehicle", maxPassengers: 6 },
     { id: "airport-16", name: "Xe đưa đón 16 chỗ", time: "08:00", duration: "Một chiều", detail: "Tối đa 12 khách · 10 kiện hành lý", price: 950000, unit: "vehicle", maxPassengers: 12 },
+  ],
+  private_car: [
+    { id: "dalat-private-lake-4h", name: "Xe riêng có tài xế · 4 chỗ", time: "14:00", duration: "4 giờ · khứ hồi", detail: "Ngoài lịch đoàn · tối đa 3 khách", price: 1200000, unit: "vehicle", maxPassengers: 3 },
+    { id: "dalat-private-city-6h", name: "Xe riêng có tài xế · 7 chỗ", time: "09:00", duration: "6 giờ · khứ hồi", detail: "Ngoài lịch đoàn · tối đa 5 khách", price: 1650000, unit: "vehicle", maxPassengers: 5 },
   ],
 };
 

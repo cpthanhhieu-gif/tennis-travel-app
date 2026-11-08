@@ -7,8 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BusFront, CarFront, Check, MapPin, Minus, Plane, Plus, Star, TrainFront, Users } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { activityAmount, formatTransportMoney, isTransportDraft, TRANSPORT_ACTIVITY, TRANSPORT_DRAFT_KEY, transportAmount, transportGrandTotal, type TransportDraft } from "@/lib/transport-order";
-const modeLabels = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay" };
-const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane };
+const modeLabels = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay", private_car: "Xe riêng ngoài lịch đoàn" };
+const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane, private_car: CarFront };
 
 export default function TransportReview() {
   const router = useRouter();

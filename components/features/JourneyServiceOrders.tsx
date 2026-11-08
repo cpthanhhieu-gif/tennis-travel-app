@@ -30,19 +30,18 @@ export default function JourneyServiceOrders({ bookingId, compact = false }: { b
 
   const visibleOrders = bookingId ? orders.filter(order => order.relatedTourBookingId === bookingId) : orders;
 
-  if (compact && loaded && !visibleOrders.length) return <section className="journey-service-section"><div className="journey-service-heading"><div><span className="ui-kicker">DỊCH VỤ RIÊNG</span><h2>Dịch vụ xe liên quan</h2></div></div><p className="ds-caption">Đơn xe riêng đặt cho tour này sẽ xuất hiện tại đây; thanh toán tách khỏi giá tour.</p></section>;
+  if (compact && loaded && !visibleOrders.length) return <section className="journey-service-section"><div className="journey-service-heading"><div><h2>Dịch vụ xe liên quan</h2></div></div><p className="ds-caption">Đơn xe riêng đặt cho tour này sẽ xuất hiện tại đây; thanh toán tách khỏi giá tour.</p></section>;
 
   return <section className="journey-service-section" aria-labelledby={`journey-service-title-${bookingId ?? "all"}`}>
     <div className="journey-service-heading">
-      <div><span className="ui-kicker">ĐƠN RIÊNG · KHÔNG GỘP VÀO BOOKING TOUR</span><h2 id={`journey-service-title-${bookingId ?? "all"}`}>{bookingId ? "Dịch vụ riêng của tour" : "Dịch vụ riêng"}</h2></div>
-      {!compact && <Link href="/transport?mode=private_car">Đặt xe riêng <ArrowRight size={16}/></Link>}
+      <div><h2 id={`journey-service-title-${bookingId ?? "all"}`}>{bookingId ? "Dịch vụ riêng của tour" : "Dịch vụ riêng"}</h2></div>
     </div>
     {!loaded ? <p role="status">Đang tải đơn dịch vụ…</p> : !visibleOrders.length ? <div className="journey-service-empty"><p>{bookingId ? "Chưa có đơn xe riêng gắn với tour này." : "Đơn xe riêng bạn đặt trong phiên này sẽ xuất hiện ở đây."}</p>{!compact && <Link className="ds-link" href="/transport?mode=private_car">Đặt xe riêng</Link>}</div> : <div className="journey-service-list">
       {visibleOrders.map(order => {
         const Icon = modeIcons[order.mode];
         return <article className="journey-service-card" key={order.id}>
           <div className="journey-service-card-top"><span className="journey-service-icon"><Icon size={20}/></span><span className="ui-badge">{order.status === "simulated_paid" ? "Đã thanh toán mô phỏng" : "Đang xử lý"}</span></div>
-          <span className="ui-kicker">{modeNames[order.mode]} · {order.id}</span>
+          <span className="journey-service-order-label">{modeNames[order.mode]} · {order.id}</span>
           <h3>{order.from || "Điểm đi"} → {order.to || "Điểm đến"}</h3>
           <p>{order.date} · {order.time} · <Users size={14}/> {order.passengers} khách</p>
           <small>Mã dịch vụ: {order.rideId}{order.relatedTourId ? ` · Tour: ${order.relatedTourId}` : " · Đơn độc lập"}</small>

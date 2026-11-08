@@ -1,6 +1,5 @@
-import PageWrapper from "@/components/layout/PageWrapper";
-import TransportReview from "@/components/features/TransportReview";
+import { redirect } from "next/navigation";
 
 export default function TransportReviewPage() {
-  return <PageWrapper><TransportReview/></PageWrapper>;
+  redirect("/transport/payment");
 }

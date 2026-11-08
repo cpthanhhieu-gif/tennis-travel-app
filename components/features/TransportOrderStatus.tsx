@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ArrowRight, BusFront, CarFront, Check, MapPin, Plane, TrainFront, Users } from "lucide-react";
+import { ArrowRight, BusFront, CarFront, MapPin, Plane, TrainFront, Users } from "lucide-react";
 import { activityAmount, formatTransportMoney, parseTransportOrders, TRANSPORT_ACTIVITY, TRANSPORT_ORDER_KEY, transportAmount, transportGrandTotal, type TransportDemoOrder } from "@/lib/transport-order";
 
 const modeNames = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay", private_car: "Xe riêng ngoài lịch đoàn" };
@@ -37,8 +37,7 @@ export default function TransportOrderStatus() {
 
   return <div className="ds-container transport-order-page">
     <section className="transport-order-success" aria-labelledby="transport-order-status-title">
-      <Image className="transport-order-success-art" src="/images/transport-order-success.png" alt="Huy hiệu xác nhận màu tím bạc" width={160} height={160} priority/><span className="ui-kicker">ĐƠN DI CHUYỂN DEMO</span><h1 id="transport-order-status-title">Thanh toán mô phỏng hoàn tất</h1><p>Đơn đã được tạo trong phiên này. Chưa có giao dịch tiền thật và chưa giữ chỗ với nhà cung cấp.</p>
-      <div className="transport-order-status-badge"><Check size={15}/> Đã hoàn tất · Mô phỏng</div>
+      <Image className="transport-order-success-art" src="/images/transport-order-success.png" alt="Huy hiệu xác nhận màu tím bạc" width={160} height={160} priority/><h1 id="transport-order-status-title">Thanh toán mô phỏng hoàn tất</h1><p>Đơn đã được tạo trong phiên này. Chưa có giao dịch tiền thật và chưa giữ chỗ với nhà cung cấp.</p>
     </section>
     <div className="transport-order-view-layout">
       <section className="transport-order-view-card" aria-labelledby="transport-order-id-title">
@@ -51,5 +50,6 @@ export default function TransportOrderStatus() {
         <div className="transport-order-view-footer"><span>Phương thức thanh toán</span><strong>{order.paymentMethod}</strong><small>Mã dịch vụ: {order.rideId}</small><small>{order.relatedTourId ? `Mã tour liên quan: ${order.relatedTourId}` : "Đơn dịch vụ độc lập · không cần booking tour"}</small><small>Tạo lúc {createdAtLabel}</small>{order.relatedTourBookingId && <Link className="ds-link" href={`/pre-tour?booking=${encodeURIComponent(order.relatedTourBookingId)}`}>Mở tour liên quan</Link>}</div>
       </section>
     </div>
+    <Link className="transport-order-back-home" href="/pre-tour">Về chuyến đi <ArrowRight size={17} aria-hidden="true"/></Link>
   </div>;
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, BusFront, CarFront, Check, Clock3, Plane, TrainFront, Users } from "lucide-react";
+import { ArrowLeft, ArrowRight, BusFront, CalendarDays, CarFront, Check, Clock3, Plane, TrainFront, Users } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { TRANSPORT_ACTIVITY, TRANSPORT_DRAFT_KEY } from "@/lib/transport-order";
 import { transportRidesByMode, type TransportMode } from "@/lib/transport-catalog";
@@ -33,6 +33,7 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
   const selected = rides.find(ride => ride.id === selectedId) ?? rides[0];
   const maxPassengers = selected.maxPassengers ?? 16;
   const total = selected.unit === "person" ? selected.price * passengers : selected.price;
+  const dateLabel = date ? new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`)) : "Chưa chọn ngày";
 
   useEffect(() => {
     try {
@@ -67,7 +68,7 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
     <header className="transport-results-heading"><div className="transport-results-title"><span className="transport-results-icon"><Icon size={21}/></span><div><span className="ui-kicker">{label.toUpperCase()}</span><h1>{initialSearch.from || "Điểm đi"}<ArrowRight size={19}/>{initialSearch.to || "Điểm đến"}</h1></div></div><p>{date || "Chưa chọn ngày"} · {mode === "private_car" ? "Giá demo theo thời lượng thuê" : "Giá demo cho một lượt"}</p></header>
     <div className="transport-results-layout">
       <section className="transport-ride-list" aria-labelledby="transport-ride-list-title">
-        <div className="transport-results-section-heading"><div><span className="ui-kicker">CHỌN PHƯƠNG ÁN</span><h2 id="transport-ride-list-title">{rides.length} chuyến / xe phù hợp</h2></div><span className="transport-count-badge">Dữ liệu demo</span></div>
+        <div className="transport-results-section-heading"><div><span className="ui-kicker">{mode === "private_car" ? "CHỌN XE VÀ KHUNG GIỜ" : mode === "train" || mode === "bus" ? "CHỌN CHUYẾN" : "CHỌN XE"}</span><h2 id="transport-ride-list-title">{rides.length} {mode === "train" || mode === "bus" ? "chuyến phù hợp" : "phương án xe"}</h2></div><span className="transport-count-badge">Dữ liệu demo</span></div>
         {rides.map(ride => <button type="button" key={ride.id} className={`transport-ride-card${selectedId === ride.id ? " is-selected" : ""}`} aria-pressed={selectedId === ride.id} onClick={() => setSelectedId(ride.id)}>
           <span className="transport-ride-radio" aria-hidden="true">{selectedId === ride.id && <Check size={14}/>}</span>
           <span className="transport-ride-main"><strong>{ride.time}</strong><span className="transport-ride-line"/><span className="transport-ride-duration"><Clock3 size={14}/>{ride.duration}</span></span>
@@ -77,8 +78,9 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
         {mode === "private_car" && <p className="transport-flow-note">Giá, sức chứa và khung giờ là dữ liệu demo. Chưa xác nhận nhà xe, lịch xe hoặc chỗ trống; lựa chọn ở đây chưa phải xác nhận đặt xe.</p>}
       </section>
       <aside className="transport-selection-card" aria-label="Thông tin lựa chọn">
-        <span className="ui-kicker">TÙY CHỌN CHUYẾN ĐI</span><h2>Số khách</h2>
-        <label className="transport-result-date"><span>Ngày khởi hành</span><input type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={event => setDate(event.target.value)}/></label>
+        <span className="ui-kicker">NGÀY VÀ SỐ KHÁCH</span>
+        <fieldset className="booking-departures transport-request-date"><legend><CalendarDays size={18} aria-hidden="true"/> {mode === "private_car" ? "Ngày sử dụng xe" : "Ngày khởi hành"}</legend><div><label className="transport-result-date"><span>{dateLabel}</span><input style={{ width: "100%", height: "auto" }} aria-describedby="transport-date-note" type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={event => setDate(event.target.value)}/><small id="transport-date-note" className="ds-caption">{mode === "private_car" ? "Ngày khách yêu cầu · chưa xác nhận lịch xe" : "Ngày và tình trạng chỗ là dữ liệu demo"}</small></label></div></fieldset>
+        <h2>Số khách</h2>
         <p className="transport-passenger-note"><Users size={17}/> Khách đi cùng chuyến</p>
         <div className="transport-passenger-stepper"><button type="button" aria-label="Giảm số khách" disabled={passengers <= 1} onClick={() => setPassengers(value => Math.max(1, value - 1))}>−</button><strong aria-live="polite">{passengers}</strong><button type="button" aria-label="Tăng số khách" disabled={passengers >= maxPassengers} onClick={() => setPassengers(value => Math.min(maxPassengers, value + 1))}>+</button></div>
         {passengers > maxPassengers && <p className="transport-price-disclaimer" role="status">Xe đang chọn tối đa {maxPassengers} khách. Hãy chọn xe phù hợp hoặc giảm số khách để tiếp tục.</p>}

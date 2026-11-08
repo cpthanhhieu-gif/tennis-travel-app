@@ -33,7 +33,6 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
   const selected = rides.find(ride => ride.id === selectedId) ?? rides[0];
   const maxPassengers = selected.maxPassengers ?? 16;
   const total = selected.unit === "person" ? selected.price * passengers : selected.price;
-  const dateLabel = date ? new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`)) : "Chưa chọn ngày";
 
   useEffect(() => {
     try {
@@ -79,7 +78,7 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
       </section>
       <aside className="transport-selection-card" aria-label="Thông tin lựa chọn">
         <span className="ui-kicker">NGÀY VÀ SỐ KHÁCH</span>
-        <fieldset className="booking-departures transport-request-date"><legend><CalendarDays size={18} aria-hidden="true"/> {mode === "private_car" ? "Ngày sử dụng xe" : "Ngày khởi hành"}</legend><div><label className="transport-result-date"><span>{dateLabel}</span><input style={{ width: "100%", height: "auto" }} aria-describedby="transport-date-note" type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={event => setDate(event.target.value)}/><small id="transport-date-note" className="ds-caption">{mode === "private_car" ? "Ngày khách yêu cầu · chưa xác nhận lịch xe" : "Ngày và tình trạng chỗ là dữ liệu demo"}</small></label></div></fieldset>
+        <fieldset className="booking-departures transport-request-date"><legend><CalendarDays size={18} aria-hidden="true"/> {mode === "private_car" ? "Ngày sử dụng xe" : "Ngày khởi hành"}</legend><div><label className="transport-result-date"><span>Ngày khách yêu cầu</span><input style={{ width: "100%", height: "auto" }} aria-describedby="transport-date-note" type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={event => setDate(event.target.value)}/><small id="transport-date-note" className="ds-caption">{mode === "private_car" ? "Lịch xe chưa xác nhận." : "Ngày và tình trạng chỗ là dữ liệu demo."}</small></label></div></fieldset>
         <h2>Số khách</h2>
         <p className="transport-passenger-note"><Users size={17}/> Khách đi cùng chuyến</p>
         <div className="transport-passenger-stepper"><button type="button" aria-label="Giảm số khách" disabled={passengers <= 1} onClick={() => setPassengers(value => Math.max(1, value - 1))}>−</button><strong aria-live="polite">{passengers}</strong><button type="button" aria-label="Tăng số khách" disabled={passengers >= maxPassengers} onClick={() => setPassengers(value => Math.min(maxPassengers, value + 1))}>+</button></div>

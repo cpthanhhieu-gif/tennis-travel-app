@@ -3,7 +3,7 @@ import DemoScenarioGuide from "./DemoScenarioGuide";
 import {browserStorageKey,browserExploring} from "@/lib/demo-scope";
 import {useEffect,useRef,useState} from "react";
 import Link from "next/link";import Image from "next/image";
-import {Search,SlidersHorizontal,ArrowUpRight,CalendarDays,UserRound,Trophy,MapPin,X,Compass,ChevronRight,BusFront,Star} from "lucide-react";
+import {Search,SlidersHorizontal,ArrowUpRight,CalendarDays,UserRound,Trophy,MapPin,X,Compass,ChevronRight,Star} from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import {tourPackages,tours,formatVND} from "@/lib/mock-data";
 import {useLocalAccount} from "@/lib/use-local-account";
@@ -46,7 +46,7 @@ export default function ActiveHome(){
  <DemoScenarioGuide/>
  <div className="app-home-layout"><section className="app-discover" aria-label="Tìm trải nghiệm tennis">
  <div className="app-search-row"><div className="app-search-box"><Search size={21} aria-hidden="true"/><label className="sr-only" htmlFor="home-search">Tìm tour hoặc điểm đến</label><input id="home-search" value={q} onChange={e=>setQ(e.target.value)} placeholder="Bạn muốn chơi ở đâu?" autoComplete="off"/>{q&&<button type="button" aria-label="Xóa tìm kiếm" onClick={()=>setQ("")}><X size={18}/></button>}</div><button className="app-filter-button" type="button" aria-haspopup="dialog" onClick={()=>setFiltersOpen(true)} aria-label="Lọc theo điểm đến"><SlidersHorizontal size={20}/><span>Điểm đến{destination!=="all"?" · 1":""}</span></button></div>
- <div className="app-intent-chips" role="group" aria-label="Loại trải nghiệm">{intents.map(i=><button key={i.id} type="button" aria-pressed={filter===i.id} onClick={()=>setFilter(i.id)}><img src={i.image} alt=""/><span>{i.label}</span></button>)}<Link href="/transport" aria-label="Di chuyển: tàu hỏa, xe buýt, xe riêng"><BusFront size={32} aria-hidden="true"/><span>Di chuyển</span></Link></div>
+ <div className="app-intent-chips" role="group" aria-label="Loại trải nghiệm">{intents.map(i=><button key={i.id} type="button" aria-pressed={filter===i.id} onClick={()=>setFilter(i.id)}><img src={i.image} alt=""/><span>{i.label}</span></button>)}<Link href="/transport" aria-label="Di chuyển: tàu hỏa, xe buýt, xe riêng"><img src="/images/intents/di-chuyen.svg" alt=""/><span>Di chuyển</span></Link></div>
  <section className="app-promo-stack" aria-label="Ưu đãi và chương trình thành viên">
   <a className="app-stay-banner" href="#tour-packages"><span className="app-stay-copy"><span className="app-stay-title">Stay+ <b>Hot</b> <ChevronRight size={16}/></span><small>Tiết kiệm hơn khi đặt gói khách sạn + hoạt động</small></span></a>
  </section>

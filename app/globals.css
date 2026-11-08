@@ -1024,5 +1024,15 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .transport-results-page{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .transport-selection-card{position:fixed;z-index:35;left:max(16px,calc((100vw - 872px)/2));right:max(16px,calc((100vw - 872px)/2));bottom:calc(76px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:16px;padding:12px 14px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-card);background:var(--ds-surface);box-shadow:0 -4px 18px rgba(16,24,40,.14)}
 .transport-selection-card .transport-total{flex:1;margin:0}
+.transport-selection-card .transport-total>span{white-space:nowrap}
+.transport-selection-card .transport-total>strong{white-space:nowrap}
 .transport-selection-card .transport-confirm-button{width:min(280px,45%);min-height:46px}
+.transport-step-progress{display:grid;gap:12px;margin:0 0 16px}
+.transport-step-progress-top{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}
+.transport-step-progress-top>a{display:inline-flex;align-items:center;gap:5px;color:var(--ds-muted);font-weight:600;text-decoration:none}
+.transport-step-progress-top>strong{color:var(--ds-primary);font-size:12px}
+.transport-step-progress-bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.transport-step-progress-bars>i{height:4px;border-radius:999px;background:var(--ds-border)}
+.transport-step-progress-bars>i.is-complete,.transport-step-progress-bars>i.is-current{background:var(--ds-primary)}
 @media(max-width:767px){.transport-hero{margin:0 0 14px;padding:18px 12px 10px;border-radius:18px}.transport-hero .transport-mode-rail{grid-auto-columns:minmax(92px,24vw);gap:7px;padding:2px 0 8px}.transport-hero .transport-mode-rail button{min-height:76px}.app-private-ride-image{min-height:190px}.transport-results-page{padding-bottom:calc(148px + env(safe-area-inset-bottom,0px))}.transport-selection-card{left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:35;order:initial;box-shadow:0 -4px 18px rgba(16,24,40,.14)}.transport-selection-card .transport-confirm-button{width:min(54%,250px)}}
+@media(max-width:767px){.transport-selection-card{z-index:60;gap:12px;padding:10px 12px}.transport-selection-card .transport-total{display:grid;grid-template-columns:minmax(0,1fr);justify-content:start;gap:2px}.transport-selection-card .transport-total>span{font-size:12px}.transport-selection-card .transport-total>strong{font-size:16px}.transport-selection-card .transport-confirm-button{flex:0 0 52%;width:auto;min-width:132px}}

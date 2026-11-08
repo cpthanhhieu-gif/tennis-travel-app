@@ -82,8 +82,7 @@ export default function TransportPayment() {
   const backQuery = backParams.toString();
 
   return <div className="ds-container transport-payment-page">
-    <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>
-    <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 5 · THANH TOÁN RIÊNG</span><h1>{draft.mode === "private_car" ? "Thanh toán xe riêng" : "Thanh toán đơn di chuyển"}</h1><p>Khoản thanh toán của dịch vụ riêng không được cộng vào giá tour.</p></header>
+    <header className="transport-review-heading"><div className="transport-step-progress" aria-label="Bước 4 trên 4"><div className="transport-step-progress-top"><Link href={`/transport/results?${backQuery}`}><ArrowLeft size={15}/> Về chọn chuyến</Link><strong>Bước 4 / 4</strong></div><div className="transport-step-progress-bars" aria-hidden="true"><i className="is-complete"/><i className="is-complete"/><i className="is-complete"/><i className="is-current"/></div></div><h1>{draft.mode === "private_car" ? "Thanh toán xe riêng" : "Thanh toán đơn di chuyển"}</h1><p>Khoản thanh toán của dịch vụ riêng không được cộng vào giá tour.</p></header>
     <div className="transport-payment-layout">
       <section className="transport-payment-methods" aria-labelledby="payment-method-title">
         <span className="ui-kicker">PHƯƠNG THỨC</span><h2 id="payment-method-title">Chọn cách thanh toán</h2>

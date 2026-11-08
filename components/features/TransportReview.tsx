@@ -7,7 +7,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BusFront, CarFront, Check, MapPin, Minus, Plane, Plus, Star, TrainFront, Users } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { activityAmount, formatTransportMoney, isTransportDraft, TRANSPORT_ACTIVITY, TRANSPORT_DRAFT_KEY, transportAmount, transportGrandTotal, type TransportDraft } from "@/lib/transport-order";
-import { transportRidesByMode } from "@/lib/transport-catalog";
 const modeLabels = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay", private_car: "Xe riêng ngoài lịch đoàn" };
 const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane, private_car: CarFront };
 
@@ -43,7 +42,6 @@ export default function TransportReview() {
   const ModeIcon = modeIcons[draft.mode] ?? BusFront;
   const activityCount = draft.activityCount ?? 0;
   const transportTotal = transportAmount(draft);
-  const selectedRide = transportRidesByMode[draft.mode].find(ride => ride.id === draft.rideId);
   const canAddLocalActivity = draft.mode !== "private_car";
 
   function updateActivity(count: number) {
@@ -60,8 +58,7 @@ export default function TransportReview() {
   const backQuery = backParams.toString();
 
   return <div className="ds-container transport-review-page">
-    <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>
-    <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 4 · RÀ SOÁT ĐƠN RIÊNG</span><h1>{draft.mode === "private_car" ? "Xem lại xe riêng" : "Xem lại lựa chọn"}</h1><p>{draft.mode === "private_car" ? "Kiểm tra giá và điều kiện xe riêng trước khi thanh toán độc lập." : "Kiểm tra phương tiện và thêm trải nghiệm cho chuyến đi."}</p></header>
+    <header className="transport-review-heading"><div className="transport-step-progress" aria-label="Bước 3 trên 4"><div className="transport-step-progress-top"><Link href={`/transport/results?${backQuery}`}><ArrowLeft size={15}/> Về chọn chuyến</Link><strong>Bước 3 / 4</strong></div><div className="transport-step-progress-bars" aria-hidden="true"><i className="is-complete"/><i className="is-complete"/><i className="is-current"/><i/></div></div><h1>{draft.mode === "private_car" ? "Xem lại xe riêng" : "Xem lại lựa chọn"}</h1><p>{draft.mode === "private_car" ? "Kiểm tra thông tin xe trước khi thanh toán riêng." : "Kiểm tra phương tiện và thêm trải nghiệm cho chuyến đi."}</p></header>
 
     <section className="transport-review-layout">
       <div className="transport-review-main">
@@ -72,7 +69,6 @@ export default function TransportReview() {
           <div className="transport-order-price"><span>Phương tiện</span><strong>{formatTransportMoney(transportTotal)}</strong></div>
         </section>
 
-        {draft.mode === "private_car" && <section className="transport-order-card" aria-labelledby="transport-private-terms-title"><span className="ui-kicker">GIÁ & ĐIỀU KIỆN DEMO</span><h2 id="transport-private-terms-title">Xe riêng ngoài lịch đoàn</h2><p><strong>{formatTransportMoney(transportTotal)}</strong> / xe · {selectedRide?.duration ?? "thời lượng theo lựa chọn"} · {selectedRide?.detail ?? "Dịch vụ ngoài lịch đoàn"}.</p><ul><li>Không thay thế xe đã gồm trong tour.</li><li>Giá, sức chứa và giờ xe chưa xác nhận với nhà cung cấp; chưa xác nhận tình trạng còn xe.</li><li>Điều kiện đổi, hủy và hoàn tiền chưa được nhà cung cấp xác nhận.</li></ul><p className="ds-caption">Thanh toán ở bước tiếp theo cũng là mô phỏng; chưa thu tiền hoặc giữ chỗ.</p></section>}
 
         {canAddLocalActivity && <section className="transport-activity-section" aria-labelledby="transport-activity-heading">
           <header><div><span className="ui-kicker">GỢI Ý THEO ĐIỂM ĐẾN</span><h2 id="transport-activity-heading">Thêm trải nghiệm cho chuyến đi</h2><p>Có thể thêm hoặc bỏ bất cứ lúc nào trước khi tiếp tục.</p></div><span className="transport-count-badge">{TRANSPORT_ACTIVITY.destinationName}</span></header>
@@ -92,7 +88,6 @@ export default function TransportReview() {
         {activityCount > 0 && <div className="transport-total-line"><span>{TRANSPORT_ACTIVITY.name} · {activityCount} khách</span><strong>{formatTransportMoney(activityAmount(draft))}</strong></div>}
         <div className="transport-review-grand-total"><span>Tổng cộng</span><strong>{formatTransportMoney(total)}</strong></div>
         <Button className="transport-review-continue" onClick={() => router.push("/transport/payment")}>Tiếp tục thanh toán</Button>
-        <p className="transport-review-payment-note">Thanh toán tại bước sau là mô phỏng; chưa thu tiền hay giữ chỗ thật.</p>
       </aside>
     </section>
   </div>;

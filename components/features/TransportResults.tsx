@@ -63,7 +63,7 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
   if (initialSearch.tourId) editParams.set("tourId", initialSearch.tourId);
 
   return <div className="ds-container transport-page transport-results-page">
-    <Link className="transport-back-link" href={`/transport?${editParams.toString()}`}><ArrowLeft size={17}/> Sửa tìm kiếm</Link>
+    <div className="transport-step-progress" aria-label="Bước 2 trên 4"><div className="transport-step-progress-top"><Link href={`/transport?${editParams.toString()}`}><ArrowLeft size={15}/> Sửa tìm kiếm</Link><strong>Bước 2 / 4</strong></div><div className="transport-step-progress-bars" aria-hidden="true"><i className="is-complete"/><i className="is-current"/><i/><i/></div></div>
     <header className="transport-results-heading"><div className="transport-results-title"><span className="transport-results-icon"><Icon size={21}/></span><div><span className="ui-kicker">{label.toUpperCase()}</span><h1>{initialSearch.from || "Điểm đi"}<ArrowRight size={19}/>{initialSearch.to || "Điểm đến"}</h1></div></div><p>{date || "Chưa chọn ngày"} · {mode === "private_car" ? "Giá demo theo thời lượng thuê" : "Giá demo cho một lượt"}</p></header>
     <div className="transport-results-layout">
       <section className="transport-ride-list" aria-label={mode === "private_car" ? "Danh sách xe phù hợp" : "Các chuyến phù hợp"}>

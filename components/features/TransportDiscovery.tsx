@@ -32,9 +32,7 @@ export default function TransportDiscovery({ initialSearch = {} }: { initialSear
   return <div className="ds-container transport-page">
     <section className="transport-hero">
     <header className="transport-heading">
-      <span className="ui-kicker">DỊCH VỤ CHUYẾN ĐI</span>
       <h1>Di chuyển</h1>
-      <p>{mode === "private_car" ? "Đặt xe riêng cho hoạt động ngoài lịch đoàn. Dịch vụ tự nguyện, không ảnh hưởng đến booking tour." : "Tìm phương tiện phù hợp cho hành trình của bạn."}</p>
     </header>
     <div className="transport-mode-rail" role="group" aria-label="Loại phương tiện">
       {modes.map(({ id, label, Icon }) => <button type="button" key={id} aria-pressed={mode === id} onClick={() => setMode(id)}>

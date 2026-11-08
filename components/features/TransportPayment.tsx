@@ -96,10 +96,8 @@ export default function TransportPayment() {
         {activityTotal > 0 ? <div className="transport-payment-line"><span><strong>{TRANSPORT_ACTIVITY.name}</strong><small>{draft.activityCount} khách × {formatTransportMoney(TRANSPORT_ACTIVITY.unitPrice)}</small></span><strong>{formatTransportMoney(activityTotal)}</strong></div> : draft.mode !== "private_car" && <div className="transport-payment-line is-muted"><span><strong>Dịch vụ trải nghiệm</strong><small>Không chọn dịch vụ thêm</small></span><strong>—</strong></div>}
         <div className="transport-payment-line transport-payment-method-line"><span>Thanh toán bằng</span><strong>{selectedMethod.label}</strong></div>
         <div className="transport-review-grand-total"><span>Tổng thanh toán</span><strong>{formatTransportMoney(grandTotal)}</strong></div>
-        {draft.mode === "private_car" && <p className="ds-caption">Điều kiện demo: xe phục vụ ngoài lịch đoàn. Giá, lịch xe và đổi/hủy chưa được nhà cung cấp xác nhận. Đơn cùng khoản thanh toán được tách khỏi giá tour.</p>}
         {error && <p className="transport-payment-error" role="alert">{error}</p>}
         <Button className="transport-review-continue" loading={busy} onClick={completePayment}>Xác nhận thanh toán mô phỏng</Button>
-        <p className="transport-review-payment-note">Sau khi xác nhận, demo sẽ tạo mã đơn và trạng thái thanh toán để bạn xem lại.</p>
       </aside>
     </div>
   </div>;

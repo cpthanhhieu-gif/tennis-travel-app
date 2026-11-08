@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ArrowRight, BusFront, CarFront, Plane, TrainFront, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { formatTransportMoney, parseTransportOrders, TRANSPORT_ORDER_KEY, type TransportDemoOrder, type TransportMode } from "@/lib/transport-order";
+import { formatTransportMoney, parseTransportOrders, TRANSPORT_ORDER_KEY, type TransportDemoOrder } from "@/lib/transport-order";
+import type { TransportMode } from "@/lib/transport-catalog";
 
 const modeNames: Record<TransportMode, string> = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay" };
 const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane };

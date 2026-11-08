@@ -6,6 +6,6 @@ const first = (value: string | string[] | undefined) => Array.isArray(value) ? v
 
 export default async function TransportResultsPage({ searchParams }: { searchParams: Promise<Search> }) {
   const params = await searchParams;
-  const initialSearch = Object.fromEntries(["mode", "from", "to", "date", "rideId", "passengers"].map(key => [key, first(params[key])]));
+  const initialSearch = Object.fromEntries(["mode", "from", "to", "date", "rideId", "passengers", "bookingId", "tourId"].map(key => [key, first(params[key])]));
   return <PageWrapper><TransportResults initialSearch={initialSearch}/></PageWrapper>;
 }

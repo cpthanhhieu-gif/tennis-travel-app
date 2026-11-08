@@ -24,6 +24,8 @@ export default function TransportDiscovery({ initialSearch = {} }: { initialSear
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = new URLSearchParams({ mode, from: from.trim(), to: to.trim(), date, passengers });
+    if (initialSearch.bookingId) query.set("bookingId", initialSearch.bookingId);
+    if (initialSearch.tourId) query.set("tourId", initialSearch.tourId);
     router.push(`/transport/results?${query.toString()}`);
   }
 

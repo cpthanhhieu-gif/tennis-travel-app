@@ -29,7 +29,7 @@ export default function TransportPayment() {
     try {
       const raw: unknown = JSON.parse(sessionStorage.getItem(TRANSPORT_DRAFT_KEY) ?? "null");
       if (isTransportDraft(raw)) {
-        const activityCount = Math.max(0, Math.min(raw.passengers, Number.isInteger(raw.activityCount) ? raw.activityCount ?? 0 : 0));
+        const activityCount = raw.mode === "private_car" ? 0 : Math.max(0, Math.min(raw.passengers, Number.isInteger(raw.activityCount) ? raw.activityCount ?? 0 : 0));
         setDraft({ ...raw, activityId: activityCount ? raw.activityId ?? TRANSPORT_ACTIVITY.id : undefined, activityCount });
       }
     } catch { /* The empty state explains how to restart if storage is unavailable. */ }
@@ -68,6 +68,7 @@ export default function TransportPayment() {
         fingerprint,
       };
       sessionStorage.setItem(TRANSPORT_ORDER_KEY, JSON.stringify([order, ...orders]));
+      window.dispatchEvent(new Event("travel-transport-orders-updated"));
       router.push(`/transport/order?id=${encodeURIComponent(order.id)}`);
     } catch {
       setError("Không lưu được đơn trong phiên này. Hãy bật bộ nhớ trình duyệt hoặc thử lại.");
@@ -75,11 +76,14 @@ export default function TransportPayment() {
     }
   }
 
-  const backQuery = new URLSearchParams({ mode: draft.mode, from: draft.from, to: draft.to, date: draft.date }).toString();
+  const backParams = new URLSearchParams({ mode: draft.mode, from: draft.from, to: draft.to, date: draft.date, passengers: String(draft.passengers), rideId: draft.rideId });
+  if (draft.relatedTourBookingId) backParams.set("bookingId", draft.relatedTourBookingId);
+  if (draft.relatedTourId) backParams.set("tourId", draft.relatedTourId);
+  const backQuery = backParams.toString();
 
   return <div className="ds-container transport-payment-page">
     <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>
-    <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 5 · THANH TOÁN</span><h1>Thanh toán đơn di chuyển</h1><p>Kiểm tra riêng từng khoản trước khi xác nhận.</p></header>
+    <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 5 · THANH TOÁN RIÊNG</span><h1>{draft.mode === "private_car" ? "Thanh toán xe riêng" : "Thanh toán đơn di chuyển"}</h1><p>Khoản thanh toán của dịch vụ riêng không được cộng vào giá tour.</p></header>
     <div className="transport-payment-layout">
       <section className="transport-payment-methods" aria-labelledby="payment-method-title">
         <span className="ui-kicker">PHƯƠNG THỨC</span><h2 id="payment-method-title">Chọn cách thanh toán</h2>
@@ -89,10 +93,12 @@ export default function TransportPayment() {
       <aside className="transport-payment-summary" aria-label="Chi tiết giá">
         <span className="ui-kicker">CHI TIẾT ĐƠN</span><h2>{draft.from} → {draft.to}</h2>
         <p className="transport-payment-meta">{draft.date} · {draft.time} · {draft.passengers} khách</p>
+        <p className="transport-payment-meta">Mã dịch vụ: {draft.rideId}{draft.relatedTourId ? ` · Tour liên quan: ${draft.relatedTourId}` : " · Đặt độc lập, không cần booking tour"}</p>
         <div className="transport-payment-line"><span><strong>{draft.rideName}</strong><small>{draft.unit === "person" ? `${draft.passengers} khách × ${formatTransportMoney(draft.unitPrice)}` : "Giá theo xe"}</small></span><strong>{formatTransportMoney(transportTotal)}</strong></div>
-        {activityTotal > 0 ? <div className="transport-payment-line"><span><strong>{TRANSPORT_ACTIVITY.name}</strong><small>{draft.activityCount} khách × {formatTransportMoney(TRANSPORT_ACTIVITY.unitPrice)}</small></span><strong>{formatTransportMoney(activityTotal)}</strong></div> : <div className="transport-payment-line is-muted"><span><strong>Dịch vụ trải nghiệm</strong><small>Không chọn dịch vụ thêm</small></span><strong>—</strong></div>}
+        {activityTotal > 0 ? <div className="transport-payment-line"><span><strong>{TRANSPORT_ACTIVITY.name}</strong><small>{draft.activityCount} khách × {formatTransportMoney(TRANSPORT_ACTIVITY.unitPrice)}</small></span><strong>{formatTransportMoney(activityTotal)}</strong></div> : draft.mode !== "private_car" && <div className="transport-payment-line is-muted"><span><strong>Dịch vụ trải nghiệm</strong><small>Không chọn dịch vụ thêm</small></span><strong>—</strong></div>}
         <div className="transport-payment-line transport-payment-method-line"><span>Thanh toán bằng</span><strong>{selectedMethod.label}</strong></div>
         <div className="transport-review-grand-total"><span>Tổng thanh toán</span><strong>{formatTransportMoney(grandTotal)}</strong></div>
+        {draft.mode === "private_car" && <p className="ds-caption">Điều kiện demo: xe phục vụ ngoài lịch đoàn. Giá, lịch xe và đổi/hủy chưa được nhà cung cấp xác nhận. Đơn cùng khoản thanh toán được tách khỏi giá tour.</p>}
         {error && <p className="transport-payment-error" role="alert">{error}</p>}
         <Button className="transport-review-continue" loading={busy} onClick={completePayment}>Xác nhận thanh toán mô phỏng</Button>
         <p className="transport-review-payment-note">Sau khi xác nhận, demo sẽ tạo mã đơn và trạng thái thanh toán để bạn xem lại.</p>

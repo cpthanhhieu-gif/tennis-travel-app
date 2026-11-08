@@ -13,6 +13,8 @@ export type TransportDraft = {
   unitPrice: number;
   unit: "person" | "vehicle";
   total: number;
+  relatedTourBookingId?: string;
+  relatedTourId?: string;
   activityId?: string;
   activityCount?: number;
 };
@@ -72,10 +74,12 @@ export function isTransportDraft(value: unknown): value is TransportDraft {
   return draft.version === 1 && ["train", "bus", "rental", "airport", "private_car"].includes(draft.mode ?? "") &&
     typeof draft.from === "string" && typeof draft.to === "string" && typeof draft.date === "string" &&
     typeof draft.rideId === "string" && typeof draft.rideName === "string" && typeof draft.time === "string" &&
+    (draft.relatedTourBookingId === undefined || typeof draft.relatedTourBookingId === "string") &&
+    (draft.relatedTourId === undefined || typeof draft.relatedTourId === "string") &&
     Number.isInteger(draft.passengers) && (draft.passengers ?? 0) > 0 && Number.isFinite(draft.unitPrice) &&
     (draft.unit === "person" || draft.unit === "vehicle");
 }
 
 export function transportFingerprint(draft: TransportDraft) {
-  return JSON.stringify([draft.mode, draft.from, draft.to, draft.date, draft.rideId, draft.time, draft.passengers, draft.unitPrice, draft.unit, draft.activityId ?? "", draft.activityCount ?? 0]);
+  return JSON.stringify([draft.mode, draft.from, draft.to, draft.date, draft.rideId, draft.time, draft.passengers, draft.unitPrice, draft.unit, draft.activityId ?? "", draft.activityCount ?? 0, draft.relatedTourBookingId ?? "", draft.relatedTourId ?? ""]);
 }

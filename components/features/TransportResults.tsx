@@ -46,11 +46,11 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
     } catch { /* Use default results if browser storage is unavailable. */ }
   }, [initialSearch, mode, rides, requestedRide]);
   function confirmSelection() {
-    const draft = { version: 1, mode, from: initialSearch.from ?? "", to: initialSearch.to ?? "", date, rideId: selected.id, rideName: selected.name, time: selected.time, passengers, unitPrice: selected.price, unit: selected.unit, total, activityId: undefined as string | undefined, activityCount: 0 };
+    const draft = { version: 1, mode, from: initialSearch.from ?? "", to: initialSearch.to ?? "", date, rideId: selected.id, rideName: selected.name, time: selected.time, passengers, unitPrice: selected.price, unit: selected.unit, total, relatedTourBookingId: initialSearch.bookingId, relatedTourId: initialSearch.tourId, activityId: undefined as string | undefined, activityCount: 0 };
     try {
       const saved = JSON.parse(sessionStorage.getItem(TRANSPORT_DRAFT_KEY) ?? "null") as Partial<typeof draft> | null;
       if (saved?.mode === mode && saved.from === draft.from && saved.to === draft.to && saved.date === date) {
-        draft.activityCount = Math.max(0, Math.min(passengers, Number(saved.activityCount) || 0));
+        draft.activityCount = mode === "private_car" ? 0 : Math.max(0, Math.min(passengers, Number(saved.activityCount) || 0));
         if (draft.activityCount) draft.activityId = typeof saved.activityId === "string" ? saved.activityId : TRANSPORT_ACTIVITY.id;
       }
       sessionStorage.setItem(TRANSPORT_DRAFT_KEY, JSON.stringify(draft));
@@ -58,8 +58,12 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
     router.push("/transport/review");
   }
 
+  const editParams = new URLSearchParams({ mode, from: initialSearch.from ?? "", to: initialSearch.to ?? "", date, passengers: String(passengers) });
+  if (initialSearch.bookingId) editParams.set("bookingId", initialSearch.bookingId);
+  if (initialSearch.tourId) editParams.set("tourId", initialSearch.tourId);
+
   return <div className="ds-container transport-page transport-results-page">
-    <Link className="transport-back-link" href="/transport"><ArrowLeft size={17}/> Sửa tìm kiếm</Link>
+    <Link className="transport-back-link" href={`/transport?${editParams.toString()}`}><ArrowLeft size={17}/> Sửa tìm kiếm</Link>
     <header className="transport-results-heading"><div className="transport-results-title"><span className="transport-results-icon"><Icon size={21}/></span><div><span className="ui-kicker">{label.toUpperCase()}</span><h1>{initialSearch.from || "Điểm đi"}<ArrowRight size={19}/>{initialSearch.to || "Điểm đến"}</h1></div></div><p>{date || "Chưa chọn ngày"} · {mode === "private_car" ? "Giá demo theo thời lượng thuê" : "Giá demo cho một lượt"}</p></header>
     <div className="transport-results-layout">
       <section className="transport-ride-list" aria-labelledby="transport-ride-list-title">
@@ -68,8 +72,9 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
           <span className="transport-ride-radio" aria-hidden="true">{selectedId === ride.id && <Check size={14}/>}</span>
           <span className="transport-ride-main"><strong>{ride.time}</strong><span className="transport-ride-line"/><span className="transport-ride-duration"><Clock3 size={14}/>{ride.duration}</span></span>
           <span className="transport-ride-copy"><strong>{ride.name}</strong><small>{ride.detail}</small><small>{initialSearch.from || "Điểm đi"} → {initialSearch.to || "Điểm đến"}</small></span>
-          <span className="transport-ride-price"><strong>{money(ride.price)}</strong><small>{ride.unit === "person" ? "/ khách" : "/ xe"}</small></span>
+          <span className="transport-ride-price"><strong>{money(ride.price)}</strong><small>{ride.unit === "person" ? "/ khách" : mode === "private_car" ? "/ xe · giá demo" : "/ xe"}</small></span>
         </button>)}
+        {mode === "private_car" && <p className="transport-flow-note">Giá, sức chứa và khung giờ là dữ liệu demo. Chưa xác nhận nhà xe, lịch xe hoặc chỗ trống; lựa chọn ở đây chưa phải xác nhận đặt xe.</p>}
       </section>
       <aside className="transport-selection-card" aria-label="Thông tin lựa chọn">
         <span className="ui-kicker">TÙY CHỌN CHUYẾN ĐI</span><h2>Số khách</h2>

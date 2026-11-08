@@ -34,6 +34,25 @@ Hành lý máy bay không có giá chung vì phụ thuộc hãng, chặng, hạn
 
 Giá tham khảo ngoài v2.12 được đối chiếu với [Vinpearl Phú Quốc](https://vinpearl.com/vi/cap-nhat-gia-phong-vinpearl-phu-quoc-moi-nhat), [bảng giá dịch vụ y học thể thao Vinmec](https://www.vinmec.com/vie/chan-thuong-chinh-hinh-y-hoc-the-thao/), [bảng giá CPET Vinmec](https://www.vinmec.com/static/uploads/251104_VMEC_Bang_gia_VMTC_SN_f3efa29081.pdf), [VinWonders Phú Quốc](https://vinwonders.com/vi/wonderpedia/vinwonders-phu-quoc/?lang=vi) và [Into the Blue Phú Quốc](https://intothebluephuquoc.com/). Đây là mốc giá tham khảo 2026, không phải giá hợp đồng hoặc cam kết áp dụng cho tour 2027.
 
+## Xe riêng ngoài lịch đoàn (đơn độc lập)
+
+Xe riêng được đặt và thanh toán qua flow riêng; không thuộc quyền lợi xe đoàn, không sửa giá booking tour và không yêu cầu có booking tour. Danh mục demo ở `lib/transport-catalog.ts`:
+
+| Mã dịch vụ | Cấu hình demo | Giá demo | Trạng thái vận hành |
+|---|---|---:|---|
+| `dalat-private-lake-4h` | Xe có tài xế 4 chỗ, 4 giờ khứ hồi, 14:00; tối đa 3 khách | 1.200.000đ/xe | Chưa có lịch xe, sức chứa thực tế hoặc xác nhận nhà cung cấp |
+| `dalat-private-city-6h` | Xe có tài xế 7 chỗ, 6 giờ khứ hồi, 09:00; tối đa 5 khách | 1.650.000đ/xe | Chưa có lịch xe, sức chứa thực tế hoặc xác nhận nhà cung cấp |
+
+Mã đơn lưu mã dịch vụ. Nếu bắt đầu từ một booking tour, đơn lưu thêm mã booking và mã tour để liên kết trong Chuyến đi; không đưa khoản xe vào tổng tour hay tiền cọc. Thanh toán và trạng thái hiện tại chỉ mô phỏng trong phiên trình duyệt, không thu tiền, không giữ xe và không xác nhận dịch vụ thật.
+
+### Điều kiện bắt buộc trước khi mở bán thật
+
+- Thay giá demo bằng giá nhà cung cấp đã duyệt, gồm phụ phí, VAT, thời gian chờ và phạm vi tuyến; API phải trả giá còn hiệu lực cho đúng ngày, giờ, thời lượng, tuyến và số khách.
+- Kết nối lịch xe và tình trạng còn xe theo thời gian thực hoặc quy trình xác nhận của nhà cung cấp. Không hiển thị còn chỗ và không nhận thanh toán thật khi chưa có xác nhận.
+- Xác nhận sức chứa thực tế theo số ghế, hành lý và hành lý cồng kềnh như túi golf; nếu không đáp ứng thì chặn lựa chọn thay vì tự giảm số khách.
+- Chốt nhà cung cấp, tuyến phục vụ, điểm đón/trả, điều kiện đổi/hủy/hoàn tiền, thời gian chờ và cách xử lý khi nhà xe không thực hiện chuyến.
+- Chỉ chuyển trạng thái sang đặt chỗ thành công sau khi nhà cung cấp xác nhận. Điều này tuân thủ v2.12: không cam kết dịch vụ chưa được bảo đảm.
+
 ## Phương án tắt/khôi phục
 
 - Cờ máy chủ `ANCILLARY_PRICING_ENABLED=false` ẩn catalog và từ chối dịch vụ mới; bỏ cờ hoặc đặt `true` để bật lại sau khi sửa.

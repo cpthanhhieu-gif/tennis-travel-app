@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BusFront, CarFront, Check, MapPin, Minus, Plane, Plus, Star, TrainFront, Users } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { activityAmount, formatTransportMoney, isTransportDraft, TRANSPORT_ACTIVITY, TRANSPORT_DRAFT_KEY, transportAmount, transportGrandTotal, type TransportDraft } from "@/lib/transport-order";
+import { transportRidesByMode } from "@/lib/transport-catalog";
 const modeLabels = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay", private_car: "Xe riêng ngoài lịch đoàn" };
 const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane, private_car: CarFront };
 
@@ -19,7 +20,7 @@ export default function TransportReview() {
     try {
       const parsed: unknown = JSON.parse(sessionStorage.getItem(TRANSPORT_DRAFT_KEY) ?? "null");
       if (isTransportDraft(parsed)) {
-        const activityCount = Math.max(0, Math.min(parsed.passengers, Number.isInteger(parsed.activityCount) ? parsed.activityCount ?? 0 : 0));
+        const activityCount = parsed.mode === "private_car" ? 0 : Math.max(0, Math.min(parsed.passengers, Number.isInteger(parsed.activityCount) ? parsed.activityCount ?? 0 : 0));
         setDraft({ ...parsed, activityId: activityCount ? parsed.activityId ?? TRANSPORT_ACTIVITY.id : undefined, activityCount });
       }
     } catch { /* Keep the empty state if browser storage is unavailable. */ }
@@ -42,6 +43,8 @@ export default function TransportReview() {
   const ModeIcon = modeIcons[draft.mode] ?? BusFront;
   const activityCount = draft.activityCount ?? 0;
   const transportTotal = transportAmount(draft);
+  const selectedRide = transportRidesByMode[draft.mode].find(ride => ride.id === draft.rideId);
+  const canAddLocalActivity = draft.mode !== "private_car";
 
   function updateActivity(count: number) {
     setDraft(current => {
@@ -51,11 +54,14 @@ export default function TransportReview() {
     });
   }
 
-  const backQuery = new URLSearchParams({ mode: draft.mode, from: draft.from, to: draft.to, date: draft.date }).toString();
+  const backParams = new URLSearchParams({ mode: draft.mode, from: draft.from, to: draft.to, date: draft.date, passengers: String(draft.passengers), rideId: draft.rideId });
+  if (draft.relatedTourBookingId) backParams.set("bookingId", draft.relatedTourBookingId);
+  if (draft.relatedTourId) backParams.set("tourId", draft.relatedTourId);
+  const backQuery = backParams.toString();
 
   return <div className="ds-container transport-review-page">
     <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>
-    <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 4 · RÀ SOÁT ĐƠN</span><h1>Xem lại lựa chọn</h1><p>Kiểm tra phương tiện và thêm trải nghiệm cho chuyến đi.</p></header>
+    <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 4 · RÀ SOÁT ĐƠN RIÊNG</span><h1>{draft.mode === "private_car" ? "Xem lại xe riêng" : "Xem lại lựa chọn"}</h1><p>{draft.mode === "private_car" ? "Kiểm tra giá và điều kiện xe riêng trước khi thanh toán độc lập." : "Kiểm tra phương tiện và thêm trải nghiệm cho chuyến đi."}</p></header>
 
     <section className="transport-review-layout">
       <div className="transport-review-main">
@@ -66,7 +72,9 @@ export default function TransportReview() {
           <div className="transport-order-price"><span>Phương tiện</span><strong>{formatTransportMoney(transportTotal)}</strong></div>
         </section>
 
-        <section className="transport-activity-section" aria-labelledby="transport-activity-heading">
+        {draft.mode === "private_car" && <section className="transport-order-card" aria-labelledby="transport-private-terms-title"><span className="ui-kicker">GIÁ & ĐIỀU KIỆN DEMO</span><h2 id="transport-private-terms-title">Xe riêng ngoài lịch đoàn</h2><p><strong>{formatTransportMoney(transportTotal)}</strong> / xe · {selectedRide?.duration ?? "thời lượng theo lựa chọn"} · {selectedRide?.detail ?? "Dịch vụ ngoài lịch đoàn"}.</p><ul><li>Không thay thế xe đã gồm trong tour.</li><li>Giá, sức chứa và giờ xe chưa xác nhận với nhà cung cấp; chưa xác nhận tình trạng còn xe.</li><li>Điều kiện đổi, hủy và hoàn tiền chưa được nhà cung cấp xác nhận.</li></ul><p className="ds-caption">Thanh toán ở bước tiếp theo cũng là mô phỏng; chưa thu tiền hoặc giữ chỗ.</p></section>}
+
+        {canAddLocalActivity && <section className="transport-activity-section" aria-labelledby="transport-activity-heading">
           <header><div><span className="ui-kicker">GỢI Ý THEO ĐIỂM ĐẾN</span><h2 id="transport-activity-heading">Thêm trải nghiệm cho chuyến đi</h2><p>Có thể thêm hoặc bỏ bất cứ lúc nào trước khi tiếp tục.</p></div><span className="transport-count-badge">{TRANSPORT_ACTIVITY.destinationName}</span></header>
           <article className={`transport-activity-card${activityCount ? " is-added" : ""}`}>
             <div className="transport-activity-image"><Image src={TRANSPORT_ACTIVITY.image} alt={`Ảnh minh họa điểm đến ${TRANSPORT_ACTIVITY.destinationName}`} fill sizes="(max-width:767px) 92vw, 420px"/></div>
@@ -75,7 +83,7 @@ export default function TransportReview() {
             </div>
           </article>
           <p className="transport-review-disclaimer">Giá và hình ảnh dịch vụ là dữ liệu demo/tham khảo, chưa xác nhận nhà cung cấp, lịch hoạt động hoặc tình trạng chỗ.</p>
-        </section>
+        </section>}
       </div>
 
       <aside className="transport-review-total-card" aria-label="Tổng kết đơn">

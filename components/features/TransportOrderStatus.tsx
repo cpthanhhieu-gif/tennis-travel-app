@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ArrowRight, BusFront, CarFront, Check, CircleCheck, MapPin, Plane, TrainFront, Users } from "lucide-react";
+import { ArrowRight, BusFront, CarFront, Check, MapPin, Plane, TrainFront, Users } from "lucide-react";
 import { activityAmount, formatTransportMoney, parseTransportOrders, TRANSPORT_ACTIVITY, TRANSPORT_ORDER_KEY, transportAmount, transportGrandTotal, type TransportDemoOrder } from "@/lib/transport-order";
 
 const modeNames = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay", private_car: "Xe riêng ngoài lịch đoàn" };
@@ -36,7 +37,7 @@ export default function TransportOrderStatus() {
 
   return <div className="ds-container transport-order-page">
     <section className="transport-order-success" aria-labelledby="transport-order-status-title">
-      <span className="transport-order-success-icon"><CircleCheck size={34}/></span><span className="ui-kicker">ĐƠN DI CHUYỂN DEMO</span><h1 id="transport-order-status-title">Thanh toán mô phỏng hoàn tất</h1><p>Đơn đã được tạo trong phiên này. Chưa có giao dịch tiền thật và chưa giữ chỗ với nhà cung cấp.</p>
+      <Image className="transport-order-success-art" src="/images/transport-order-success.png" alt="Huy hiệu xác nhận màu tím bạc" width={160} height={160} priority/><span className="ui-kicker">ĐƠN DI CHUYỂN DEMO</span><h1 id="transport-order-status-title">Thanh toán mô phỏng hoàn tất</h1><p>Đơn đã được tạo trong phiên này. Chưa có giao dịch tiền thật và chưa giữ chỗ với nhà cung cấp.</p>
       <div className="transport-order-status-badge"><Check size={15}/> Đã hoàn tất · Mô phỏng</div>
     </section>
     <div className="transport-order-view-layout">

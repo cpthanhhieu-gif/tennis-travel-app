@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720" fill="none">
+  <defs>
+    <linearGradient id="silver" x1="133" y1="103" x2="579" y2="571" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/><stop offset=".17" stop-color="#e8e7ff"/><stop offset=".31" stop-color="#fff"/><stop offset=".48" stop-color="#b8b6f2"/><stop offset=".64" stop-color="#faf9ff"/><stop offset=".82" stop-color="#c9c7fb"/><stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="142" y1="114" x2="587" y2="582" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/><stop offset=".35" stop-color="#7773d7"/><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#625cc6"/>
+    </linearGradient>
+    <linearGradient id="violet" x1="221" y1="206" x2="492" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2920bb"/><stop offset=".2" stop-color="#7661ff"/><stop offset=".52" stop-color="#aa8cff"/><stop offset=".78" stop-color="#6645f0"/><stop offset="1" stop-color="#3023bd"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="285" y1="480" x2="481" y2="677" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/><stop offset=".28" stop-color="#b9b3ff"/><stop offset=".68" stop-color="#6555e8"/><stop offset="1" stop-color="#382abf"/>
+    </linearGradient>
+    <linearGradient id="check" x1="283" y1="311" x2="442" y2="444" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/><stop offset="1" stop-color="#e3e0ff"/>
+    </linearGradient>
+    <pattern id="ridges" width="11" height="11" patternUnits="userSpaceOnUse" patternTransform="rotate(-27)">
+      <path d="M1 0v11" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>
+      <path d="M5 0v11" stroke="#2415ad" stroke-opacity=".12" stroke-width="1"/>
+    </pattern>
+    <filter id="shadow" x="66" y="62" width="597" height="637" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <filter id="soft" x="150" y="109" width="446" height="474" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <!-- Soft floating shadow, kept within the transparent canvas. -->
+  <path d="m355 94 220 127 15 252-219 132-225-128-15-253L355 94Z" fill="#28245e" fill-opacity=".3" filter="url(#shadow)"/>
+
+  <!-- Award ribbons behind the medallion. -->
+  <path d="m254 447 133 54-88 159-28-55-65 15 48-173Z" fill="url(#ribbon)" stroke="#fff" stroke-opacity=".9" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m406 458 130-62 92 200-70-5-30 63-122-196Z" fill="url(#ribbon)" stroke="#fff" stroke-opacity=".9" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m254 447 133 54-25 44-131-58 23-40Z" fill="#fff" fill-opacity=".38"/>
+  <path d="m406 458 130-62 22 46-129 69-23-53Z" fill="#fff" fill-opacity=".27"/>
+
+  <!-- Beveled silver hexagonal medal. -->
+  <path d="m360 72 230 133 0 266-230 133-230-133V205L360 72Z" fill="url(#edge)" stroke="#7772d4" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m360 87 216 125v250L360 587 144 462V212L360 87Z" fill="url(#silver)" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>
+  <path d="m360 106 199 115v230L360 566 161 451V221l199-115Z" stroke="#827bdc" stroke-opacity=".85" stroke-width="4" stroke-linejoin="round"/>
+  <path d="m360 119 187 108v216L360 551 173 443V227l187-108Z" stroke="#fff" stroke-opacity=".9" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Recessed violet center with fine machined lines. -->
+  <path d="m360 177 143 83v166l-143 83-143-83V260l143-83Z" fill="#3326cb" stroke="#3526be" stroke-width="10" stroke-linejoin="round"/>
+  <path d="m360 192 130 75v150l-130 75-130-75V267l130-75Z" fill="url(#violet)" stroke="#c6b6ff" stroke-opacity=".9" stroke-width="5" stroke-linejoin="round"/>
+  <path d="m360 192 130 75v150l-130 75-130-75V267l130-75Z" fill="url(#ridges)"/>
+  <path d="m251 270 109-63 109 63" stroke="#fff" stroke-opacity=".42" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Raised white confirmation check. -->
+  <path d="m270 340 49-39c7-6 17-5 23 2l38 42 82-70c7-6 17-5 23 2l31 37c6 7 5 17-2 23L369 470c-8 7-19 6-26-2l-77-99c-7-9-5-22 4-29Z" fill="#2f20bd" fill-opacity=".5" filter="url(#soft)"/>
+  <path d="m267 324 48-37c8-6 19-5 26 2l41 45 92-78c8-7 20-6 27 2l29 35c7 8 6 20-2 27L372 446c-9 8-22 7-30-2l-78-92c-8-9-6-21 3-28Z" fill="url(#check)" stroke="#fff" stroke-width="10" stroke-linejoin="round"/>
+  <path d="m280 325 40-31 54 59 107-91" stroke="#fff" stroke-opacity=".85" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Tiny edge highlights give the metal a polished, dimensional finish. -->
+  <path d="m147 214 213-123 213 123" stroke="#fff" stroke-opacity=".9" stroke-width="5" stroke-linecap="round"/>
+  <path d="m147 454 213 123 213-123" stroke="#6a64c9" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/>
+</svg>

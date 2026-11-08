@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="blue" x1="280" y1="450" x2="790" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#54B9FF"/><stop offset="1" stop-color="#1764E8"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="300" y1="520" x2="770" y2="745" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E8EDFF"/><stop offset="1" stop-color="#ADB9F5"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="360" y1="250" x2="690" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8AE6B6"/><stop offset="1" stop-color="#18C98B"/>
+    </linearGradient>
+    <linearGradient id="window" x1="425" y1="315" x2="650" y2="398" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDF7FF"/><stop offset="1" stop-color="#75C8F8"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="190" y1="260" x2="320" y2="410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/><stop offset="1" stop-color="#C8D8F4"/>
+    </linearGradient>
+    <filter id="shadow" x="150" y="180" width="730" height="690" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="17"/>
+    </filter>
+  </defs>
+
+  <!-- Soft grounding shadow and the familiar stacked blue cards -->
+  <ellipse cx="510" cy="790" rx="315" ry="55" fill="#7489DB" opacity=".2" filter="url(#shadow)"/>
+  <g transform="rotate(-8 512 650)">
+    <rect x="202" y="583" width="620" height="190" rx="52" fill="#2168E9"/>
+    <rect x="202" y="548" width="620" height="172" rx="50" fill="url(#silver)"/>
+    <rect x="202" y="512" width="620" height="172" rx="50" fill="#F5F7FF"/>
+    <rect x="202" y="475" width="620" height="176" rx="50" fill="url(#blue)"/>
+    <path d="M252 491h236v153H252q-35 0-35-36V526q0-35 35-35Z" fill="#66B4FF" opacity=".52"/>
+    <path d="M488 491h285q35 0 35 35v82H488V491Z" fill="#1469D6" opacity=".4"/>
+    <path d="M488 567h320v42q0 35-35 35H488v-77Z" fill="#8DCBFF" opacity=".36"/>
+  </g>
+
+  <!-- Floating mint route card -->
+  <g transform="rotate(-9 510 385)">
+    <rect x="290" y="274" width="455" height="220" rx="42" fill="url(#mint)"/>
+    <path d="M315 299h405v170H315q-25 0-25-25V324q0-25 25-25Z" fill="#C4F3D9" opacity=".76"/>
+    <path d="M351 411c50-80 103-80 151-16s104 64 151-11 75-62 93-45" stroke="#42C995" stroke-width="48" stroke-linecap="round"/>
+    <path d="M351 411c50-80 103-80 151-16s104 64 151-11 75-62 93-45" stroke="#E9FFF5" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 27"/>
+    <circle cx="352" cy="411" r="20" fill="#FFFFFF"/>
+    <path d="M731 324l25 15-28 12" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Friendly 3D city bus -->
+  <g transform="rotate(-7 526 365)">
+    <path d="M402 322c0-25 20-45 45-45h170c31 0 57 22 62 53l16 101c4 24-14 45-38 45H427c-24 0-43-19-43-43l18-111Z" fill="#0FB982"/>
+    <path d="M414 329c4-23 22-39 45-39h151c23 0 42 16 46 39l8 47H407l7-47Z" fill="url(#window)"/>
+    <path d="M425 324c4-14 16-23 31-23h59v59H417l8-36Z" fill="#DDF7FF"/>
+    <path d="M529 301h80c13 0 25 9 28 22l8 37H529v-59Z" fill="#A5E4FA"/>
+    <path d="M515 302v63" stroke="#44B995" stroke-width="9"/>
+    <path d="m407 385 276 1 7 44c3 18-11 33-29 33H427c-19 0-34-15-33-34l13-44Z" fill="#18C98B"/>
+    <path d="M401 411h286" stroke="#8AE6B6" stroke-width="8" opacity=".8"/>
+    <rect x="422" y="420" width="42" height="20" rx="10" fill="#FFF0A6"/>
+    <rect x="627" y="420" width="37" height="20" rx="10" fill="#FFF0A6"/>
+    <path d="M449 465v14m174-14v14" stroke="#1764E8" stroke-width="13" stroke-linecap="round"/>
+    <circle cx="463" cy="474" r="31" fill="#F5F7FF"/>
+    <circle cx="463" cy="474" r="19" fill="#7184C9"/>
+    <circle cx="622" cy="474" r="31" fill="#F5F7FF"/>
+    <circle cx="622" cy="474" r="19" fill="#7184C9"/>
+    <path d="M430 284c20-23 49-31 76-28" stroke="#D6FFF0" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+  </g>
+
+  <!-- Floating silver transit token -->
+  <g transform="rotate(12 250 338)">
+    <circle cx="250" cy="338" r="67" fill="#7184C9" opacity=".25"/>
+    <circle cx="244" cy="328" r="62" fill="url(#coin)"/>
+    <circle cx="244" cy="328" r="48" stroke="#FFFFFF" stroke-width="5" opacity=".9"/>
+    <path d="M229 347v-27c0-9 7-16 16-16h4c9 0 16 7 16 16v27m-36-17h36m-38 18h40" stroke="#91A1BF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="235" cy="355" r="5" fill="#91A1BF"/>
+    <circle cx="254" cy="355" r="5" fill="#91A1BF"/>
+  </g>
+</svg>

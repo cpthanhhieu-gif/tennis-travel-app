@@ -49,8 +49,6 @@ export default function TransportOrderStatus() {
         <div className="transport-order-view-total"><span>Tổng đơn</span><strong>{formatTransportMoney(transportGrandTotal(order))}</strong></div>
         <div className="transport-order-view-footer"><span>Phương thức thanh toán</span><strong>{order.paymentMethod}</strong><small>Mã dịch vụ: {order.rideId}</small><small>{order.relatedTourId ? `Mã tour liên quan: ${order.relatedTourId}` : "Đơn dịch vụ độc lập · không cần booking tour"}</small><small>Tạo lúc {createdAtLabel}</small>{order.relatedTourBookingId && <Link className="ds-link" href={`/pre-tour?booking=${encodeURIComponent(order.relatedTourBookingId)}`}>Mở tour liên quan</Link>}</div>
       </section>
-      <aside className="transport-order-next-step"><CircleCheck size={22}/><div><strong>Trạng thái hiện tại</strong><p>Hoàn tất mô phỏng. Dữ liệu chỉ lưu trong phiên trình duyệt này.</p></div></aside>
     </div>
-    <div className="transport-order-actions"><Link className="ds-link" href={order.relatedTourBookingId ? `/pre-tour?booking=${encodeURIComponent(order.relatedTourBookingId)}` : "/pre-tour"}>Quay về Chuyến đi</Link><Link className="transport-order-back-home" href="/transport">Tìm phương tiện khác <ArrowRight size={17}/></Link></div>
   </div>;
 }

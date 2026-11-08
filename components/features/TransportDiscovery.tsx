@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftRight, BusFront, CalendarDays, CarFront, TrainFront, Plane, Search, Users } from "lucide-react";
 import Button from "@/components/ui/Button";
-import TransportResults from "@/components/features/TransportResults";
-import TransportPayment from "@/components/features/TransportPayment";
 
 const modes = [
-  { id: "train", label: "Tàu hỏa", Icon: TrainFront },
-  { id: "bus", label: "Xe buýt", Icon: BusFront },
   { id: "rental", label: "Thuê xe", Icon: CarFront },
   { id: "airport", label: "Xe sân bay", Icon: Plane },
   { id: "private_car", label: "Xe riêng", Icon: CarFront },
+  { id: "train", label: "Tàu hỏa", Icon: TrainFront },
+  { id: "bus", label: "Xe buýt", Icon: BusFront },
 ];
 
 export default function TransportDiscovery({ initialSearch = {} }: { initialSearch?: Record<string, string | undefined> }) {
@@ -22,26 +20,13 @@ export default function TransportDiscovery({ initialSearch = {} }: { initialSear
   const [to, setTo] = useState(initialSearch.to ?? "");
   const [date, setDate] = useState(initialSearch.date ?? "");
   const [passengers, setPassengers] = useState(initialSearch.passengers ?? "1");
-  const [inlineSearch, setInlineSearch] = useState<Record<string, string | undefined> | null>(null);
-  const [paymentStage, setPaymentStage] = useState(false);
-
-  useEffect(() => {
-    if (!inlineSearch) return;
-    window.requestAnimationFrame(() => document.getElementById("transport-inline-booking")?.scrollIntoView({ behavior: "smooth", block: "start" }));
-  }, [inlineSearch]);
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const query = new URLSearchParams({ mode, from: from.trim(), to: to.trim(), date, passengers });
     if (initialSearch.bookingId) query.set("bookingId", initialSearch.bookingId);
     if (initialSearch.tourId) query.set("tourId", initialSearch.tourId);
-    if (mode !== "private_car") {
-      router.push(`/transport/results?${query.toString()}`);
-      return;
-    }
-    const params = Object.fromEntries(query.entries()) as Record<string, string>;
-    setInlineSearch(params);
-    setPaymentStage(false);
+    router.push(`/transport/results?${query.toString()}`);
   }
 
   return <div className="ds-container transport-page">
@@ -70,11 +55,6 @@ export default function TransportDiscovery({ initialSearch = {} }: { initialSear
         <Button type="submit" className="transport-submit"><Search size={18}/> Tìm chuyến</Button>
       </form>
     </section>
-    <p className="transport-flow-note">Kết quả hiện là dữ liệu demo; chưa liên kết nhà cung cấp, tình trạng chỗ hoặc thanh toán.</p>
-    {inlineSearch && <section id="transport-inline-booking" className="transport-inline-booking" aria-label="Chọn và đặt xe riêng">
-      {paymentStage
-        ? <TransportPayment inline onBack={() => setPaymentStage(false)} />
-        : <TransportResults key={JSON.stringify(inlineSearch)} initialSearch={inlineSearch} inline onContinue={() => setPaymentStage(true)} />}
-    </section>}
+    <p className="transport-flow-note">Kết quả hiển thị ở màn hình kế tiếp. Giá và tình trạng xe là dữ liệu demo.</p>
   </div>;
 }

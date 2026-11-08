@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, CreditCard, QrCode, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, QrCode } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { activityAmount, formatTransportMoney, isTransportDraft, parseTransportOrders, TRANSPORT_ACTIVITY, TRANSPORT_DRAFT_KEY, TRANSPORT_ORDER_KEY, transportAmount, transportFingerprint, transportGrandTotal, type TransportDemoOrder, type TransportDraft } from "@/lib/transport-order";
 
@@ -17,7 +17,7 @@ function makeOrderId() {
   return `TA-DI-${suffix}`;
 }
 
-export default function TransportPayment({ inline = false, onBack }: { inline?: boolean; onBack?: () => void }) {
+export default function TransportPayment() {
   const router = useRouter();
   const [draft, setDraft] = useState<TransportDraft | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -81,14 +81,13 @@ export default function TransportPayment({ inline = false, onBack }: { inline?: 
   if (draft.relatedTourId) backParams.set("tourId", draft.relatedTourId);
   const backQuery = backParams.toString();
 
-  return <div className={`ds-container transport-payment-page${inline ? " is-inline" : ""}`}>
-    {inline ? <button className="transport-back-link transport-inline-back" type="button" onClick={onBack}><ArrowLeft size={17}/> Về chọn chuyến</button> : <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>}
+  return <div className="ds-container transport-payment-page">
+    <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>
     <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 5 · THANH TOÁN RIÊNG</span><h1>{draft.mode === "private_car" ? "Thanh toán xe riêng" : "Thanh toán đơn di chuyển"}</h1><p>Khoản thanh toán của dịch vụ riêng không được cộng vào giá tour.</p></header>
     <div className="transport-payment-layout">
       <section className="transport-payment-methods" aria-labelledby="payment-method-title">
         <span className="ui-kicker">PHƯƠNG THỨC</span><h2 id="payment-method-title">Chọn cách thanh toán</h2>
         <div className="transport-payment-options" role="radiogroup" aria-label="Phương thức thanh toán mô phỏng">{methods.map(({ id, label, Icon, description }) => <button type="button" key={id} role="radio" aria-checked={method === id} className={`transport-payment-option${method === id ? " is-selected" : ""}`} onClick={() => setMethod(id)}><span className="transport-payment-method-icon"><Icon size={21}/></span><span><strong>{label}</strong><small>{description}</small></span><span className="transport-payment-radio">{method === id && <Check size={14}/>}</span></button>)}</div>
-        <p className="transport-payment-simulation"><ShieldCheck size={18}/> Đây là thanh toán mô phỏng. Không gửi thông tin thẻ, không gọi ngân hàng và không phát sinh khoản thu thật.</p>
       </section>
       <aside className="transport-payment-summary" aria-label="Chi tiết giá">
         <span className="ui-kicker">CHI TIẾT ĐƠN</span><h2>{draft.from} → {draft.to}</h2>

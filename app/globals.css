@@ -1014,9 +1014,15 @@ body{font-family:var(--ds-font);color:var(--ds-ink);background-color:var(--ds-su
 .transport-hero .transport-mode-rail{margin:0 -16px;padding:2px 16px 12px}
 .transport-hero .transport-mode-rail button{min-height:94px;border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.78);color:var(--ds-ink);backdrop-filter:blur(8px)}
 .transport-hero .transport-mode-rail button[aria-pressed=true]{border:2px solid var(--ds-primary);background:var(--ds-surface);color:var(--ds-primary)}
-.transport-inline-booking{margin-top:20px;padding-top:4px;border-top:1px solid var(--ds-border)}
-.transport-results-page.is-inline,.transport-payment-page.is-inline{max-width:none;padding:8px 0 0}
-.transport-results-page.is-inline .transport-results-layout{grid-template-columns:minmax(0,1fr) 270px}
-.transport-inline-meta{display:flex;align-items:center;gap:7px;margin:12px 0;color:var(--ds-muted);font-size:13px}
-.transport-inline-back{padding:0;border:0;background:none;cursor:pointer}
-@media(max-width:767px){.transport-hero{margin:0 -16px 14px;padding:18px 16px 12px;border-radius:0 0 20px 20px}.transport-hero .transport-heading{margin:12px 0 12px}.transport-hero .transport-heading h1{font-size:30px}.transport-hero .transport-mode-rail button{min-height:80px}.transport-results-page.is-inline .transport-results-layout{display:flex;flex-direction:column}.transport-results-page.is-inline .transport-ride-list{order:0}.transport-results-page.is-inline .transport-selection-card{order:1}}
+.transport-hero{margin:0 0 18px;padding:24px 14px 12px;border-radius:var(--ds-radius-card)}
+.transport-hero .transport-mode-rail{margin:0;padding:2px 0 8px}
+.app-private-ride-image{position:relative;isolation:isolate;overflow:hidden;background:#26384c}
+.app-private-ride-image::after{position:absolute;z-index:0;inset:0;content:"";background:linear-gradient(180deg,rgba(10,24,42,.05) 25%,rgba(10,24,42,.72) 100%)}
+.app-private-ride-image img{z-index:-1;object-fit:cover}
+.app-private-ride-image>span,.app-private-ride-image>strong{position:relative;z-index:1}
+.app-private-ride-image>strong{color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.45)}
+.transport-results-page{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+.transport-selection-card{position:fixed;z-index:35;left:max(16px,calc((100vw - 872px)/2));right:max(16px,calc((100vw - 872px)/2));bottom:calc(76px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:16px;padding:12px 14px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-card);background:var(--ds-surface);box-shadow:0 -4px 18px rgba(16,24,40,.14)}
+.transport-selection-card .transport-total{flex:1;margin:0}
+.transport-selection-card .transport-confirm-button{width:min(280px,45%);min-height:46px}
+@media(max-width:767px){.transport-hero{margin:0 0 14px;padding:18px 12px 10px;border-radius:18px}.transport-hero .transport-mode-rail{grid-auto-columns:minmax(92px,24vw);gap:7px;padding:2px 0 8px}.transport-hero .transport-mode-rail button{min-height:76px}.app-private-ride-image{min-height:190px}.transport-results-page{padding-bottom:calc(148px + env(safe-area-inset-bottom,0px))}.transport-selection-card{left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:35;order:initial;box-shadow:0 -4px 18px rgba(16,24,40,.14)}.transport-selection-card .transport-confirm-button{width:min(54%,250px)}}

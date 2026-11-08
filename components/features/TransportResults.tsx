@@ -19,7 +19,7 @@ const modeInfo: Record<Mode, { label: string; Icon: typeof TrainFront }> = {
 const validModes: Mode[] = ["train", "bus", "rental", "airport", "private_car"];
 const money = (amount: number) => `${amount.toLocaleString("vi-VN")} đ`;
 
-export default function TransportResults({ initialSearch }: { initialSearch: Record<string, string | undefined> }) {
+export default function TransportResults({ initialSearch, inline = false, onContinue }: { initialSearch: Record<string, string | undefined>; inline?: boolean; onContinue?: () => void }) {
   const router = useRouter();
   const mode = validModes.includes(initialSearch.mode as Mode) ? initialSearch.mode as Mode : "train";
   const { label, Icon } = modeInfo[mode];
@@ -55,15 +55,16 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
       }
       sessionStorage.setItem(TRANSPORT_DRAFT_KEY, JSON.stringify(draft));
     } catch { /* Browser storage may be disabled in private mode. */ }
-    router.push("/transport/review");
+    if (inline && onContinue) onContinue();
+    else router.push("/transport/review");
   }
 
   const editParams = new URLSearchParams({ mode, from: initialSearch.from ?? "", to: initialSearch.to ?? "", date, passengers: String(passengers) });
   if (initialSearch.bookingId) editParams.set("bookingId", initialSearch.bookingId);
   if (initialSearch.tourId) editParams.set("tourId", initialSearch.tourId);
 
-  return <div className="ds-container transport-page transport-results-page">
-    <Link className="transport-back-link" href={`/transport?${editParams.toString()}`}><ArrowLeft size={17}/> Sửa tìm kiếm</Link>
+  return <div className={`ds-container transport-page transport-results-page${inline ? " is-inline" : ""}`}>
+    {!inline && <Link className="transport-back-link" href={`/transport?${editParams.toString()}`}><ArrowLeft size={17}/> Sửa tìm kiếm</Link>}
     <header className="transport-results-heading"><div className="transport-results-title"><span className="transport-results-icon"><Icon size={21}/></span><div><span className="ui-kicker">{label.toUpperCase()}</span><h1>{initialSearch.from || "Điểm đi"}<ArrowRight size={19}/>{initialSearch.to || "Điểm đến"}</h1></div></div><p>{date || "Chưa chọn ngày"} · {mode === "private_car" ? "Giá demo theo thời lượng thuê" : "Giá demo cho một lượt"}</p></header>
     <div className="transport-results-layout">
       <section className="transport-ride-list" aria-labelledby="transport-ride-list-title">
@@ -78,10 +79,12 @@ export default function TransportResults({ initialSearch }: { initialSearch: Rec
       </section>
       <aside className="transport-selection-card" aria-label="Thông tin lựa chọn">
         <span className="ui-kicker">NGÀY VÀ SỐ KHÁCH</span>
-        <fieldset className="booking-departures transport-request-date"><legend><CalendarDays size={18} aria-hidden="true"/> {mode === "private_car" ? "Ngày sử dụng xe" : "Ngày khởi hành"}</legend><div><label className="transport-result-date"><span>Ngày khách yêu cầu</span><input style={{ width: "100%", height: "auto" }} aria-describedby="transport-date-note" type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={event => setDate(event.target.value)}/><small id="transport-date-note" className="ds-caption">{mode === "private_car" ? "Lịch xe chưa xác nhận." : "Ngày và tình trạng chỗ là dữ liệu demo."}</small></label></div></fieldset>
+        {inline ? <p className="transport-inline-meta"><CalendarDays size={16}/> Ngày {date || "chưa chọn"} · {passengers} khách</p> : <fieldset className="booking-departures transport-request-date"><legend><CalendarDays size={18} aria-hidden="true"/> {mode === "private_car" ? "Ngày sử dụng xe" : "Ngày khởi hành"}</legend><div><label className="transport-result-date"><span>Ngày khách yêu cầu</span><input style={{ width: "100%", height: "auto" }} aria-describedby="transport-date-note" type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={event => setDate(event.target.value)}/><small id="transport-date-note" className="ds-caption">{mode === "private_car" ? "Lịch xe chưa xác nhận." : "Ngày và tình trạng chỗ là dữ liệu demo."}</small></label></div></fieldset>}
+        {!inline && <>
         <h2>Số khách</h2>
         <p className="transport-passenger-note"><Users size={17}/> Khách đi cùng chuyến</p>
         <div className="transport-passenger-stepper"><button type="button" aria-label="Giảm số khách" disabled={passengers <= 1} onClick={() => setPassengers(value => Math.max(1, value - 1))}>−</button><strong aria-live="polite">{passengers}</strong><button type="button" aria-label="Tăng số khách" disabled={passengers >= maxPassengers} onClick={() => setPassengers(value => Math.min(maxPassengers, value + 1))}>+</button></div>
+        </>}
         {passengers > maxPassengers && <p className="transport-price-disclaimer" role="status">Xe đang chọn tối đa {maxPassengers} khách. Hãy chọn xe phù hợp hoặc giảm số khách để tiếp tục.</p>}
         <div className="transport-selection-summary"><span>{selected.name}</span><strong>{money(selected.price)} <small>{selected.unit === "person" ? "× khách" : "/ xe"}</small></strong>{selected.unit === "person" && <span>{passengers} khách</span>}<span className="transport-selection-date">Ngày {date || "chưa chọn"} · {selected.time}</span></div>
         <div className="transport-total"><span>Tổng tạm tính</span><strong>{money(total)}</strong></div>

@@ -17,7 +17,7 @@ function makeOrderId() {
   return `TA-DI-${suffix}`;
 }
 
-export default function TransportPayment() {
+export default function TransportPayment({ inline = false, onBack }: { inline?: boolean; onBack?: () => void }) {
   const router = useRouter();
   const [draft, setDraft] = useState<TransportDraft | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -81,8 +81,8 @@ export default function TransportPayment() {
   if (draft.relatedTourId) backParams.set("tourId", draft.relatedTourId);
   const backQuery = backParams.toString();
 
-  return <div className="ds-container transport-payment-page">
-    <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>
+  return <div className={`ds-container transport-payment-page${inline ? " is-inline" : ""}`}>
+    {inline ? <button className="transport-back-link transport-inline-back" type="button" onClick={onBack}><ArrowLeft size={17}/> Về chọn chuyến</button> : <Link className="transport-back-link" href={`/transport/results?${backQuery}`}><ArrowLeft size={17}/> Về chọn chuyến</Link>}
     <header className="transport-review-heading"><span className="ui-kicker">BƯỚC 5 · THANH TOÁN RIÊNG</span><h1>{draft.mode === "private_car" ? "Thanh toán xe riêng" : "Thanh toán đơn di chuyển"}</h1><p>Khoản thanh toán của dịch vụ riêng không được cộng vào giá tour.</p></header>
     <div className="transport-payment-layout">
       <section className="transport-payment-methods" aria-labelledby="payment-method-title">

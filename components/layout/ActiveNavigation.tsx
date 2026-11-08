@@ -3,7 +3,7 @@ import {useEffect,useState} from "react";
 import DemoBanner from "./DemoBanner";
 import Link from "next/link";import {usePathname} from "next/navigation";
 import {Compass,CalendarDays,Trophy,UserRound,ArrowLeft} from "lucide-react";
-const tabs=[{href:"/",label:"Khám phá",Icon:Compass},{href:"/pre-tour",label:"Hành trình",Icon:CalendarDays},{href:"/gamification",label:"Ace Club",Icon:Trophy},{href:"/profile",label:"Cá nhân",Icon:UserRound}];
+const tabs=[{href:"/",label:"Khám phá",Icon:Compass},{href:"/pre-tour",label:"Chuyến đi",Icon:CalendarDays},{href:"/gamification",label:"Ace Club",Icon:Trophy},{href:"/profile",label:"Cá nhân",Icon:UserRound}];
 function section(path:string){if(path==="/profile"||path==="/passport")return "/profile";if(path==="/gamification")return "/gamification";if(["/pre-tour","/in-tour","/share-card","/check-in","/pilot","/test-controls"].includes(path))return "/pre-tour";return "/";}
 export default function ActiveNavigation({mobile=false}:{mobile?:boolean}){
  const path=usePathname(),selected=section(path);const [bookingParent,setBookingParent]=useState("/");

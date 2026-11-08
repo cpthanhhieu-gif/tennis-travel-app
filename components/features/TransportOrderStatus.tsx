@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, BusFront, CarFront, Check, CircleCheck, MapPin, Plane, TrainFront, Users } from "lucide-react";
-import { activityAmount, formatTransportMoney, isTransportDraft, TRANSPORT_ACTIVITY, TRANSPORT_ORDER_KEY, transportAmount, transportGrandTotal, type TransportDemoOrder } from "@/lib/transport-order";
+import { activityAmount, formatTransportMoney, parseTransportOrders, TRANSPORT_ACTIVITY, TRANSPORT_ORDER_KEY, transportAmount, transportGrandTotal, type TransportDemoOrder } from "@/lib/transport-order";
 
 const modeNames = { train: "Tàu hỏa", bus: "Xe buýt", rental: "Thuê xe", airport: "Xe sân bay" };
 const modeIcons = { train: TrainFront, bus: BusFront, rental: CarFront, airport: Plane };
@@ -14,11 +14,13 @@ export default function TransportOrderStatus() {
 
   useEffect(() => {
     try {
-      const parsed: unknown = JSON.parse(sessionStorage.getItem(TRANSPORT_ORDER_KEY) ?? "null");
-      if (isTransportDraft(parsed) && typeof (parsed as Partial<TransportDemoOrder>).id === "string" && typeof (parsed as Partial<TransportDemoOrder>).createdAt === "string" && typeof (parsed as Partial<TransportDemoOrder>).paymentMethod === "string" && typeof (parsed as Partial<TransportDemoOrder>).fingerprint === "string" && (parsed as Partial<TransportDemoOrder>).status === "simulated_paid") {
+      const orders = parseTransportOrders(sessionStorage.getItem(TRANSPORT_ORDER_KEY));
+      const requestedId = new URLSearchParams(window.location.search).get("id");
+      const parsed = orders.find(item => item.id === requestedId) ?? (requestedId ? undefined : orders[0]);
+      if (parsed) {
         const activityCount = Math.max(0, Math.min(parsed.passengers, Number.isInteger(parsed.activityCount) ? parsed.activityCount ?? 0 : 0));
         const draft = { ...parsed, activityId: activityCount ? parsed.activityId ?? TRANSPORT_ACTIVITY.id : undefined, activityCount };
-        setOrder({ ...draft, id: (parsed as TransportDemoOrder).id, createdAt: (parsed as TransportDemoOrder).createdAt, paymentMethod: (parsed as TransportDemoOrder).paymentMethod, status: "simulated_paid", transportTotal: transportAmount(draft), activityTotal: activityAmount(draft), grandTotal: transportGrandTotal(draft), fingerprint: (parsed as TransportDemoOrder).fingerprint });
+        setOrder({ ...draft, transportTotal: transportAmount(draft), activityTotal: activityAmount(draft), grandTotal: transportGrandTotal(draft) });
       }
     } catch { /* Render the empty state when local order storage cannot be read. */ }
     setLoaded(true);
@@ -49,6 +51,6 @@ export default function TransportOrderStatus() {
       </section>
       <aside className="transport-order-next-step"><CircleCheck size={22}/><div><strong>Trạng thái hiện tại</strong><p>Hoàn tất mô phỏng. Dữ liệu chỉ lưu trong phiên trình duyệt này.</p></div></aside>
     </div>
-    <Link className="transport-order-back-home" href="/transport">Tìm phương tiện khác <ArrowRight size={17}/></Link>
+    <div className="transport-order-actions"><Link className="ds-link" href="/pre-tour">Quay về Chuyến đi</Link><Link className="transport-order-back-home" href="/transport">Tìm phương tiện khác <ArrowRight size={17}/></Link></div>
   </div>;
 }

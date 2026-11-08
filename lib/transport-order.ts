@@ -33,6 +33,32 @@ export const TRANSPORT_ORDER_KEY = "travel-ace-transport-order-v1";
 export const TRANSPORT_ACTIVITY = transportExperiences[0];
 export const TRANSPORT_ACTIVITY_PRICE = TRANSPORT_ACTIVITY.unitPrice;
 export const formatTransportMoney = (amount: number) => `${amount.toLocaleString("vi-VN")} đ`;
+
+export function isTransportDemoOrder(value: unknown): value is TransportDemoOrder {
+  if (!isTransportDraft(value)) return false;
+  const order = value as Partial<TransportDemoOrder>;
+  return typeof order.id === "string" && typeof order.createdAt === "string" &&
+    typeof order.paymentMethod === "string" && order.status === "simulated_paid" &&
+    typeof order.fingerprint === "string" && Number.isFinite(order.transportTotal) &&
+    Number.isFinite(order.activityTotal) && Number.isFinite(order.grandTotal);
+}
+
+export function parseTransportOrders(raw: string | null): TransportDemoOrder[] {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const candidates = Array.isArray(parsed) ? parsed : [parsed];
+    const seen = new Set<string>();
+    return candidates.filter(isTransportDemoOrder).filter(order => {
+      if (seen.has(order.id)) return false;
+      seen.add(order.id);
+      return true;
+    });
+  } catch {
+    return [];
+  }
+}
+
 export const transportAmount = (draft: TransportDraft) => draft.unit === "person" ? draft.unitPrice * draft.passengers : draft.unitPrice;
 export const activityAmount = (draft: TransportDraft) => {
   const experience = transportExperiences.find(item => item.id === draft.activityId);

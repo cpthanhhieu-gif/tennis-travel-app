@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, CreditCard, QrCode, ShieldCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { activityAmount, formatTransportMoney, isTransportDraft, TRANSPORT_ACTIVITY, TRANSPORT_DRAFT_KEY, TRANSPORT_ORDER_KEY, transportAmount, transportFingerprint, transportGrandTotal, type TransportDemoOrder, type TransportDraft } from "@/lib/transport-order";
+import { activityAmount, formatTransportMoney, isTransportDraft, parseTransportOrders, TRANSPORT_ACTIVITY, TRANSPORT_DRAFT_KEY, TRANSPORT_ORDER_KEY, transportAmount, transportFingerprint, transportGrandTotal, type TransportDemoOrder, type TransportDraft } from "@/lib/transport-order";
 
 const methods = [
   { id: "bank_qr", label: "Quét mã ngân hàng", Icon: QrCode, description: "Mô phỏng · Không tạo giao dịch thật" },
@@ -50,9 +50,10 @@ export default function TransportPayment() {
     setError("");
     const fingerprint = transportFingerprint(draft);
     try {
-      const existing = JSON.parse(sessionStorage.getItem(TRANSPORT_ORDER_KEY) ?? "null") as Partial<TransportDemoOrder> | null;
-      if (existing?.fingerprint === fingerprint && typeof existing.id === "string") {
-        router.push("/transport/order");
+      const orders = parseTransportOrders(sessionStorage.getItem(TRANSPORT_ORDER_KEY));
+      const existing = orders.find(order => order.fingerprint === fingerprint);
+      if (existing) {
+        router.push(`/transport/order?id=${encodeURIComponent(existing.id)}`);
         return;
       }
       const order: TransportDemoOrder = {
@@ -66,8 +67,8 @@ export default function TransportPayment() {
         grandTotal,
         fingerprint,
       };
-      sessionStorage.setItem(TRANSPORT_ORDER_KEY, JSON.stringify(order));
-      router.push("/transport/order");
+      sessionStorage.setItem(TRANSPORT_ORDER_KEY, JSON.stringify([order, ...orders]));
+      router.push(`/transport/order?id=${encodeURIComponent(order.id)}`);
     } catch {
       setError("Không lưu được đơn trong phiên này. Hãy bật bộ nhớ trình duyệt hoặc thử lại.");
       setBusy(false);

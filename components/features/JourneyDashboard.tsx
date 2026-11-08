@@ -25,6 +25,7 @@ import Link from "next/link";
 import {journeyPhase,type JourneyPhase} from "@/lib/journey";
 import {tours,formatVND} from "@/lib/mock-data";
 import {useLocalAccount} from "@/lib/use-local-account";
+import JourneyServiceOrders from "./JourneyServiceOrders";
 export default function JourneyDashboard(){
  const {data,error,busy,refresh,act,needsLogin,clearError}=useLocalAccount();
  const [phase,setPhase]=useState<JourneyPhase|"Tất cả">("Tất cả");
@@ -56,5 +57,5 @@ export default function JourneyDashboard(){
 {id:"preparation",label:"Chuẩn bị",content:<>{t?.packageId==="sbu3"&&<JourneyServices order={o} busy={busy} act={act}/>} {!o.completedAt&&<PreparationPanel order={o} busy={busy} act={act}/>}</>},
 {id:"feedback",label:"Sau chuyến",content:<>{o.completedAt&&<PostTripExperience key={o.id} order={o} busy={busy} act={act}/>}{(o.startedAt||o.completedAt)&&<PilotSurvey order={o} busy={busy} act={act}/>} {o.completedAt&&<Link className="ds-link" href={`/share-card?booking=${o.id}`}>Mở thẻ thành tích</Link>}
 {!o.startedAt&&!o.completedAt&&<p>Đánh giá sẽ mở theo tiến độ chuyến đi.</p>}</>}
-]}/></Modal>}</section>})}</div>{pageCount>1&&<nav className="journey-pagination" aria-label="Trang hành trình"><span>{currentPage*6+1}–{Math.min((currentPage+1)*6,filtered.length)} / {filtered.length} chuyến</span><button aria-label="Trang trước" disabled={currentPage===0} onClick={()=>setPage(currentPage-1)}><ChevronLeft size={20}/></button><span>Trang {currentPage+1} / {pageCount}</span><button aria-label="Trang sau" disabled={currentPage+1>=pageCount} onClick={()=>setPage(currentPage+1)}><ChevronRight size={20}/></button></nav>}</>}</div>;
+]}/></Modal>}</section>})}</div>{pageCount>1&&<nav className="journey-pagination" aria-label="Trang hành trình"><span>{currentPage*6+1}–{Math.min((currentPage+1)*6,filtered.length)} / {filtered.length} chuyến</span><button aria-label="Trang trước" disabled={currentPage===0} onClick={()=>setPage(currentPage-1)}><ChevronLeft size={20}/></button><span>Trang {currentPage+1} / {pageCount}</span><button aria-label="Trang sau" disabled={currentPage+1>=pageCount} onClick={()=>setPage(currentPage+1)}><ChevronRight size={20}/></button></nav>}</>}<JourneyServiceOrders/></div>;
 }

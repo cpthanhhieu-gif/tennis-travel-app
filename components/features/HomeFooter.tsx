@@ -62,7 +62,7 @@ export default function HomeFooter() {
 
         <div className="border-t border-white/10 pt-[2.4rem] flex flex-col md:flex-row justify-between items-center gap-[1.6rem]">
           <p className="text-white/40 text-[1.2rem]">
-            © 2027 Vietravel. Tennis Travel Experience — Prototype V2.12
+            © 2027 Vietravel. Tennis Travel Experience — Prototype
           </p>
           <p className="text-white/40 text-[1.2rem]">
             Thiết kế bởi Nguyễn Thủy Tiên — Ban Nhân chính, Vietravel

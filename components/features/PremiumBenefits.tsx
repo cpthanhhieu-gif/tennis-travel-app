@@ -1,9 +1,9 @@
 "use client";
 import {useState} from "react";
-import {ImageIcon, ArrowUpRight} from "lucide-react";
+import {ArrowUpRight} from "lucide-react";
 import Modal from "@/components/ui/Modal";
-import VisualStoryDeck from "./VisualStoryDeck";
-type Benefit={title:string;summary:string;detail:string;image:string};
+import VisualStoryDeck, {PhotoSlot} from "./VisualStoryDeck";
+type Benefit={title:string;summary:string;detail:string;image:string;imageSrc?:string};
 const included:Benefit[]=[
 {title:"Court Hours · 3 buổi sân",summary:"Chơi theo nhịp của bạn",image:"Sân tennis & người chơi",detail:"Ba buổi sân trong Court Hours; khung hiện tại dự kiến tổng 6,5 giờ. Sân, khung giờ và phương án khi thời tiết thay đổi được xác nhận trong phương án chuyến đi."},
 {title:"HLV đại sứ · 1 buổi",summary:"Một buổi trong giá gói",image:"Chân dung HLV đại sứ",detail:"Theo cấu hình bắt buộc v2.12: một buổi với HLV đại sứ nằm trong giá. Tên đại sứ và lịch tham gia chờ xác nhận. Buổi tập riêng 1-1 là dịch vụ mua thêm, không thay thế buổi này."},
@@ -16,10 +16,10 @@ const included:Benefit[]=[
 {title:"App & share card",summary:"Hành trình và thẻ kỷ niệm",image:"Khoảnh khắc đôi bạn sau tour",detail:"App hỗ trợ hành trình, chuẩn bị, check-in, phản hồi và thẻ chia sẻ sau chuyến hoàn thành. Các chức năng hiện ở mức trải nghiệm thử; thẻ công khai giới hạn thông tin theo đồng thuận."}
 ];
 const extras:Benefit[]=[
-{title:"Tập 1-1 với đại sứ",summary:"Tham khảo 1,5 triệu / giờ",image:"Buổi tập riêng",detail:"Buổi riêng mua thêm, tách biệt một buổi đại sứ trong gói; phụ thuộc lịch đại sứ và báo giá xác nhận."},
-{title:"Spa thêm & nâng phòng",summary:"Spa thêm tham khảo 900.000đ",image:"Spa & phòng nghỉ",detail:"Nâng phòng báo giá riêng. Mọi khoản mua thêm chỉ ghi nhận sau khi có phương án và khách chấp thuận."},
-{title:"Couple Mode",summary:"Tham khảo 22,9 triệu / người",image:"Hai người nghỉ dưỡng",detail:"Người đi cùng chung phòng, có lịch nghỉ dưỡng riêng; không gồm sân và HLV. Chọn số người đi cùng khi gửi yêu cầu."},
-{title:"Trải nghiệm mua thêm",summary:"Xác nhận khả năng cung cấp",image:"Hoạt động ngoài sân",detail:"Theo v2.12: VinWonders/snorkeling theo giá niêm yết; pickleball 400.000đ/buổi; video kỹ thuật 800.000đ; Ace Lab 30 phút kèm video gộp gói 800.000đ; Ace Check theo giá cơ sở y tế; merchandise theo mùa từ G3. Chưa mở đặt các dịch vụ này trên app; cần xác nhận đối tác và báo giá, tránh cộng trùng video với gói Ace Lab."}
+{title:"Tập 1-1 với đại sứ",summary:"Tham khảo 1,5 triệu / giờ",image:"Buổi tập riêng",imageSrc:"/images/premium-extras/ambassador-training.png",detail:"Buổi riêng mua thêm, tách biệt một buổi đại sứ trong gói; phụ thuộc lịch đại sứ và báo giá xác nhận."},
+{title:"Spa thêm & nâng phòng",summary:"Spa thêm tham khảo 900.000đ",image:"Spa & phòng nghỉ",imageSrc:"/images/premium-extras/spa.png",detail:"Nâng phòng báo giá riêng. Mọi khoản mua thêm chỉ ghi nhận sau khi có phương án và khách chấp thuận."},
+{title:"Couple Mode",summary:"Tham khảo 22,9 triệu / người",image:"Hai người nghỉ dưỡng",imageSrc:"/images/premium-extras/couple-mode.png",detail:"Người đi cùng chung phòng, có lịch nghỉ dưỡng riêng; không gồm sân và HLV. Chọn số người đi cùng khi gửi yêu cầu."},
+{title:"Trải nghiệm mua thêm",summary:"Xác nhận khả năng cung cấp",image:"Hoạt động ngoài sân",imageSrc:"/images/premium-extras/outdoor-activities.png",detail:"Theo v2.12: VinWonders/snorkeling theo giá niêm yết; pickleball 400.000đ/buổi; video kỹ thuật 800.000đ; Ace Lab 30 phút kèm video gộp gói 800.000đ; Ace Check theo giá cơ sở y tế; merchandise theo mùa từ G3. Chưa mở đặt các dịch vụ này trên app; cần xác nhận đối tác và báo giá, tránh cộng trùng video với gói Ace Lab."}
 ];
 const personal:Benefit[]=[
 {title:"Nhóm chơi & mục tiêu",summary:"NTRP · kỹ thuật · thi đấu · thư giãn",image:"Nhóm tập cùng HLV",detail:"Đã có tự đánh giá NTRP và điều phối nhóm thủ công. Nhu cầu mục tiêu tập và ngôn ngữ HLV Việt/Anh cần xác nhận trong phương án; chưa có tự động ghép nhóm."},
@@ -35,7 +35,7 @@ export default function PremiumBenefits(){
  <div className="premium-benefit-tabs" aria-label="Nhóm quyền lợi">{groups.map((g,i)=><button type="button" key={g.label} aria-pressed={group===i} aria-controls="premium-benefit-list" onClick={()=>setGroup(i)}>{g.label}<span>{g.items.length}</span></button>)}</div>
  <p className="premium-swipe-hint">Vuốt ngang để khám phá · Chạm thẻ để xem chi tiết</p>
  <div id="premium-benefit-list" className="premium-benefit-rail" role="region" aria-label={groups[group].label} tabIndex={0} key={group}>{groups[group].items.map(item=><button type="button" className="premium-benefit-card" key={item.title} onClick={()=>setSelected(item)} aria-haspopup="dialog">
- <span className="premium-image-slot"><span className="premium-shape-circle"/><span className="premium-shape-court"/><ImageIcon size={30} aria-hidden="true"/><span>{item.image}</span><small>Vị trí ảnh</small></span>
+ <PhotoSlot label={item.image} src={item.imageSrc}/>
  <span className="premium-benefit-copy"><small>{group===0?"Trong cấu hình gói":group===1?"Tuỳ chọn · báo giá riêng":"Theo hồ sơ & phương án"}</small><strong>{item.title}</strong><span>{item.summary}</span><span className="premium-benefit-more">Xem chi tiết <ArrowUpRight size={16}/></span></span>
  </button>)}</div>
  <p className="ds-caption">{group===0?"Đã liệt kê đủ 9 thành phần bắt buộc. Đối tác, lịch dịch vụ và điều kiện bảo hiểm còn chờ xác nhận theo chuyến.":group===1?"Giá tham khảo từ hồ sơ; chưa tự cộng vào booking.":"Mức độ hỗ trợ khác nhau theo từng nhu cầu; xem chi tiết trước khi gửi yêu cầu."}</p>
@@ -44,6 +44,6 @@ export default function PremiumBenefits(){
 {title:"Di chuyển liền mạch",image:"Hành trình bay & xe đón",summary:"Bay SGN–Phú Quốc khứ hồi, xe theo lịch",detail:"Hãng, giờ bay, hành lý và lịch xe cần được xác nhận theo ngày khởi hành."},
 {title:"Có người đồng hành",image:"Tour Manager đón khách",summary:"Tour Manager & hoạt động theo chương trình",detail:"Các bữa theo lịch, cooking class, yoga/stretching và Tour Manager theo chương trình. Nhà cung cấp, lịch và phạm vi hỗ trợ được xác nhận trong phương án."}
 ]}/></details>
- <Modal isOpen={!!selected} onClose={()=>setSelected(null)} title={selected?.title??"Quyền lợi"}>{selected&&<><p className="ds-eyebrow">THÔNG TIN QUYỀN LỢI</p><p>{selected.detail}</p><p className="ds-caption">Nguồn: hồ sơ sản phẩm v2.12, trang 26. Khung ảnh đang chờ bạn bổ sung ảnh thật.</p></>}</Modal>
+ <Modal isOpen={!!selected} onClose={()=>setSelected(null)} title={selected?.title??"Quyền lợi"}>{selected&&<><PhotoSlot label={selected.image} src={selected.imageSrc}/><p className="ds-eyebrow">THÔNG TIN QUYỀN LỢI</p><p>{selected.detail}</p><p className="ds-caption">Nguồn: hồ sơ sản phẩm v2.12, trang 26.</p></>}</Modal>
  </section>
 }

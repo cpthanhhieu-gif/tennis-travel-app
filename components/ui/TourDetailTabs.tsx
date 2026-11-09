@@ -1,11 +1,12 @@
 "use client";
-import {useCallback,useState,type ReactNode} from "react";
+import {useCallback,useEffect,useState,type ReactNode} from "react";
 import Link from "next/link";
 import TourDeparturePicker from "@/components/features/TourDeparturePicker";
 import type {DepartureSchedule} from "@/lib/mock-data";
 import SectionTabs from "./SectionTabs";
 export default function TourDetailTabs({overview,conditions,bookingHref,bookingLabel,basePrice,packageId,schedules,referral,aceSource}:{overview:ReactNode;conditions:ReactNode;bookingHref:string;bookingLabel:string;basePrice:string;packageId:string;schedules:DepartureSchedule[];referral:string;aceSource:string}){
  const [tab,setTab]=useState("overview"),[required,setRequired]=useState(false);
+ useEffect(()=>{if(new URLSearchParams(window.location.search).get("tab")==="dates")setTab("dates");},[]);
  const [booking,setBooking]=useState({href:bookingHref,price:basePrice,ready:false,hasDate:false});
  const updateBooking=useCallback((href:string,price:string,ready:boolean,hasDate:boolean)=>setBooking(current=>current.href===href&&current.price===price&&current.ready===ready&&current.hasDate===hasDate?current:{href,price,ready,hasDate}),[]);
  const dates=<TourDeparturePicker packageId={packageId} schedules={schedules} referral={referral} aceSource={aceSource} onBookingChange={updateBooking}/>;

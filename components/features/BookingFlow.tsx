@@ -26,18 +26,24 @@ export default function BookingFlow() {
   const { booking,step,setStep,clearDraft } = useBooking();
   useEffect(()=>{window.scrollTo({top:0,behavior:"instant"});},[step]);
   const isGroup = booking.packageId === "sbu2";
-  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : ["Chọn gói tour", "Đánh giá trình độ tennis", "Thông tin", booking.packageId==="sbu3"?"Xem lại yêu cầu":"Xác nhận & đặt cọc"];
+  const scenarioSkipsTourSelection=booking.entrySource==="scenario"&&!isGroup;
+  const needsScenarioTourSelection=scenarioSkipsTourSelection&&step===1;
+  const regularSteps=["Chọn gói tour", "Đánh giá trình độ tennis", "Thông tin", booking.packageId==="sbu3"?"Xem lại yêu cầu":"Xác nhận & đặt cọc"];
+  const STEPS = isGroup ? ["Gói & quy mô đoàn", "Liên hệ đại diện", "Gửi yêu cầu"] : scenarioSkipsTourSelection?regularSteps.slice(1):regularSteps;
   const visibleStep = isGroup && step > 1 ? step - 1 : step;
-  const previousStep = isGroup && step === 3 ? 1 : step - 1;
+  const progressStep=scenarioSkipsTourSelection?step-1:visibleStep;
+  const previousStep=isGroup&&step===3?1:step-1;
   const router = useRouter();
+  useEffect(()=>{if(needsScenarioTourSelection)router.replace(`/tours/${booking.packageId}?tab=dates`);},[booking.packageId,needsScenarioTourSelection,router]);
   const selectedTour = tours.find((tour) => tour.id === booking.tourId) ?? tours[0];
   const selectedPackage=tourPackages.find(item=>item.id===booking.packageId)??tourPackages[0];
   const selectedSchedule = selectedTour.departureSchedules.find((schedule) => schedule.code === booking.departureCode)
     ?? selectedTour.departureSchedules[0];
-  const currentHeaderTitle=booking.entrySource==="ace"&&!booking.aceConsultation&&!consultationConfirmed?"Tư vấn cùng Ace":STEPS[visibleStep-1];
+  const currentHeaderTitle=needsScenarioTourSelection?"Lịch khởi hành":booking.entrySource==="ace"&&!booking.aceConsultation&&!consultationConfirmed?"Tư vấn cùng Ace":STEPS[progressStep-1];
   useEffect(()=>{const timer=window.setTimeout(()=>window.dispatchEvent(new CustomEvent("travel-header-title",{detail:{title:currentHeaderTitle}})),0);return()=>window.clearTimeout(timer);},[currentHeaderTitle]);
 
   const handleBack = () => {
+    if(scenarioSkipsTourSelection&&step===2){router.push(`/tours/${booking.packageId}?tab=dates`);return;}
     if (step > 1) setStep(previousStep);
     else router.push(`/tours/${booking.packageId}`);
   };
@@ -50,13 +56,14 @@ export default function BookingFlow() {
 
   const handleConfirmCancel = () => {
     setShowCancelDialog(false);
-    setStep(previousStep);
+    handleBack();
   };
 
   const handleViewPreTour = () => {
     router.push("/pre-tour");
   };
 
+  if(needsScenarioTourSelection)return <div className="ds-container ds-booking" role="status">Đang mở lịch khởi hành…</div>;
   if(booking.entrySource==="ace"&&!booking.aceConsultation&&!consultationConfirmed)return <div className="ds-container ds-booking"><BookingConsultation onConfirmed={()=>setConsultationConfirmed(true)}/></div>;
   return (
     <div className={`ds-container ds-booking booking-unified ${step===1?"booking-compact":""}`}>
@@ -75,7 +82,7 @@ export default function BookingFlow() {
             <span className="text-[1.4rem] font-medium">Quay lại</span>
           </button>
           <p className="text-brand-primary font-bold text-[1.4rem]">
-            Bước {visibleStep} / {STEPS.length}
+            Bước {progressStep} / {STEPS.length}
           </p>
         </div>
 
@@ -83,14 +90,14 @@ export default function BookingFlow() {
         <div
           className="flex gap-[0.8rem]"
           role="progressbar"
-          aria-valuenow={visibleStep}
+          aria-valuenow={progressStep}
           aria-valuemin={1}
           aria-valuemax={STEPS.length}
-          aria-label={`Bước ${visibleStep} trên ${STEPS.length}`}
+          aria-label={`Bước ${progressStep} trên ${STEPS.length}`}
         >
           {STEPS.map((label, i) => {
             const num = i + 1;
-            const state = num < visibleStep ? "done" : num === visibleStep ? "active" : "upcoming";
+            const state = num < progressStep ? "done" : num === progressStep ? "active" : "upcoming";
             return (
               <div key={label} className="flex-1 flex flex-col items-center gap-[0.4rem]">
                 <div

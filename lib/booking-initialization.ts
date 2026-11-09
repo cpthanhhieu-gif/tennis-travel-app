@@ -27,7 +27,8 @@ export function initializeBooking(params: URLSearchParams, exploring: boolean, s
  if(Number.isInteger(saved.step)&&saved.step>=1&&saved.step<=4)step=tour.packageId==="sbu2"&&saved.step===2?3:saved.step;
  restored=true;
  }}catch{}
- if(!restored&&completeTourSelection&&t.packageId!=="sbu2")step=2;
+ if(source==="scenario"&&completeTourSelection&&t.packageId!=="sbu2"&&(!restored||step===1))step=2;
+ else if(!restored&&completeTourSelection&&t.packageId!=="sbu2")step=2;
  return {booking,quiz,step,restored,draftConflict};
 }
 export function bookingDraftName(params:URLSearchParams){return `tennis-booking-draft-v2:${params.get("package")??"all"}:${params.get("destination")??"all"}:${params.get("ref")??"direct"}:${params.get("from")==="ace"?`ace:${params.get("consultation")??"current"}`:"normal"}`;}

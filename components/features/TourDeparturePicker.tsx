@@ -6,6 +6,7 @@ import {companionRate} from "@/lib/couple-pricing";
 import {formatVND,packageCapacity,type DepartureSchedule} from "@/lib/mock-data";
 import Modal from "@/components/ui/Modal";
 import {departureTimeSlots} from "@/lib/departure-times";
+import {browserScenario,demoParty} from "@/lib/demo-experience";
 
 const weekdayLabels=["CN","T2","T3","T4","T5","T6","T7"];
 const monthLabel=(date:string)=>`Tháng ${Number(date.slice(5,7))}`;
@@ -27,6 +28,7 @@ export default function TourDeparturePicker({packageId,schedules,referral="",ace
  const ready=!!selected&&!!departureTime;
  const bookingHref=ready&&selected&&departureTime?`/booking?package=${packageId}&departure=${encodeURIComponent(selected.code)}&departureTime=${encodeURIComponent(departureTime)}&players=${players}&companions=${companions}${referral}${aceSource}`:"";
  const priceLabel=packageId==="sbu2"?"Chờ báo giá":formatVND(total);
+ useEffect(()=>{const scenario=browserScenario();if(!scenario)return;const party=demoParty(scenario,packageId);setPlayers(party.numPeople-party.numCompanions);setCompanions(party.numCompanions);},[packageId]);
  useEffect(()=>{onBookingChange?.(bookingHref,priceLabel,ready,!!selected);},[bookingHref,onBookingChange,priceLabel,ready,selected]);
  const availableByDate=useMemo(()=>new Map(schedules.map(schedule=>[schedule.date,schedule])),[schedules]);
  const [year,month]=calendarMonth.split("-").map(Number);

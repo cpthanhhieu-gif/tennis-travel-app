@@ -647,8 +647,16 @@ body{background:var(--ds-canvas);color:var(--ds-ink);font-family:Arial,'Helvetic
 .service-fulfillment select{width:100%;min-height:44px;padding:10px;border:1px solid var(--ds-border);border-radius:var(--ds-radius-card);background:var(--ds-surface)}
 .service-plan-editor{padding:20px 0;border-bottom:1px solid var(--ds-border)}
 .service-plan-editor details{padding:var(--ds-space-3) 0;border-bottom:1px solid var(--ds-border)}
-.service-plan-editor summary{min-height:44px;cursor:pointer}
-.service-plan-editor textarea{min-height:88px}
+.service-plan-editor summary{min-height:44px;cursor:pointer;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px 12px;line-height:1.45}
+.service-plan-editor .service-plan-summary-label{min-width:0;flex:1 1 180px;overflow-wrap:anywhere}
+.service-plan-editor .service-plan-status{flex:0 1 auto;max-width:100%;font-size:12px;line-height:1.4;color:var(--ds-muted);overflow-wrap:anywhere}
+.service-plan-editor .service-plan-status.is-confirmed{color:var(--ds-success,#176b43)}
+.service-plan-editor .service-plan-hint{display:block;font-size:12px;font-weight:400;color:var(--ds-muted);line-height:1.4;margin-top:2px}
+.service-plan-editor textarea{display:block;width:100%;max-width:100%;min-width:0;min-height:88px;box-sizing:border-box;resize:vertical;white-space:pre-wrap;overflow-wrap:anywhere}
+.service-plan-editor .pilot-check{display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.service-plan-editor .pilot-check input{flex:0 0 20px;margin-top:2px}
+.service-plan-editor-demo>p{padding:12px 14px;border-left:3px solid var(--ds-primary);border-radius:8px;background:var(--ds-palette-eaf1fc);color:var(--ds-ink)}
+@media(max-width:600px){.service-plan-editor .premium-request-fields{padding:14px}.service-plan-editor .premium-request-fields legend{max-width:100%;font-size:17px;line-height:1.35}.service-plan-editor details>label{line-height:1.45}.service-plan-editor summary{gap:4px 8px}}
 .ui-dialog-body p{white-space:pre-line}
 /* Electronic Passport and private post-trip memories. */
 .passport-metrics{display:flex;gap:var(--ds-space-8);margin:var(--ds-space-6) 0;padding:20px 0;border-block:1px solid var(--ds-border)}

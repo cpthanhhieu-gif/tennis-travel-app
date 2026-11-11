@@ -641,6 +641,31 @@ body{background:var(--ds-canvas);color:var(--ds-ink);font-family:Arial,'Helvetic
 .premium-couple-days dl>div:last-child{border:0}
 .premium-couple-days dd{margin:5px 0 0;line-height:1.5}
 .premium-couple-inclusions .premium-benefit-card{max-width:280px}
+.premium-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0 28px;align-items:stretch}
+.premium-info-grid>.ui-entry-card{display:grid;grid-template-columns:36px minmax(0,1fr) 16px;align-content:center;gap:8px;min-width:0;min-height:112px;margin:0;padding:14px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);box-shadow:0 3px 12px rgba(23,45,74,.06);text-align:left}
+.premium-info-grid>.ui-entry-card>.ui-entry-icon{width:36px;height:36px}
+.premium-info-grid>.ui-entry-card>span:nth-child(2){min-width:0}
+.premium-info-grid>.ui-entry-card strong,.premium-info-grid>.ui-entry-card small{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.premium-info-grid>.ui-entry-card strong{-webkit-line-clamp:2;font-size:14px;line-height:1.35}
+.premium-info-grid>.ui-entry-card small{-webkit-line-clamp:2;margin-top:4px;font-size:12px;line-height:1.4;color:var(--ds-muted)}
+.premium-info-grid>.ui-entry-card>.ui-entry-arrow{width:15px;align-self:center}
+
+.premium-request-fields .group-advice-choice{display:flex;align-items:flex-start;gap:12px;min-height:44px;margin:10px 0;padding:8px 4px;line-height:1.5}
+.premium-request-fields .group-advice-choice input[type=checkbox]{flex:0 0 20px;width:20px;height:20px;margin:2px 0 0}
+.booking-context-strip>div:last-child>span,.booking-context-strip>div:last-child>strong,.booking-context-strip>div:last-child>small{display:block}
+.booking-context-strip>div:last-child>small{margin-top:5px;color:var(--ds-muted);font-size:11px;line-height:1.4}
+.journey-controls .admin-booking-picker{display:block;max-width:100%;margin:16px 0 20px}
+.journey-controls .admin-booking-picker select{min-width:0}
+@media(max-width:767px){.premium-info-grid{gap:10px;margin:16px 0 22px}.premium-info-grid>.ui-entry-card{grid-template-columns:32px minmax(0,1fr) 14px;min-height:112px;padding:11px;gap:7px}.premium-info-grid>.ui-entry-card>.ui-entry-icon{width:32px;height:32px}.premium-info-grid>.ui-entry-card strong{font-size:13px}.premium-info-grid>.ui-entry-card small{font-size:11px}.booking-context-strip>div:last-child{align-items:flex-start!important;flex-direction:column}.booking-context-strip>div:last-child>small{width:100%}}
+.journey-control-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+.journey-controls .admin-booking-picker select{width:100%;margin-top:8px}
+.journey-controls .admin-booking-picker{line-height:1.5}
+.journey-controls .admin-feedback+.journey-control-toolbar{margin-top:16px}
+.offer-version-history{margin:16px 0;padding:12px 14px;border:1px solid var(--ds-border);border-radius:12px;background:var(--ds-subtle)}
+.offer-version-history summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700;color:var(--ds-primary)}
+.offer-version-history article{padding:12px 0;border-top:1px solid var(--ds-border);overflow-wrap:anywhere}
+.offer-version-history h4{font-size:14px;font-weight:700}
+.offer-version-history article p{font-size:13px;line-height:1.55}
 @media(min-width:768px){.premium-couple-days>section{flex-basis:45%}}
 .service-fulfillment{border-top:1px solid var(--ds-border);padding:18px 0;margin-top:var(--ds-space-4)}
 .service-fulfillment label,.service-plan-editor label{display:block;margin:var(--ds-space-3) 0}

@@ -29,6 +29,7 @@ export default function PremiumTourDetails() {
 </InfoPanel>
       <p className="ds-caption">Thời lượng trên là khung chương trình, có thể điều chỉnh vì an toàn hoặc điều kiện vận hành. Tên HLV/đại sứ, đối tác và giờ sân được xác nhận trong phương án chuyến đi.</p>
     </section></ResponsiveDetail>
+    <div className="premium-info-grid">
     <InfoPanel icon={<Utensils size={22}/>} title="Năm bữa FEI" description="Hương vị địa phương, thực đơn và nhịp phục hồi">    <section className="ds-section" aria-labelledby="premium-food">
       <h2 id="premium-food">Năm bữa FEI có gì?</h2>
       <p>Thực đơn dự kiến theo nhịp vận động. Món ăn và lựa chọn theo nhu cầu ăn uống được thống nhất trước chuyến; FEI là khung đánh giá trải nghiệm, chưa phải điểm chất lượng đã đạt.</p>
@@ -58,8 +59,9 @@ export default function PremiumTourDetails() {
       <ul className="premium-list">
         <li><strong>Chờ xác nhận theo chuyến:</strong> resort và loại phòng, chuyến bay, khung giờ sân, tên HLV, thực đơn và các hoạt động mua thêm.</li>
         <li><strong>Phụ thuộc hợp tác:</strong> đại sứ/Pro-Am, bảo trợ VTF, MyLeague và điểm xếp hạng chỉ được cung cấp khi có thỏa thuận và khả năng tích hợp tương ứng. Chưa cam kết huấn luyện 1-1 với HLV quốc tế hoặc chef nổi tiếng.</li>
-        <li><strong>Trước khi đặt cọc:</strong> nhận phương án cho ngày đã chọn, kiểm tra quyền lợi, dịch vụ thay thế và tổng giá; chấp thuận phương án rồi tiếp tục thanh toán. Yêu cầu Premium được phản hồi trong tối đa 24 giờ.</li>
+        <li><strong>Trước khi đặt cọc:</strong> nhận phương án cho ngày đã chọn, kiểm tra quyền lợi, dịch vụ thay thế và tổng giá; chấp thuận phương án rồi tiếp tục thanh toán.</li>
       </ul>
     </section></InfoPanel>
+    </div>
   </div>;
 }

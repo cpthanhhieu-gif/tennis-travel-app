@@ -6,13 +6,12 @@ import VisualStoryDeck,{PhotoSlot} from "./VisualStoryDeck";
 export default function PremiumCouplePlan(){
  const [players,setPlayers]=useState(1),[companions,setCompanions]=useState(1);
  useEffect(()=>{const scenario=browserScenario();if(scenario){const party=demoParty(scenario,"sbu3");setPlayers(party.numPeople-party.numCompanions);setCompanions(party.numCompanions);}},[]);
- const total=players*29900000+companions*22900000;
  const setPlayerCount=(value:number)=>setPlayers(Math.max(1,Math.min(16-companions,value||1)));
  const setCompanionCount=(value:number)=>setCompanions(Math.max(0,Math.min(16-players,value||0)));
  return <section className="premium-couple-plan">
   <h2>Đi cùng người thân &amp; bạn bè</h2>
-  <p className="premium-couple-total"><strong>{total.toLocaleString("vi-VN")} đ</strong><span>/ {players+companions} khách</span></p>
-  <p className="premium-couple-breakdown">Người chơi: 29.900.000đ · Người đi cùng: 22.900.000đ. Giá tham khảo; xác nhận giá và phòng theo ngày khởi hành.</p>
+  <p className="premium-couple-total"><strong>29.900.000 đ</strong><span>/ 1 người chơi</span></p>
+  <p className="premium-couple-breakdown">Giá tham khảo cho 1 người chơi. Người đi cùng không chơi: 22.900.000đ/người, chung phòng; chưa gồm phụ thu phòng đơn và dịch vụ mua thêm. Giá cuối cùng xác nhận theo lịch khởi hành.</p>
   <InfoPanel title="Lịch người chơi & người đi cùng" description="4 ngày · chỉnh số khách và xem hoạt động chung">
    <section className="premium-party-controls" aria-label="Số khách tham gia">
     <h3>Số khách tham gia</h3>

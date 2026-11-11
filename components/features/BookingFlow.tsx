@@ -135,7 +135,7 @@ export default function BookingFlow() {
         {step === 4 && <BookingStep4 onConfirm={handleNext} />}
       </div>
 
-      {step>1&&<aside className="booking-context-strip"><div><span className="ds-eyebrow">CHUYẾN ĐANG ĐẶT</span><strong>{selectedTour.name}</strong><p>{selectedSchedule.dateLabel}{booking.departureTime?` · ${booking.departureTime}`:""} · {booking.numPeople} khách</p></div><div>{booking.packageId==="sbu2"?<><span>Chi phí đoàn</span><strong>Chờ báo giá theo nhu cầu</strong></>:<><span>{booking.packageId==="sbu3"?"Gói cơ bản tham khảo":"Giá tour"}</span><strong>{coupleTotal(booking.packageId,selectedSchedule.price,booking.numPeople,booking.numCompanions).toLocaleString("vi-VN")} ₫</strong>{booking.packageId==="sbu3"&&<small>Chưa gồm dịch vụ bổ sung, phụ thu phòng</small>}</>}</div></aside>}</div>
+      {step>1&&<aside className="booking-context-strip"><div><span className="ds-eyebrow">CHUYẾN ĐANG ĐẶT</span><strong>{selectedTour.name}</strong><p>{selectedSchedule.dateLabel}{booking.departureTime?` · ${booking.departureTime}`:""} · {booking.numPeople} khách</p></div><div>{booking.packageId==="sbu2"?<><span>Chi phí đoàn</span><strong>Chờ báo giá theo nhu cầu</strong></>:<><span>{booking.packageId==="sbu3"?"Gói cơ bản tham khảo":"Giá tour"}</span><strong>{coupleTotal(booking.packageId,selectedSchedule.price,booking.numPeople,booking.numCompanions).toLocaleString("vi-VN")} ₫</strong>{booking.packageId==="sbu3"&&<small>Chưa bao gồm dịch vụ bổ sung và phụ thu phòng</small>}</>}</div></aside>}</div>
       {/* Cancel confirm — Bottom Sheet on mobile */}
       <Modal
         isOpen={showCancelDialog}

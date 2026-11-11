@@ -105,7 +105,7 @@ export default function BookingStep4({ onConfirm }: Props) {
       <div className="bg-success-light border border-success/30 rounded-[var(--ds-radius-card)] p-[1.6rem] mb-[2.4rem]">
         <ul className="space-y-[0.8rem]">
           {[
-            pkg.id === "sbu2" ? "Báo giá trong 1 ngày làm việc" : pkg.id === "sbu3" ? "Xác nhận trong 24 giờ" : "Xác nhận sau khi đặt cọc",
+            pkg.id === "sbu2" ? "Báo giá trong 1 ngày làm việc" : pkg.id === "sbu3" ? "Phương án gửi để bạn xem trước khi đặt cọc" : "Xác nhận sau khi đặt cọc",
             pkg.id!=="sbu1"?"Khoản cọc và điều kiện thay đổi/hủy được thông báo trong báo giá hoặc phương án trước khi bạn chấp thuận.":"Hủy trước D-30: hoàn 100% trừ 500.000đ; D-30 đến D-15: mất cọc 30%; D-14 đến D-7: mất 70%; dưới D-7: mất 100%.",
             "Hỗ trợ 24/7 trong suốt hành trình",
           ].map((item) => (
@@ -121,7 +121,7 @@ export default function BookingStep4({ onConfirm }: Props) {
       </div>
 
       {error && <p role="alert" className="mb-[1.6rem]">{error}</p>}
-      <div className="booking-step-action"><p>{pkg.id==="sbu2"?"Nhận báo giá trong 1 ngày làm việc.":pkg.id==="sbu3"?"Nhận phương án trong tối đa 24 giờ.":"Tiếp tục thanh toán cọc 30% để hoàn tất đăng ký."}</p><Button
+      <div className="booking-step-action"><p>{pkg.id==="sbu2"?"Nhận báo giá trong 1 ngày làm việc.":pkg.id==="sbu3"?"Nhận phương án để xem trước khi đặt cọc.":"Tiếp tục thanh toán cọc 30% để hoàn tất đăng ký."}</p><Button
         variant="primary"
         size="lg"
         className="w-full"
